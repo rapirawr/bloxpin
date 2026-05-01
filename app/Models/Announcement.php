@@ -18,10 +18,10 @@ class Announcement extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true)
+        return $query->whereRaw('is_active = true')
                      ->where(function ($q) {
                          $q->whereNull('ends_at')
-                           ->orWhere('ends_at', '>', now()->toDateTimeString());
+                           ->orWhereRaw('ends_at > ?', [now()->toDateTimeString()]);
                      });
     }
 }
