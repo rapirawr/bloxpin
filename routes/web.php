@@ -93,6 +93,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Photo Management
             Route::get('/photos', [\App\Http\Controllers\Admin\AdminController::class, 'photos'])->name('photos');
             Route::delete('/photos/{photo}', [\App\Http\Controllers\Admin\AdminController::class, 'deletePhoto'])->name('photos.delete');
+
+            // Global Announcement
+            Route::get('/announcement', [\App\Http\Controllers\Admin\AdminController::class, 'announcement'])->name('announcement');
+            Route::post('/announcement', [\App\Http\Controllers\Admin\AdminController::class, 'sendAnnounce'])->name('announce.send');
         });
     });
 });

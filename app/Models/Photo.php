@@ -63,7 +63,28 @@ class Photo extends Model
     }
 
     /**
-     * Get the route key for the model.
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('exclude_shadowbanned', function ($builder) {
+            if (auth()->check() && auth()->user()->is_admin) {
+                return;
+            }
+
+            $builder->whereHas('user', function ($query) {
+                $query->where('is_shadowbanned', false);
+                
+                // If logged in, allow user to see their own shadowbanned content
+                if (auth()->check()) {
+                    $query->orWhere('id', auth()->id());
+                }
+            });
+        });
+    }
+
+    /**
+     * Get the route key name for Laravel.
      */
     public function getRouteKeyName(): string
     {

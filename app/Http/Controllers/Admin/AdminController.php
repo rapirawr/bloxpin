@@ -57,10 +57,13 @@ class AdminController extends Controller
      */
     public function toggleVerified(User $user)
     {
-        $user->is_verified = !$user->is_verified;
-        $user->save();
-
-        return back()->with('success', 'Status verifikasi user diperbarui.');
+        try {
+            $user->is_verified = !$user->is_verified;
+            $user->save();
+            return back()->with('success', 'Status verifikasi user diperbarui.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal update: Sepertinya Anda perlu menjalankan "php artisan migrate" di terminal.');
+        }
     }
 
     /**
@@ -68,10 +71,13 @@ class AdminController extends Controller
      */
     public function toggleShadowban(User $user)
     {
-        $user->is_shadowbanned = !$user->is_shadowbanned;
-        $user->save();
-
-        return back()->with('success', 'Status shadowban user diperbarui.');
+        try {
+            $user->is_shadowbanned = !$user->is_shadowbanned;
+            $user->save();
+            return back()->with('success', 'Status shadowban user diperbarui.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal update: Sepertinya Anda perlu menjalankan "php artisan migrate" di terminal.');
+        }
     }
 
     /**
@@ -111,6 +117,31 @@ class AdminController extends Controller
     {
         $photos = Photo::with('user')->latest()->paginate(20);
         return view('admin.photos', compact('photos'));
+    }
+
+    /**
+     * Show Announcement Page
+     */
+    public function announcement()
+    {
+        return view('admin.announcement');
+    }
+
+    /**
+     * Send Global Announcement
+     */
+    public function sendAnnounce(Request $request)
+    {
+        if ($request->action === 'clear') {
+            \Illuminate\Support\Facades\Cache::forget('global_announcement');
+            return back()->with('success', 'Pengumuman telah dihapus.');
+        }
+
+        $request->validate(['message' => 'required|string|max:500']);
+        
+        \Illuminate\Support\Facades\Cache::forever('global_announcement', $request->message);
+
+        return back()->with('success', 'Pengumuman berhasil disiarkan ke seluruh user!');
     }
 
     /**

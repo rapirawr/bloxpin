@@ -21,6 +21,14 @@
 </head>
 <body class="font-sans antialiased bg-light dark:bg-dark text-dark dark:text-gray-100 pb-16 md:pb-0 pt-[80px] min-h-screen flex flex-col">
     
+    <!-- Global Announcement Banner -->
+    @if($announcement = \Illuminate\Support\Facades\Cache::get('global_announcement'))
+        <div class="fixed top-0 left-0 w-full bg-pinterest text-white py-2.5 px-4 z-[100] text-center text-[10px] font-black tracking-[0.3em] uppercase shadow-2xl">
+            {{ $announcement }}
+        </div>
+        <style>body { padding-top: 115px !important; }</style>
+    @endif
+    
     <!-- Top Navbar -->
     @include('components.navbar')
 
