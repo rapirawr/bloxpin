@@ -4,9 +4,16 @@
      style="padding-bottom: {{ ($photo->height / $photo->width) * 100 }}%;"
 >
     <!-- Image -->
-    <a href="{{ route('photos.show', $photo->uid) }}" class="absolute inset-0 w-full h-full rounded-2xl overflow-hidden" style="background-color: {{ $photo->dominant_color ?? '#e0e0e0' }};" x-data="{ loaded: false }" >
-    <img src="{{ $photo->thumbnail_url }}" alt="{{ $photo->title }}" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.02] opacity-0" x-bind:class="{ 'opacity-100': loaded }" @load="loaded = true" />
-
+    <a href="{{ route('photos.show', $photo->uid) }}" 
+       class="absolute inset-0 w-full h-full rounded-2xl overflow-hidden" 
+       style="background-color: {{ $photo->dominant_color ?? '#e0e0e0' }};" 
+       x-data="{ 
+           loaded: false,
+           checkLoad() { if (this.$refs.img.complete) this.loaded = true; }
+       }" 
+       x-init="checkLoad()"
+    >
+        <img x-ref="img" src="{{ $photo->thumbnail_url }}" alt="{{ $photo->title }}" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.02] opacity-0" :class="{ 'opacity-100': loaded }" @load="loaded = true" />
     </a>
 
     <!-- Overlay -->

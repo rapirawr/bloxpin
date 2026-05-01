@@ -52,18 +52,35 @@
         
         <!-- Left: Image -->
         <div class="w-full md:w-1/2 bg-light dark:bg-[#0A0A0A] flex items-center justify-center p-0 md:p-8 shrink-0 min-h-[40vh] md:min-h-[50vh] transition-colors border-r border-borderlight dark:border-borderdark relative overflow-hidden"
-             x-data="{ loaded: false }">
+             x-data="{ 
+                loaded: false,
+                error: false,
+                checkLoad() {
+                    if (this.$refs.mainImage.complete) {
+                        this.loaded = true;
+                    }
+                }
+             }"
+             x-init="checkLoad()">
             
             <!-- Dominant Color Placeholder (Fades out) -->
             <div class="absolute inset-0 transition-opacity duration-1000"
                  :class="loaded ? 'opacity-0' : 'opacity-100'"
                  style="background-color: {{ $photo->dominant_color ?? '#e0e0e0' }};">
+                 <!-- Error state -->
+                 <template x-if="error">
+                     <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 p-4">
+                         <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                         <span class="text-xs font-bold uppercase tracking-widest text-center">Gagal memuat gambar</span>
+                     </div>
+                 </template>
             </div>
 
-            <img src="{{ $photo->image_url }}" alt="{{ $photo->title }}" 
+            <img x-ref="mainImage" src="{{ $photo->image_url }}" alt="{{ $photo->title }}" 
                  class="w-full h-auto object-contain md:rounded-2xl max-h-[70vh] md:max-h-[80vh] opacity-0 transition-opacity duration-700 relative z-10"
-                 x-bind:class="{ 'opacity-100': loaded }"
-                 @load="loaded = true">
+                 :class="{ 'opacity-100': loaded }"
+                 @load="loaded = true"
+                 @error="error = true; loaded = false">
         </div>
 
         <!-- Right: Info -->
