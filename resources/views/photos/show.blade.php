@@ -164,7 +164,7 @@
                             <div class="font-bold text-dark dark:text-white group-hover:underline flex items-center gap-1.5">
                                 {{ $photo->user->name }}
                                 @if($photo->user->is_verified)
-                                    <svg class="w-4 h-4 text-blue-500 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>
+                                    <x-verified-badge size="w-4 h-4" checkSize="w-2.5 h-2.5" />
                                 @endif
                             </div>
                             <!-- <div class="text-sm text-gray-500 dark:text-gray-400">{{ $photo->user->photos()->count() }} unggahan</div> -->

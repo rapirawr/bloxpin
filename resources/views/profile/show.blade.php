@@ -13,12 +13,12 @@
             </div>
         @endif
 
-        @if(auth()->check() && auth()->id() === $user->id)
+        <!-- @if(auth()->check() && auth()->id() === $user->id)
             <a href="{{ route('profile.edit') }}" class="absolute bottom-6 right-6 bg-white/90 hover:bg-white backdrop-blur-sm text-dark px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-all active:scale-95 opacity-0 group-hover:opacity-100 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 Ganti Sampul
             </a>
-        @endif
+        @endif -->
     </div>
 
     <!-- Profile Header -->
@@ -35,11 +35,7 @@
         <h1 class="text-3xl md:text-4xl font-display font-bold text-dark mb-1 flex items-center gap-2">
             {{ $user->name }}
             @if($user->is_verified)
-                <div class="flex-shrink-0 flex items-center justify-center w-6 h-6 md:w-7 md:h-7 bg-pinterest rounded-full shadow-sm" title="Akun Terverifikasi">
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-white fill-current" viewBox="0 0 20 20">
-                        <path d="M7.629 14.571L3.125 10.068L4.547 8.648L7.629 11.731L15.453 3.906L16.875 5.326L7.629 14.571Z"/>
-                    </svg>
-                </div>
+                <x-verified-badge />
             @endif
         </h1>
         <div class="text-gray-500 mb-4">{{ '@' . $user->username }}</div>

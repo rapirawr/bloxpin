@@ -20,12 +20,12 @@
             <tr class="hover:bg-white/[0.01] transition-colors group">
                 <td class="p-6">
                     <div class="flex items-center gap-4">
-                        <img src="{{ $user->avatar_url }}" class="w-10 h-10 rounded-full border border-border grayscale group-hover:grayscale-0 transition-all">
+                        <img src="{{ $user->avatar_url }}" class="w-10 h-10 rounded-full border border-border  group-hover:transition-all">
                         <div>
                             <div class="font-bold text-sm flex items-center gap-2">
                                 {{ $user->name }}
                                 @if($user->is_verified)
-                                    <svg class="w-3 h-3 text-white fill-current" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>
+                                    <x-verified-badge size="w-3.5 h-3.5" checkSize="w-2 h-2" />
                                 @endif
                             </div>
                             <div class="text-[10px] text-gray-500 font-medium tracking-tight">@ {{ $user->username }}</div>
@@ -35,7 +35,7 @@
                 <td class="p-6">
                     <div class="flex gap-2">
                         @if($user->is_admin)
-                            <span class="px-2 py-0.5 bg-white text-black text-[9px] font-black uppercase tracking-tighter rounded">Staff</span>
+                            <span class="px-2 py-0.5 bg-white text-black text-[9px] font-black uppercase tracking-tighter rounded">Developer</span>
                         @endif
                         @if($user->is_shadowbanned)
                             <span class="px-2 py-0.5 border border-white/20 text-gray-500 text-[9px] font-black uppercase tracking-tighter rounded">Shadow</span>
