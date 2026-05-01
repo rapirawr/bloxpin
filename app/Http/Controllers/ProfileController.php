@@ -102,18 +102,29 @@ class ProfileController extends Controller
 
         // Handle Avatar Upload
         if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                Storage::delete($user->avatar);
+            try {
+                if ($user->avatar) {
+                    Storage::disk('s3')->delete($user->avatar);
+                }
+                $path = $request->file('avatar')->store('avatars', 's3');
+                $user->avatar = $path;
+            } catch (\Exception $e) {
+                // Silently fail or log if needed, but don't 500
+                report($e);
             }
-            $user->avatar = $request->file('avatar')->store('avatars');
         }
 
         // Handle Cover Photo Upload
         if ($request->hasFile('cover_photo')) {
-            if ($user->cover_photo) {
-                Storage::delete($user->cover_photo);
+            try {
+                if ($user->cover_photo) {
+                    Storage::disk('s3')->delete($user->cover_photo);
+                }
+                $path = $request->file('cover_photo')->store('covers', 's3');
+                $user->cover_photo = $path;
+            } catch (\Exception $e) {
+                report($e);
             }
-            $user->cover_photo = $request->file('cover_photo')->store('covers');
         }
 
         $user->save();
