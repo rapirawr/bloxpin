@@ -91,6 +91,12 @@ class PhotoService
             $newHeight = $origHeight;
         }
 
+        // Check if GD library exists
+        if (!function_exists('imagecreatefromjpeg')) {
+            // Fallback: use original as thumbnail if GD is missing
+            return $originalPath;
+        }
+
         // Create image from file
         $mimeType = $imageInfo['mime'];
         $sourceImage = match ($mimeType) {
