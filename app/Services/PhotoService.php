@@ -28,7 +28,7 @@ class PhotoService
         $height = $imageInfo[1] ?? 600;
 
         // Store original image
-        $imagePath = $file->store('photos/originals', 'public');
+        $imagePath = $file->store('photos/originals');
 
         // Generate thumbnail
         $thumbnailPath = $this->generateThumbnail($file, $imagePath);
@@ -129,7 +129,7 @@ class PhotoService
         };
 
         // Store via Laravel Storage
-        Storage::disk('public')->put($thumbnailName, file_get_contents($tempPath));
+        Storage::put($thumbnailName, file_get_contents($tempPath));
 
         // Cleanup
         imagedestroy($sourceImage);
@@ -170,8 +170,8 @@ class PhotoService
     public function delete(Photo $photo): void
     {
         // Delete files from storage
-        Storage::disk('public')->delete($photo->image_path);
-        Storage::disk('public')->delete($photo->thumbnail_path);
+        Storage::delete($photo->image_path);
+        Storage::delete($photo->thumbnail_path);
 
         // Delete the record (cascade will handle likes, pins, tags)
         $photo->delete();
