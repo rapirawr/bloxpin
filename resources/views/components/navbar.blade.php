@@ -119,11 +119,12 @@
                     </div>
                 </div>
             </div>
-        @else
+        @endauth
+        @guest
             <div class="flex items-center gap-4">
                 <a href="{{ route('login') }}" class="text-sm font-bold tracking-tight hover:text-gray-600 dark:hover:text-gray-300 transition-colors uppercase">Login</a>
                 <a href="{{ route('register') }}" class="px-6 py-2.5 bg-dark dark:bg-white text-white dark:text-dark rounded-full font-bold text-sm transition-all hover:scale-105 active:scale-95 shadow-lg shadow-dark/10">Sign Up</a>
             </div>
-        @endauth
+        @endguest
     </div>
 </nav>

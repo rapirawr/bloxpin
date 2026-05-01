@@ -79,8 +79,8 @@
             <img x-ref="mainImage" src="{{ $photo->image_url }}" alt="{{ $photo->title }}" 
                  class="w-full h-auto object-contain md:rounded-2xl max-h-[70vh] md:max-h-[80vh] opacity-0 transition-opacity duration-700 relative z-10"
                  :class="{ 'opacity-100': loaded }"
-                 @load="loaded = true"
-                 @error="error = true; loaded = false">
+                 x-on:load="loaded = true"
+                 x-on:error="error = true; loaded = false">
         </div>
 
         <!-- Right: Info -->
@@ -160,7 +160,7 @@
                     <button @click="showBoards = !showBoards" class="flex justify-between items-center gap-2 bg-light dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2.5 rounded-l-lg font-semibold text-dark dark:text-white transition-colors border border-borderlight dark:border-borderdark border-r-0">
                         <span class="truncate max-w-[120px] text-sm">Pilih Board</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                    </button
+                    </button>
                     <button class="bg-dark text-white hover:bg-black dark:bg-white dark:text-dark dark:hover:bg-gray-100 font-semibold px-6 py-2.5 rounded-r-lg transition-colors border border-dark dark:border-white text-sm">
                         Simpan
                     </button>
@@ -197,9 +197,10 @@
                         </div>
                     </div>
                 </div>
-                @else
-                <a href="{{ route('login') }}" class="btn-primary">Simpan</a>
                 @endauth
+                @guest
+                <a href="{{ route('login') }}" class="btn-primary">Simpan</a>
+                @endguest
             </div>
 
             <!-- Scrollable Content (Only scrollable on desktop, natural on mobile) -->
@@ -255,9 +256,10 @@
                                         })
                                         .finally(() => isFollowingLoading = false);
                                 "
-                            @else
-                                onclick="window.location='{{ route('login') }}'"
                             @endauth
+                            @guest
+                                onclick="window.location='{{ route('login') }}'"
+                            @endguest
                             :class="isFollowing ? 'bg-light dark:bg-borderdark text-dark dark:text-white border-borderlight dark:border-borderdark' : 'bg-dark dark:bg-white text-white dark:text-dark border-dark dark:border-white'"
                             class="px-6 py-2.5 rounded-full font-bold text-sm transition-all active:scale-95 border disabled:opacity-50"
                             :disabled="isFollowingLoading"
@@ -306,7 +308,7 @@
                                          likesCount = previousCount;
                                          window.showToast('Gagal menyukai foto', 'error');
                                      })
-                            " @else onclick="window.location='{{ route('login') }}'" @endauth 
+                            " @endauth @guest onclick="window.location='{{ route('login') }}'" @endguest
                             class="flex items-center gap-2 group transition-transform active:scale-90">
                         <div class="w-12 h-12 rounded-full border border-borderlight dark:border-borderdark flex items-center justify-center group-hover:bg-light dark:group-hover:bg-borderdark transition-colors">
                             <svg class="w-6 h-6 transition-colors" :class="liked ? 'text-dark dark:text-white fill-current' : 'text-dark dark:text-white fill-none'" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -397,12 +399,13 @@
                                 </div>
                             </div>
                         </div>
-                    @else
+                    @endauth
+                    @guest
                         <div class="bg-light dark:bg-borderdark rounded-2xl p-6 text-center mb-8">
                             <p class="text-sm text-gray-500 mb-4">Ingin berdiskusi? Masuk untuk menulis komentar.</p>
                             <a href="{{ route('login') }}" class="px-6 py-2 bg-dark dark:bg-white text-white dark:text-dark rounded-full text-xs font-bold inline-block">Masuk</a>
                         </div>
-                    @endauth
+                    @endguest
 
                     <!-- Comments List -->
                     <div class="space-y-6">
@@ -428,15 +431,7 @@
                                         
                                         @auth
                                         <template x-if="comment.user.username === '{{ auth()->user()->username }}'">
-                                           <button @click="deleteComment(comment.id)" class="inline-flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-700 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <polyline points="3 6 5 6 21 6"/>
-                                                <path d="M19 6l-1 14H6L5 6"/>
-                                                <path d="M10 11v6M14 11v6"/>
-                                                <path d="M9 6V4h6v2"/>
-                                            </svg>
-                                            Hapus
-                                        </button>
+                                            <button @click="deleteComment(comment.id)" class="text-xs font-bold text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600">Hapus</button>
                                         </template>
                                         @endauth
                                     </div>
@@ -595,6 +590,8 @@
                 </form>
             </div>
         </div>
+    </div>
+
     <!-- Collection Modal -->
     <div x-show="isCollectionModalOpen" 
          x-transition:enter="transition ease-out duration-300"

@@ -13,7 +13,7 @@
        }" 
        x-init="checkLoad()"
     >
-        <img x-ref="img" src="{{ $photo->thumbnail_url }}" alt="{{ $photo->title }}" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.02] opacity-0" :class="{ 'opacity-100': loaded }" @load="loaded = true" />
+        <img x-ref="img" src="{{ $photo->thumbnail_url }}" alt="{{ $photo->title }}" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.02] opacity-0" :class="{ 'opacity-100': loaded }" x-on:load="loaded = true" />
     </a>
 
     <!-- Overlay -->
@@ -59,11 +59,12 @@
                      </div>
                  </div>
              </div>
-             @else
+             @endauth
+             @guest
              <a href="{{ route('login') }}" class="bg-pinterest text-white font-bold px-4 py-2 rounded-full text-sm shadow-md pointer-events-auto">
                  Simpan
              </a>
-             @endauth
+             @endguest
          </div>
 
          <!-- Bottom: Title and Owner -->
