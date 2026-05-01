@@ -102,7 +102,7 @@ document.addEventListener('alpine:init', () => {
                         this.msnry.layout();
                     });
 
-                    this.nextPageUrl = data.next_page;
+                    this.nextPageUrl = (data.next_page || '').replace(/^http:\/\//i, 'https://');
                     this.hasMore = data.has_more;
                 })
                 .catch(error => {
