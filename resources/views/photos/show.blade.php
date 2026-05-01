@@ -22,18 +22,18 @@
     }
 }">
     <!-- Back Button (Mobile) -->
-    <div class="fixed top-[72px] left-0 w-full p-4 bg-white/80 dark:bg-dark/80 backdrop-blur-md z-30 md:hidden flex justify-between items-center pointer-events-none transition-colors">
-        <button onclick="history.back()" class="w-10 h-10 bg-white dark:bg-card rounded-full flex items-center justify-center shadow-minimal dark:shadow-minimal-dark pointer-events-auto active:scale-95 transition-all text-dark dark:text-white">
+    <div class="fixed top-20 left-4 z-[60] md:hidden">
+        <button onclick="history.back()" class="w-10 h-10 bg-white/90 dark:bg-card/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg border border-borderlight dark:border-borderdark active:scale-95 transition-all text-dark dark:text-white">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
         </button>
     </div>
 
     <!-- Main Card -->
-    <div class="bg-cardlight dark:bg-card md:rounded-[32px] shadow-minimal dark:shadow-minimal-dark border border-borderlight dark:border-borderdark overflow-hidden flex flex-col md:flex-row relative z-20 transition-colors">
+    <div class="bg-cardlight dark:bg-card md:rounded-[32px] shadow-minimal dark:shadow-minimal-dark border border-borderlight dark:border-borderdark flex flex-col md:flex-row relative z-20 transition-colors md:overflow-hidden">
         
         <!-- Left: Image -->
-        <div class="w-full md:w-1/2 bg-light dark:bg-[#0A0A0A] flex items-center justify-center p-0 md:p-8 shrink-0 min-h-[50vh] transition-colors border-r border-borderlight dark:border-borderdark">
-            <img src="{{ $photo->image_url }}" alt="{{ $photo->title }}" class="w-full h-auto object-contain md:rounded-2xl max-h-[80vh]">
+        <div class="w-full md:w-1/2 bg-light dark:bg-[#0A0A0A] flex items-center justify-center p-0 md:p-8 shrink-0 min-h-[40vh] md:min-h-[50vh] transition-colors border-r border-borderlight dark:border-borderdark">
+            <img src="{{ $photo->image_url }}" alt="{{ $photo->title }}" class="w-full h-auto object-contain md:rounded-2xl max-h-[70vh] md:max-h-[80vh]">
         </div>
 
         <!-- Right: Info -->
@@ -139,10 +139,10 @@
                 @endauth
             </div>
 
-            <!-- Scrollable Content -->
-            <div class="flex-1 overflow-y-auto hide-scrollbar -mx-6 px-6 inertia-scroll overscroll-y-contain">
-                <!-- Mobile Save -->
-                <div class="md:hidden flex justify-between items-center mb-6">
+            <!-- Scrollable Content (Only scrollable on desktop, natural on mobile) -->
+            <div class="flex-1 md:overflow-y-auto hide-scrollbar -mx-6 px-6 md:inertia-scroll overscroll-y-contain">
+                <!-- Mobile Save (Hidden on desktop) -->
+                <div class="md:hidden flex justify-between items-center mb-6 pt-4">
                     <div class="flex gap-2">
                         <button class="w-12 h-12 bg-light dark:bg-borderdark rounded-full flex items-center justify-center text-dark dark:text-white transition-colors"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
                     </div>
