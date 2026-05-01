@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $photo->title . ' — Bloxpin')
-@section('meta_description', Str::limit($photo->description, 160) ?: 'Temukan momen menarik ini di Bloxpin.')
+@section('meta_description', str()->limit($photo->description, 160) ?: 'Temukan momen menarik ini di Bloxpin.')
 @section('meta_image', $photo->image_url)
 @section('meta_image_width', $photo->width ?? '1200')
 @section('meta_image_height', $photo->height ?? '630')
