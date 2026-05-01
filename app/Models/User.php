@@ -45,7 +45,8 @@ class User extends Authenticatable
     public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar) {
-            return asset('storage/' . $this->avatar);
+            if (str_starts_with($this->avatar, 'http')) return $this->avatar;
+            return \Illuminate\Support\Facades\Storage::url($this->avatar);
         }
 
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=E60023&color=fff&size=200';
@@ -57,7 +58,8 @@ class User extends Authenticatable
     public function getCoverPhotoUrlAttribute(): ?string
     {
         if ($this->cover_photo) {
-            return asset('storage/' . $this->cover_photo);
+            if (str_starts_with($this->cover_photo, 'http')) return $this->cover_photo;
+            return \Illuminate\Support\Facades\Storage::url($this->cover_photo);
         }
 
         return null;
