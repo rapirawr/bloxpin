@@ -21,16 +21,30 @@
 </head>
 <body class="font-sans antialiased bg-light dark:bg-dark text-dark dark:text-gray-100 pb-16 md:pb-0 pt-[80px] min-h-screen flex flex-col">
     
-    <!-- Global Announcement Banner -->
-    @if($announcement = \App\Models\Setting::get('global_announcement'))
-        <div class="fixed top-0 left-0 w-full bg-pinterest text-white py-2.5 px-4 z-[100] text-center text-[10px] font-black tracking-[0.3em] uppercase shadow-2xl">
-            {{ $announcement }}
-        </div>
-        <style>body { padding-top: 115px !important; }</style>
-    @endif
-    
     <!-- Top Navbar -->
     @include('components.navbar')
+
+    <!-- Global Announcement Banner -->
+    @php $activeAnnounce = \App\Models\Announcement::active()->latest()->first(); @endphp
+    @if($activeAnnounce)
+        <div x-data="{ showAnnouncement: true }" x-show="showAnnouncement" 
+             class="w-full px-4 pt-4 animate-fade-in"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            <div class="max-w-[1600px] mx-auto">
+                <div class="bg-black text-white px-6 py-4 rounded-[2rem] shadow-lg flex items-center justify-between border border-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        <span class="text-[10px] font-black uppercase tracking-[0.3em] leading-none">{{ $activeAnnounce->message }}</span>
+                    </div>
+                    <button @click="showAnnouncement = false" class="text-white/40 hover:text-white transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Main Content -->
     <main class="w-full flex-1">

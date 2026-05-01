@@ -124,7 +124,9 @@ class AdminController extends Controller
      */
     public function announcement()
     {
-        return view('admin.announcement');
+        $current = \App\Models\Announcement::active()->latest()->first();
+        $history = \App\Models\Announcement::latest()->paginate(10);
+        return view('admin.announcement', compact('current', 'history'));
     }
 
     /**
@@ -133,15 +135,44 @@ class AdminController extends Controller
     public function sendAnnounce(Request $request)
     {
         if ($request->action === 'clear') {
-            \App\Models\Setting::set('global_announcement', null);
-            return back()->with('success', 'Pengumuman telah dihapus.');
+            \App\Models\Announcement::where('is_active', true)->update(['is_active' => false]);
+            return back()->with('success', 'Semua pengumuman aktif telah dinonaktifkan.');
         }
 
-        $request->validate(['message' => 'required|string|max:500']);
-        
-        \App\Models\Setting::set('global_announcement', $request->message);
+        $request->validate([
+            'message' => 'required|string|max:500',
+            'duration' => 'required|string'
+        ]);
 
-        return back()->with('success', 'Pengumuman berhasil disiarkan secara permanen!');
+        // Deactivate previous ones
+        \App\Models\Announcement::where('is_active', true)->update(['is_active' => false]);
+
+        $ends_at = null;
+        if ($request->duration !== 'permanent') {
+            $ends_at = match($request->duration) {
+                '1h' => now()->addHour(),
+                '1d' => now()->addDay(),
+                '1w' => now()->addWeek(),
+                default => null
+            };
+        }
+
+        \App\Models\Announcement::create([
+            'message' => $request->message,
+            'is_active' => true,
+            'ends_at' => $ends_at
+        ]);
+
+        return back()->with('success', 'Pengumuman baru berhasil disiarkan!');
+    }
+
+    /**
+     * Delete Announcement from History
+     */
+    public function deleteAnnounce(\App\Models\Announcement $announcement)
+    {
+        $announcement->delete();
+        return back()->with('success', 'History pengumuman berhasil dihapus.');
     }
 
     /**

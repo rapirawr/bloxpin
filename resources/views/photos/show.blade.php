@@ -52,7 +52,7 @@
                                 <span class="font-medium">Salin Tautan</span>
                             </button>
                             
-                            <a href="{{ $photo->image_url }}" download="{{ $photo->title }}" class="w-full text-left px-4 py-3 hover:bg-light dark:hover:bg-borderdark flex items-center gap-3 text-dark dark:text-white transition-colors">
+                            <a href="{{ route('photos.download', $photo) }}" class="w-full text-left px-4 py-3 hover:bg-light dark:hover:bg-borderdark flex items-center gap-3 text-dark dark:text-white transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 <span class="font-medium">Unduh Gambar</span>
                             </a>
@@ -155,7 +155,12 @@
                         <a href="{{ $photo->user ? route('profile.show', $photo->user) : '#' }}" class="flex items-center gap-3 group">
                         <img src="{{ $photo->user->avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full object-cover ring-1 ring-borderlight dark:ring-borderdark">
                         <div>
-                            <div class="font-bold text-dark dark:text-white group-hover:underline">{{ $photo->user->name }}</div>
+                            <div class="font-bold text-dark dark:text-white group-hover:underline flex items-center gap-1.5">
+                                {{ $photo->user->name }}
+                                @if($photo->user->is_verified)
+                                    <svg class="w-4 h-4 text-blue-500 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>
+                                @endif
+                            </div>
                             <!-- <div class="text-sm text-gray-500 dark:text-gray-400">{{ $photo->user->photos()->count() }} unggahan</div> -->
                         </div>
                     </a>
@@ -324,6 +329,9 @@
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-1">
                                         <a :href="'/user/' + comment.user.username" class="font-bold text-sm text-dark dark:text-white hover:underline" x-text="comment.user.name"></a>
+                                        <template x-if="comment.user.is_verified">
+                                            <svg class="w-3.5 h-3.5 text-blue-500 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>
+                                        </template>
                                         <span class="text-xs text-gray-400" x-text="comment.created_at"></span>
                                     </div>
                                     <p class="text-sm text-dark dark:text-gray-300 leading-relaxed" x-text="comment.body"></p>

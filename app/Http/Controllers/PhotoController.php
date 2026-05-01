@@ -165,4 +165,27 @@ class PhotoController extends Controller
             ->route('home')
             ->with('success', 'Foto berhasil dihapus!');
     }
+
+    /**
+     * Proxy download to force browser download for cross-origin S3/Supabase images
+     */
+    public function download(Photo $photo)
+    {
+        $url = $photo->image_url;
+        $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+        $filename = \Illuminate\Support\Str::slug($photo->title) . '.' . $extension;
+
+        try {
+            // Fetch content and stream to browser
+            $contents = file_get_contents($url);
+            if ($contents === false) throw new \Exception("Failed to fetch image");
+
+            return response($contents)
+                ->header('Content-Type', 'image/' . $extension)
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        } catch (\Exception $e) {
+            // Fallback: if proxy fails, at least redirect to the direct URL
+            return redirect($url);
+        }
+    }
 }

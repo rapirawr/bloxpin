@@ -25,6 +25,7 @@ export default {
                 light: '#F7F7F7',
                 cardlight: '#FFFFFF',
                 borderlight: '#E0E0E0',
+                pinterest: '#E60023',
             },
             boxShadow: {
                 'minimal': '0 4px 20px rgba(0, 0, 0, 0.05)',

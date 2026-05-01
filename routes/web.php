@@ -31,6 +31,7 @@ Route::post('/photo/{photo:uid}/like', [PhotoController::class, 'like'])->name('
 // dst.
 Route::get('/user/{user:username}', [ProfileController::class, 'show'])->name('profile.show');
 Route::get('/board/{board}', [BoardController::class, 'show'])->name('boards.show');
+Route::get('/photo/{photo:uid}/download', [PhotoController::class, 'download'])->name('photos.download');
 
 // ─── Authenticated Routes ────────────────────────────────────────
 
@@ -97,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Global Announcement
             Route::get('/announcement', [\App\Http\Controllers\Admin\AdminController::class, 'announcement'])->name('announcement');
             Route::post('/announcement', [\App\Http\Controllers\Admin\AdminController::class, 'sendAnnounce'])->name('announce.send');
+            Route::delete('/announcement/{announcement}', [\App\Http\Controllers\Admin\AdminController::class, 'deleteAnnounce'])->name('announce.delete');
         });
     });
 });
