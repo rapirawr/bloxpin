@@ -48,7 +48,7 @@ class User extends Authenticatable
             if (str_starts_with($this->avatar, 'http')) return $this->avatar;
             
             $base = 'https://qbzvydkjvlutcsgdqikn.supabase.co/storage/v1/object/public/bloxpin-bucket/';
-            return $base . $this->avatar;
+            return $base . ltrim($this->avatar, '/');
         }
 
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=E60023&color=fff&size=200';
@@ -63,7 +63,7 @@ class User extends Authenticatable
             if (str_starts_with($this->cover_photo, 'http')) return $this->cover_photo;
             
             $base = 'https://qbzvydkjvlutcsgdqikn.supabase.co/storage/v1/object/public/bloxpin-bucket/';
-            return $base . $this->cover_photo;
+            return $base . ltrim($this->cover_photo, '/');
         }
 
         return null;
