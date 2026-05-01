@@ -78,17 +78,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markRead'])->name('notifications.mark-read');
 
     // ─── Admin Routes (God Mode) ──────────────────────────────────
-    Route::middleware([\App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\AdminController::class, 'dashboard'])->name('dashboard');
-        
-        // User Management
-        Route::get('/users', [\App\Http\Controllers\Admin\AdminController::class, 'users'])->name('users');
-        Route::post('/users/{user}/toggle-admin', [\App\Http\Controllers\Admin\AdminController::class, 'toggleAdmin'])->name('users.toggle-admin');
-        Route::delete('/users/{user}', [\App\Http\Controllers\Admin\AdminController::class, 'deleteUser'])->name('users.delete');
+    Route::middleware([\App\Http\Middleware\AdminMiddleware::class])->group(function () {
+        Route::prefix('admin')->name('admin.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminController::class, 'dashboard'])->name('dashboard');
+            
+            // User Management
+            Route::get('/users', [\App\Http\Controllers\Admin\AdminController::class, 'users'])->name('users');
+            Route::post('/users/{user}/toggle-admin', [\App\Http\Controllers\Admin\AdminController::class, 'toggleAdmin'])->name('users.toggle-admin');
+            Route::post('/users/{user}/toggle-verified', [\App\Http\Controllers\Admin\AdminController::class, 'toggleVerified'])->name('users.toggle-verified');
+            Route::post('/users/{user}/toggle-shadowban', [\App\Http\Controllers\Admin\AdminController::class, 'toggleShadowban'])->name('users.toggle-shadowban');
+            Route::post('/users/{user}/impersonate', [\App\Http\Controllers\Admin\AdminController::class, 'impersonate'])->name('users.impersonate');
+            Route::delete('/users/{user}', [\App\Http\Controllers\Admin\AdminController::class, 'deleteUser'])->name('users.delete');
 
-        // Photo Management
-        Route::get('/photos', [\App\Http\Controllers\Admin\AdminController::class, 'photos'])->name('photos');
-        Route::delete('/photos/{photo}', [\App\Http\Controllers\Admin\AdminController::class, 'deletePhoto'])->name('photos.delete');
+            // Photo Management
+            Route::get('/photos', [\App\Http\Controllers\Admin\AdminController::class, 'photos'])->name('photos');
+            Route::delete('/photos/{photo}', [\App\Http\Controllers\Admin\AdminController::class, 'deletePhoto'])->name('photos.delete');
+        });
     });
 });
 

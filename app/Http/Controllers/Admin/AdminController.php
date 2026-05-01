@@ -53,6 +53,45 @@ class AdminController extends Controller
     }
 
     /**
+     * Toggle Verified Badge
+     */
+    public function toggleVerified(User $user)
+    {
+        $user->is_verified = !$user->is_verified;
+        $user->save();
+
+        return back()->with('success', 'Status verifikasi user diperbarui.');
+    }
+
+    /**
+     * Toggle Shadowban
+     */
+    public function toggleShadowban(User $user)
+    {
+        $user->is_shadowbanned = !$user->is_shadowbanned;
+        $user->save();
+
+        return back()->with('success', 'Status shadowban user diperbarui.');
+    }
+
+    /**
+     * Impersonate User (Login as)
+     */
+    public function impersonate(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda sudah login sebagai akun ini.');
+        }
+
+        // Store original admin ID in session if you want to switch back later
+        session(['impersonator_id' => auth()->id()]);
+        
+        auth()->loginUsingId($user->id);
+        
+        return redirect()->route('home')->with('success', "Sekarang Anda login sebagai {$user->name}");
+    }
+
+    /**
      * Delete User
      */
     public function deleteUser(User $user)
