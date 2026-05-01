@@ -67,23 +67,25 @@
                     <p class="text-[10px] text-gray-500 mt-2">Pisahkan beberapa tag dengan tanda koma.</p>
                 </div>
 
-                <!-- Danger Zone -->
-                <div class="mt-8 pt-8 border-t border-borderlight dark:border-borderdark">
-                    <h3 class="text-sm font-bold text-red-600 mb-4">Zona Bahaya</h3>
-                    <div class="bg-red-50 dark:bg-red-900/10 rounded-xl p-4 flex items-center justify-between border border-red-100 dark:border-red-900/20">
-                        <div>
-                            <div class="text-sm font-bold text-red-800 dark:text-red-400">Hapus Postingan Ini</div>
-                            <div class="text-xs text-red-600/70 dark:text-red-400/60">Tindakan ini tidak dapat dibatalkan.</div>
-                        </div>
-                        <form action="{{ route('photos.destroy', $photo) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus postingan ini selamanya?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors">Hapus</button>
-                        </form>
+        </form>
+
+        <!-- Danger Zone (Moved outside main form) -->
+        <div class="p-6 md:p-10 pt-0">
+            <div class="mt-0 pt-8 border-t border-borderlight dark:border-borderdark">
+                <h3 class="text-sm font-bold text-red-600 mb-4">Zona Bahaya</h3>
+                <div class="bg-red-50 dark:bg-red-900/10 rounded-xl p-4 flex items-center justify-between border border-red-100 dark:border-red-900/20">
+                    <div>
+                        <div class="text-sm font-bold text-red-800 dark:text-red-400">Hapus Postingan Ini</div>
+                        <div class="text-xs text-red-600/70 dark:text-red-400/60">Tindakan ini tidak dapat dibatalkan.</div>
                     </div>
+                    <form action="{{ route('photos.destroy', $photo) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus postingan ini selamanya?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors">Hapus</button>
+                    </form>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 @endsection

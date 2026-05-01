@@ -62,6 +62,28 @@
                         <input type="file" id="imageUpload" name="image[]" class="hidden" accept="image/jpeg,image/png,image/webp,image/gif" multiple @change="handleFileSelect($event)">
                     </label>
 
+                    <!-- File Size Indicator -->
+                    <div x-show="previews.length > 0" class="mt-4 p-4 rounded-xl bg-light dark:bg-dark border border-borderlight dark:border-borderdark shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Upload Size</span>
+                            <span class="text-xs font-black" :class="!isAdmin && totalSize > limit ? 'text-red-500 animate-pulse' : 'text-dark dark:text-white'" x-text="formatSize(totalSize)"></span>
+                        </div>
+                        <div class="w-full h-1.5 bg-gray-200 dark:bg-borderdark rounded-full overflow-hidden">
+                            <div class="h-full transition-all duration-500" 
+                                 :class="!isAdmin && totalSize > limit ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-dark dark:bg-white'"
+                                 :style="`width: ${Math.min((totalSize / limit) * 100, 100)}%`"
+                            ></div>
+                        </div>
+                        <p x-show="!isAdmin && totalSize > limit" class="mt-2 text-[9px] font-bold text-red-500 uppercase tracking-tight flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            Vercel Limit Reached (4.5MB). Please upload fewer or smaller files.
+                        </p>
+                        <p x-show="isAdmin && totalSize > limit" class="mt-2 text-[9px] font-bold text-amber-500 uppercase tracking-tight flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            Admin Mode: Bypassing size limit (Caution: Vercel may still reject).
+                        </p>
+                    </div>
+
                     <!-- Detailed Grid for Multiple Files -->
                     <div x-show="previews.length > 1" class="grid grid-cols-4 gap-2" style="display: none;">
                         <template x-for="(p, i) in previews">
@@ -94,7 +116,9 @@
                         @endforeach
                     </select>
                     <div class="flex-1 px-4 text-sm font-semibold text-dark dark:text-white truncate" x-text="selectedBoardName"></div>
-                    <button type="submit" class="btn-primary ml-2 z-10 shrink-0 shadow-minimal dark:shadow-minimal-dark" :disabled="previews.length === 0" :class="{'opacity-50 cursor-not-allowed': previews.length === 0}">
+                    <button type="submit" class="btn-primary ml-2 z-10 shrink-0 shadow-minimal dark:shadow-minimal-dark" 
+                            :disabled="previews.length === 0 || (!isAdmin && totalSize > limit)" 
+                            :class="{'opacity-50 cursor-not-allowed grayscale': previews.length === 0 || (!isAdmin && totalSize > limit)}">
                         <span x-text="previews.length > 1 ? 'Publish Semua' : 'Publish'">Publish</span>
                     </button>
                 </div>
@@ -143,6 +167,9 @@ function uploadForm() {
     return {
         dragover: false,
         previews: [], // Array of {file, url}
+        totalSize: 0,
+        isAdmin: {{ auth()->user()->is_admin ? 'true' : 'false' }},
+        limit: 4.5 * 1024 * 1024,
         
         triggerFileInput() {
             document.getElementById('imageUpload').click();
@@ -172,6 +199,7 @@ function uploadForm() {
                             file: file,
                             url: e.target.result
                         });
+                        this.calculateTotalSize();
                         this.syncInput();
                     };
                     reader.readAsDataURL(file);
@@ -179,8 +207,21 @@ function uploadForm() {
             });
         },
         
+        calculateTotalSize() {
+            this.totalSize = this.previews.reduce((acc, p) => acc + p.file.size, 0);
+        },
+
+        formatSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        },
+        
         removeImage(index) {
             this.previews.splice(index, 1);
+            this.calculateTotalSize();
             this.syncInput();
         },
 

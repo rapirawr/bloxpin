@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('title', $photo->title . ' — Bloxpin')
+@section('meta_description', Str::limit($photo->description, 160) ?? 'Temukan momen menarik ini di Bloxpin.')
+@section('meta_image', $photo->image_url)
+
 @section('content')
 <div class="max-w-6xl mx-auto px-0 sm:px-4 py-4 md:py-8" x-data="{ 
     liked: {{ auth()->check() && auth()->user()->hasLiked($photo) ? 'true' : 'false' }}, 

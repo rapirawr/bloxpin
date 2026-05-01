@@ -11,8 +11,23 @@
         </script>
     @endauth
 
-    <title>{{ config('app.name', 'Bloxpin') }}</title>
+    <title>@yield('title', config('app.name', 'Bloxpin'))</title>
+    <meta name="description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('title', config('app.name', 'Bloxpin'))">
+    <meta property="og:description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
+    <meta property="og:image" content="@yield('meta_image', asset('og-default.png'))">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ url()->current() }}">
+    <meta property="twitter:title" content="@yield('title', config('app.name', 'Bloxpin'))">
+    <meta property="twitter:description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
+    <meta property="twitter:image" content="@yield('meta_image', asset('og-default.png'))">
 
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
