@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-light text-dark antialiased transition-colors duration-300 font-['Outfit'];
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .glass-nav {
+        @apply bg-white/60 dark:bg-dark/60 backdrop-blur-2xl border-b border-white/20 dark:border-white/5;
+    }
+
+    .nav-link {
+        @apply relative px-3 py-2 text-sm font-medium text-gray-500 hover:text-dark dark:text-gray-400 dark:hover:text-white transition-all duration-300;
+    }
+
+    .nav-link::after {
+        content: '';
+        @apply absolute bottom-0 left-0 w-0 h-[2px] bg-dark dark:bg-white transition-all duration-300;
+    }
+
+    .nav-link:hover::after {
+        @apply w-full;
+    }
+    
+    .dark body {
+        @apply bg-dark text-gray-100;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        @apply bg-gray-300 rounded-full;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+        @apply bg-gray-700;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-gray-400;
+    }
+    .dark ::-webkit-scrollbar-thumb:hover {
+        @apply bg-gray-600;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-dark text-white hover:bg-black dark:bg-white dark:text-dark dark:hover:bg-gray-100 font-medium rounded-lg px-4 py-2 transition-transform duration-300 active:scale-95;
+    }
+    
+    .btn-secondary {
+        @apply bg-transparent border border-borderlight hover:bg-gray-50 dark:border-borderdark dark:hover:bg-card text-dark dark:text-white font-medium rounded-lg px-4 py-2 transition-transform duration-300 active:scale-95;
+    }
+    
+    .icon-btn {
+        @apply p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-borderdark transition-colors duration-300 flex items-center justify-center;
+    }
+}
+
+/* Hide scrollbar for horizontal scrolling elements */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Inertia Scroll Utility */
+.inertia-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}

@@ -1,0 +1,161 @@
+<?php
+
+namespace App\Models;
+
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+#[Fillable(['name', 'username', 'email', 'password', 'bio', 'avatar', 'cover_photo'])]
+#[Hidden(['password', 'remember_token'])]
+class User extends Authenticatable
+{
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable;
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
+    /**
+     * Get the route key name for model binding.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'username';
+    }
+
+    /**
+     * Get the user's avatar URL.
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=E60023&color=fff&size=200';
+    }
+
+    /**
+     * Get the user's cover photo URL.
+     */
+    public function getCoverPhotoUrlAttribute(): ?string
+    {
+        if ($this->cover_photo) {
+            return asset('storage/' . $this->cover_photo);
+        }
+
+        return null;
+    }
+
+    /**
+     * Photos uploaded by this user.
+     */
+    public function photos(): HasMany
+    {
+        return $this->hasMany(Photo::class);
+    }
+
+    /**
+     * Boards created by this user.
+     */
+    public function boards(): HasMany
+    {
+        return $this->hasMany(Board::class);
+    }
+
+    /**
+     * Likes given by this user.
+     */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    /**
+     * Pins made by this user.
+     */
+    public function pins(): HasMany
+    {
+        return $this->hasMany(Pin::class);
+    }
+
+    /**
+     * Check if the user has liked a specific photo.
+     */
+    public function hasLiked(Photo $photo): bool
+    {
+        return $this->likes()->where('photo_id', $photo->id)->exists();
+    }
+
+    /**
+     * Check if the user has pinned a photo to any board.
+     */
+    public function hasPinned(Photo $photo): bool
+    {
+        return $this->pins()->where('photo_id', $photo->id)->exists();
+    }
+
+    /**
+     * Users who follow this user.
+     */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id')->withTimestamps();
+    }
+
+    /**
+     * Users that this user follows.
+     */
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id')->withTimestamps();
+    }
+
+    /**
+     * Check if this user is following another user.
+     */
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->where('following_id', $user->id)->exists();
+    }
+
+    /**
+     * User's notifications.
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class)->latest();
+    }
+
+    /**
+     * User's unread notifications.
+     */
+    public function unreadNotifications(): HasMany
+    {
+        return $this->notifications()->whereNull('read_at');
+    }
+
+    /**
+     * User's comments.
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+}
