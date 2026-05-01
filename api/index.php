@@ -10,8 +10,18 @@ if (!is_dir($compiledViews)) {
     mkdir($compiledViews, 0777, true);
 }
 
+$bootstrapCache = '/tmp/bootstrap/cache';
+if (!is_dir($bootstrapCache)) {
+    mkdir($bootstrapCache, 0777, true);
+}
+
 // Override Laravel Cache paths to /tmp dynamically
 $_ENV['VIEW_COMPILED_PATH'] = $compiledViews;
+$_ENV['APP_SERVICES_CACHE'] = $bootstrapCache . '/services.php';
+$_ENV['APP_PACKAGES_CACHE'] = $bootstrapCache . '/packages.php';
+$_ENV['APP_CONFIG_CACHE']   = $bootstrapCache . '/config.php';
+$_ENV['APP_ROUTES_CACHE']   = $bootstrapCache . '/routes.php';
+$_ENV['APP_EVENTS_CACHE']   = $bootstrapCache . '/events.php';
 
 try {
     require __DIR__ . '/../public/index.php';
