@@ -103,17 +103,17 @@ class ProfileController extends Controller
         // Handle Avatar Upload
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
+                Storage::delete($user->avatar);
             }
-            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $request->file('avatar')->store('avatars');
         }
 
         // Handle Cover Photo Upload
         if ($request->hasFile('cover_photo')) {
             if ($user->cover_photo) {
-                Storage::disk('public')->delete($user->cover_photo);
+                Storage::delete($user->cover_photo);
             }
-            $user->cover_photo = $request->file('cover_photo')->store('covers', 'public');
+            $user->cover_photo = $request->file('cover_photo')->store('covers');
         }
 
         $user->save();
@@ -133,8 +133,8 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // Delete associated files
-        if ($user->avatar) Storage::disk('public')->delete($user->avatar);
-        if ($user->cover_photo) Storage::disk('public')->delete($user->cover_photo);
+        if ($user->avatar) Storage::delete($user->avatar);
+        if ($user->cover_photo) Storage::delete($user->cover_photo);
 
         Auth::logout();
 
