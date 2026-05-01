@@ -1,5 +1,5 @@
 @extends('errors.layout')
 
-@section('title', 'Server Error')
+@section('title', 'Internal Server Error')
 @section('code', '500')
-@section('message', 'Something went wrong on our end. Our engineers are already on the case.')
+@section('message', 'The server encountered an unexpected condition and could not complete your request.')

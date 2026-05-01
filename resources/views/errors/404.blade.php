@@ -1,5 +1,5 @@
 @extends('errors.layout')
 
-@section('title', 'Page Not Found')
+@section('title', 'Not Found')
 @section('code', '404')
-@section('message', 'Oops! The inspiration you are looking for seems to have wandered off the grid.')
+@section('message', 'Oops! The page you are looking for has vanished into the void.')
