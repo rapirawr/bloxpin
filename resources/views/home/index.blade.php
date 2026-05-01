@@ -44,7 +44,7 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('masonryGallery', () => ({
         msnry: null,
-        nextPageUrl: '{{ $photos->nextPageUrl() }}',
+        nextPageUrl: ('{{ $photos->nextPageUrl() }}' || '').replace(/^http:\/\//i, 'https://'),
         hasMore: {{ $photos->hasMorePages() ? 'true' : 'false' }},
         loading: false,
 
