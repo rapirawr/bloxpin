@@ -3,12 +3,30 @@
 @section('content')
 <div class="w-full max-w-7xl mx-auto pt-8">
     
+    <!-- Profile Banner -->
+    <div class="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-b-[32px] md:rounded-b-[48px] bg-gray-100 group">
+        @if($user->cover_photo_url)
+            <img src="{{ $user->cover_photo_url }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+        @else
+            <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-white/5 dark:to-white/10 flex items-center justify-center">
+                <svg class="w-12 h-12 text-gray-300 dark:text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+        @endif
+
+        @if(auth()->check() && auth()->id() === $user->id)
+            <a href="{{ route('profile.edit') }}" class="absolute bottom-6 right-6 bg-white/90 hover:bg-white backdrop-blur-sm text-dark px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-all active:scale-95 opacity-0 group-hover:opacity-100 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                Ganti Sampul
+            </a>
+        @endif
+    </div>
+
     <!-- Profile Header -->
-    <div class="flex flex-col items-center px-4 mb-10">
-        <div class="relative w-32 h-32 md:w-40 md:h-40 mb-4 group">
-            <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="w-full h-full rounded-full object-cover shadow-md">
+    <div class="flex flex-col items-center px-4 mb-10 -mt-16 md:-mt-20 relative z-10">
+        <div class="relative w-32 h-32 md:w-40 md:h-40 mb-4 group ring-8 ring-white dark:ring-dark rounded-full overflow-hidden bg-white dark:bg-dark shadow-xl">
+            <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
             @if(auth()->check() && auth()->id() === $user->id)
-                <a href="{{ route('profile.edit') }}" class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <a href="{{ route('profile.edit') }}" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </a>
             @endif

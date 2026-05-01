@@ -73,7 +73,7 @@ class Photo extends Model
             }
 
             $builder->whereHas('user', function ($query) {
-                $query->whereRaw('is_shadowbanned = false');
+                $query->whereRaw('(is_shadowbanned IS NOT TRUE)');
                 
                 // If logged in, allow user to see their own shadowbanned content
                 if (auth()->check()) {

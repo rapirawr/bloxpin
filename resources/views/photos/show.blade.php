@@ -21,9 +21,9 @@
         });
     }
 }">
-    <!-- Back Button (Mobile) -->
-    <div class="fixed top-20 left-4 z-[60] md:hidden">
-        <button onclick="history.back()" class="w-10 h-10 bg-white/90 dark:bg-card/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg border border-borderlight dark:border-borderdark active:scale-95 transition-all text-dark dark:text-white">
+    <!-- Back Button (Mobile Fixed) -->
+    <div class="fixed top-[92px] left-4 z-[70] md:hidden pointer-events-none">
+        <button onclick="history.back()" class="w-10 h-10 bg-white/90 dark:bg-card/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border border-borderlight dark:border-borderdark active:scale-95 transition-all text-dark dark:text-white pointer-events-auto">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
         </button>
     </div>

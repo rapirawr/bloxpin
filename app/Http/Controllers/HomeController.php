@@ -13,8 +13,14 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $photos = Photo::with(['user', 'tags'])
+            ->when(auth()->check(), function ($q) {
+                $q->withExists(['pins as is_pinned' => function ($query) {
+                    $query->where('user_id', auth()->id());
+                }]);
+            })
             ->latest()
             ->paginate(30);
+
 
         // For infinite scroll AJAX requests
         if ($request->ajax()) {
@@ -24,9 +30,9 @@ class HomeController extends Controller
             }
 
             return response()->json([
-                'html' => $html,
+                'html'      => $html,
                 'next_page' => $photos->nextPageUrl(),
-                'has_more' => $photos->hasMorePages(),
+                'has_more'  => $photos->hasMorePages(),
             ]);
         }
 

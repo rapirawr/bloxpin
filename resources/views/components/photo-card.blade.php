@@ -15,7 +15,7 @@
          <div class="flex justify-end pointer-events-auto">
              @auth
              <div x-data="{ 
-                 pinned: {{ auth()->user()->hasPinned($photo) ? 'true' : 'false' }}, 
+                 pinned: {{ ($photo->is_pinned ?? false) ? 'true' : 'false' }}, 
                  saving: false,
                  showBoards: false
              }" class="relative">
@@ -45,7 +45,7 @@
                                  <span x-text="board.title" class="truncate"></span>
                              </button>
                          </template>
-                         <div x-show="boards.length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">
+                         <div x-show="(window.bloxpinBoards || []).length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">
                              Belum ada board.
                          </div>
                      </div>
