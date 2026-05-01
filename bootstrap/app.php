@@ -13,6 +13,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         //
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
+    ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e, $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage() ?: 'Something went wrong',
+                    'code' => $e->getStatusCode()
+                ], $e->getStatusCode());
+            }
+
+            if (in_array($e->getStatusCode(), [404, 500, 403])) {
+                return response()->view("errors.{$e->getStatusCode()}", [], $e->getStatusCode());
+            }
+        });
     })->create();

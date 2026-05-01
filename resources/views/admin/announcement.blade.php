@@ -17,7 +17,7 @@
                     rows="5" 
                     class="w-full bg-white/5 border border-border rounded-2xl p-6 text-white focus:border-white focus:ring-0 transition-all placeholder:text-gray-700 text-sm font-medium"
                     placeholder="Broadcast your message to all users..."
-                >{{ \Illuminate\Support\Facades\Cache::get('global_announcement') }}</textarea>
+                >{{ \App\Models\Setting::get('global_announcement') }}</textarea>
             </div>
 
             <div class="flex gap-4">

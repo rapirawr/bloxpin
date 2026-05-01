@@ -133,15 +133,15 @@ class AdminController extends Controller
     public function sendAnnounce(Request $request)
     {
         if ($request->action === 'clear') {
-            \Illuminate\Support\Facades\Cache::forget('global_announcement');
+            \App\Models\Setting::set('global_announcement', null);
             return back()->with('success', 'Pengumuman telah dihapus.');
         }
 
         $request->validate(['message' => 'required|string|max:500']);
         
-        \Illuminate\Support\Facades\Cache::forever('global_announcement', $request->message);
+        \App\Models\Setting::set('global_announcement', $request->message);
 
-        return back()->with('success', 'Pengumuman berhasil disiarkan ke seluruh user!');
+        return back()->with('success', 'Pengumuman berhasil disiarkan secara permanen!');
     }
 
     /**

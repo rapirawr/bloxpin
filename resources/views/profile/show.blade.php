@@ -14,7 +14,12 @@
             @endif
         </div>
         
-        <h1 class="text-3xl md:text-4xl font-display font-bold text-dark mb-1">{{ $user->name }}</h1>
+        <h1 class="text-3xl md:text-4xl font-display font-bold text-dark mb-1 flex items-center gap-2">
+            {{ $user->name }}
+            @if($user->is_verified)
+                <svg class="w-6 h-6 md:w-8 md:h-8 text-blue-500 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>
+            @endif
+        </h1>
         <div class="text-gray-500 mb-4">{{ '@' . $user->username }}</div>
         
         @if($user->bio)
