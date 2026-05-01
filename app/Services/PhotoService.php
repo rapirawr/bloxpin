@@ -43,9 +43,13 @@ class PhotoService
             'height' => $height,
         ]);
 
+        // Auto-tagging AI (suggested tags from title and description)
+        $suggestedTags = $this->suggestTags($title, $description);
+        $finalTags = !empty($tags) ? $tags . ',' . $suggestedTags : $suggestedTags;
+
         // Attach tags
-        if (!empty($tags)) {
-            $this->syncTags($photo, $tags);
+        if (!empty($finalTags)) {
+            $this->syncTags($photo, $finalTags);
         }
 
         // Pin to board if specified
@@ -181,5 +185,34 @@ class PhotoService
 
         // Delete the record (cascade will handle likes, pins, tags)
         $photo->delete();
+    }
+    /**
+     * Suggest tags based on title and description.
+     */
+    protected function suggestTags(string $title, ?string $description = null): string
+    {
+        $text = $title . ' ' . ($description ?? '');
+        $text = strtolower($text);
+        
+        // Remove special chars except spaces
+        $text = preg_replace('/[^a-z0-9\s]/', '', $text);
+        
+        // Split into words
+        $words = explode(' ', $text);
+        
+        // Filter: min 4 chars, not common words (stop words)
+        $stopWords = [
+            'dan', 'yang', 'dari', 'untuk', 'pada', 'adalah', 'dengan', 'saya', 'anda', 'ini', 'itu', 
+            'juga', 'akan', 'bisa', 'ada', 'tidak', 'ia', 'ke', 'the', 'and', 'for', 'with', 'this', 'that'
+        ];
+        
+        $suggested = array_filter($words, function($word) use ($stopWords) {
+            $word = trim($word);
+            return strlen($word) >= 4 && !in_array($word, $stopWords);
+        });
+        
+        // Unique and limited to 5 tags
+        $suggested = array_unique($suggested);
+        return implode(', ', array_slice($suggested, 0, 5));
     }
 }

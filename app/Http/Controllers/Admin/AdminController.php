@@ -16,6 +16,20 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
+        // Chart data for last 7 days
+        $chartData = [
+            'labels' => [],
+            'photos' => [],
+            'users' => []
+        ];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $chartData['labels'][] = now()->subDays($i)->format('D');
+            $chartData['photos'][] = Photo::whereDate('created_at', $date)->count();
+            $chartData['users'][] = User::whereDate('created_at', $date)->count();
+        }
+
         $stats = [
             'users_count' => User::count(),
             'photos_count' => Photo::count(),
@@ -23,6 +37,7 @@ class AdminController extends Controller
             'comments_count' => Comment::count(),
             'latest_users' => User::latest()->take(5)->get(),
             'latest_photos' => Photo::with('user')->latest()->take(5)->get(),
+            'chart' => $chartData,
         ];
 
         return view('admin.dashboard', compact('stats'));
@@ -198,5 +213,26 @@ class AdminController extends Controller
     {
         $photo->delete();
         return back()->with('success', 'Foto berhasil dihapus oleh Admin.');
+    }
+
+    /**
+     * Report Management
+     */
+    public function reports()
+    {
+        $reports = \App\Models\Report::with(['user', 'photo.user'])->latest()->paginate(20);
+        return view('admin.reports', compact('reports'));
+    }
+
+    /**
+     * Resolve / Dismiss Report
+     */
+    public function resolveReport(\App\Models\Report $report, Request $request)
+    {
+        $report->update([
+            'status' => $request->status // resolved, dismissed
+        ]);
+
+        return back()->with('success', 'Laporan berhasil diperbarui.');
     }
 }

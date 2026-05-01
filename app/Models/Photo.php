@@ -193,4 +193,8 @@ class Photo extends Model
     {
         return $this->hasMany(Comment::class)->latest();
     }
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class);
+    }
 }

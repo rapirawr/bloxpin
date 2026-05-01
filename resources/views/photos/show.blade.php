@@ -14,6 +14,7 @@
     isFollowingLoading: false,
     shareUrl: window.location.href,
     isShareModalOpen: false,
+    isReportModalOpen: false,
     copyLink() {
         navigator.clipboard.writeText(this.shareUrl).then(() => {
             window.showToast('Tautan disalin!');
@@ -62,6 +63,15 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 <span class="font-medium">Unduh Gambar</span>
                             </a>
+
+                            @auth
+                            @if(auth()->id() !== $photo->user_id)
+                                <button @click="isReportModalOpen = true; open = false" class="w-full text-left px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-3 text-red-500 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    <span class="font-medium">Laporkan Postingan</span>
+                                </button>
+                            @endif
+                            @endauth
 
                             @can('update', $photo)
                                 <div class="h-px bg-borderlight dark:bg-borderdark my-1"></div>
@@ -472,4 +482,49 @@
         </div>
     </div>
 </div>
+    <!-- Report Modal -->
+    <div x-show="isReportModalOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style="display: none;">
+        
+        <div @click.away="isReportModalOpen = false" 
+             class="bg-white dark:bg-card w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl animate-modal-up">
+            
+            <div class="p-8">
+                <h3 class="text-2xl font-black text-dark dark:text-white text-center mb-2">Laporkan Postingan</h3>
+                <p class="text-gray-500 text-sm text-center mb-8 uppercase tracking-widest font-bold">Bantu kami menjaga Bloxpin tetap aman</p>
+
+                <form action="{{ route('photos.report', $photo) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest pl-4">Alasan Pelaporan</label>
+                        <select name="reason" required class="w-full bg-gray-100 dark:bg-borderdark border-none rounded-2xl px-6 py-4 text-dark dark:text-white focus:ring-2 focus:ring-pinterest transition-all appearance-none">
+                            <option value="">Pilih alasan...</option>
+                            <option value="spam">Spam atau Penipuan</option>
+                            <option value="inappropriate">Konten Tidak Pantas / Dewasa</option>
+                            <option value="violence">Kekerasan atau Ancaman</option>
+                            <option value="copyright">Pelanggaran Hak Cipta</option>
+                            <option value="harassment">Pelecehan atau Bullying</option>
+                            <option value="other">Alasan Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest pl-4">Detail Tambahan (Opsional)</label>
+                        <textarea name="description" placeholder="Ceritakan lebih lanjut..." class="w-full bg-gray-100 dark:bg-borderdark border-none rounded-2xl px-6 py-4 text-dark dark:text-white focus:ring-2 focus:ring-pinterest transition-all min-h-[100px] resize-none"></textarea>
+                    </div>
+
+                    <div class="flex gap-4 pt-4">
+                        <button type="button" @click="isReportModalOpen = false" class="flex-1 px-6 py-4 rounded-2xl font-bold text-dark dark:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-95">Batal</button>
+                        <button type="submit" class="flex-1 bg-pinterest text-white px-6 py-4 rounded-2xl font-bold hover:bg-pinterest-hover shadow-lg shadow-pinterest/20 transition-all active:scale-95">Kirim Laporan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection

@@ -58,6 +58,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/photo/{photo:uid}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
+    // Reports
+    Route::post('/photo/{photo:uid}/report', [\App\Http\Controllers\ReportController::class, 'store'])->name('photos.report');
+
     // Profile Settings
     Route::get('/settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/settings/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -96,6 +99,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/announcement', [\App\Http\Controllers\Admin\AdminController::class, 'announcement'])->name('announcement');
             Route::post('/announcement', [\App\Http\Controllers\Admin\AdminController::class, 'sendAnnounce'])->name('announce.send');
             Route::delete('/announcement/{announcement}', [\App\Http\Controllers\Admin\AdminController::class, 'deleteAnnounce'])->name('announce.delete');
+            
+            // SQL Terminal
+            Route::get('/sql', [\App\Http\Controllers\Admin\SqlController::class, 'index'])->name('sql.index');
+            Route::post('/sql/execute', [\App\Http\Controllers\Admin\SqlController::class, 'execute'])->name('sql.execute');
+
+            // Reports Management
+            Route::get('/reports', [\App\Http\Controllers\Admin\AdminController::class, 'reports'])->name('reports');
+            Route::post('/reports/{report}/resolve', [\App\Http\Controllers\Admin\AdminController::class, 'resolveReport'])->name('reports.resolve');
         });
     });
 });
