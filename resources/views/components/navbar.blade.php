@@ -24,7 +24,7 @@
                 x-model="query"
                 @focus="focused = true"
                 @blur="setTimeout(() => focused = false, 200)"
-                placeholder="Find your next inspiration..." 
+                placeholder="Find moments on bloxpin" 
                 :class="focused ? 'bg-gray-100 dark:bg-white/10 rounded-2xl pl-10' : 'bg-transparent border-b border-gray-200 dark:border-white/10 pl-8'"
                 class="w-full py-2.5 pr-4 focus:ring-0 transition-all duration-500 font-medium placeholder:text-gray-400 text-sm text-dark dark:text-white outline-none"
                 autocomplete="off"
