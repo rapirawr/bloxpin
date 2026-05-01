@@ -89,6 +89,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/users/{user}/toggle-verified', [\App\Http\Controllers\Admin\AdminController::class, 'toggleVerified'])->name('users.toggle-verified');
             Route::post('/users/{user}/toggle-shadowban', [\App\Http\Controllers\Admin\AdminController::class, 'toggleShadowban'])->name('users.toggle-shadowban');
             Route::post('/users/{user}/impersonate', [\App\Http\Controllers\Admin\AdminController::class, 'impersonate'])->name('users.impersonate');
+            Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\AdminController::class, 'resetPassword'])->name('users.reset-password');
             Route::delete('/users/{user}', [\App\Http\Controllers\Admin\AdminController::class, 'deleteUser'])->name('users.delete');
 
             // Photo Management

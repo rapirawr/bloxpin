@@ -167,6 +167,22 @@ class AdminController extends Controller
     }
 
     /**
+     * Admin Force Reset Password
+     */
+    public function resetPassword(Request $request, \App\Models\User $user)
+    {
+        $request->validate([
+            'password' => 'required|string|min:8',
+        ]);
+
+        $user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ]);
+
+        return back()->with('success', 'Password user ' . $user->name . ' berhasil direset!');
+    }
+
+    /**
      * Delete Announcement from History
      */
     public function deleteAnnounce(\App\Models\Announcement $announcement)
