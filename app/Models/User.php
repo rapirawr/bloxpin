@@ -46,7 +46,7 @@ class User extends Authenticatable
     {
         if ($this->avatar) {
             if (str_starts_with($this->avatar, 'http')) return $this->avatar;
-            return \Illuminate\Support\Facades\Storage::url($this->avatar);
+            return \Illuminate\Support\Facades\Storage::disk('s3')->url($this->avatar);
         }
 
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=E60023&color=fff&size=200';
@@ -59,7 +59,7 @@ class User extends Authenticatable
     {
         if ($this->cover_photo) {
             if (str_starts_with($this->cover_photo, 'http')) return $this->cover_photo;
-            return \Illuminate\Support\Facades\Storage::url($this->cover_photo);
+            return \Illuminate\Support\Facades\Storage::disk('s3')->url($this->cover_photo);
         }
 
         return null;

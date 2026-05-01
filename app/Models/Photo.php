@@ -77,7 +77,7 @@ class Photo extends Model
     {
         if (empty($this->image_path)) return '';
         if (str_starts_with($this->image_path, 'http')) return $this->image_path;
-        return \Illuminate\Support\Facades\Storage::url($this->image_path);
+        return \Illuminate\Support\Facades\Storage::disk('s3')->url($this->image_path);
     }
 
     /**
@@ -87,7 +87,7 @@ class Photo extends Model
     {
         if (empty($this->thumbnail_path)) return '';
         if (str_starts_with($this->thumbnail_path, 'http')) return $this->thumbnail_path;
-        return \Illuminate\Support\Facades\Storage::url($this->thumbnail_path);
+        return \Illuminate\Support\Facades\Storage::disk('s3')->url($this->thumbnail_path);
     }
 
     /**
