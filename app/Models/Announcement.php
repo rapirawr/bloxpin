@@ -21,7 +21,7 @@ class Announcement extends Model
         return $query->where('is_active', true)
                      ->where(function ($q) {
                          $q->whereNull('ends_at')
-                           ->orWhere('ends_at', '>', now());
+                           ->orWhere('ends_at', '>', now()->toDateTimeString());
                      });
     }
 }
