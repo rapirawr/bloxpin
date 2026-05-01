@@ -20,15 +20,10 @@ use Illuminate\Support\Facades\Route;
 // ─── Public Routes ───────────────────────────────────────────────
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest');
 
-// Route::get('/photo/{uid}', [PhotoController::class, 'show'])->name('photos.show');
 Route::get('/photo/{photo:uid}', [PhotoController::class, 'show'])->name('photos.show');
-Route::post('/photo/{photo:uid}/like', [PhotoController::class, 'like'])->name('photos.like');
-// dst.
 Route::get('/user/{user:username}', [ProfileController::class, 'show'])->name('profile.show');
 Route::get('/board/{board}', [BoardController::class, 'show'])->name('boards.show');
 Route::get('/photo/{photo:uid}/download', [PhotoController::class, 'download'])->name('photos.download');
@@ -40,26 +35,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Photo CRUD
     Route::get('/upload', [PhotoController::class, 'create'])->name('photos.create');
     Route::post('/upload', [PhotoController::class, 'store'])->name('photos.store');
-    Route::get('/photo/{photo}/edit', [PhotoController::class, 'edit'])->name('photos.edit');
-    Route::put('/photo/{photo}', [PhotoController::class, 'update'])->name('photos.update');
-    Route::delete('/photo/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
+    Route::get('/photo/{photo:uid}/edit', [PhotoController::class, 'edit'])->name('photos.edit');
+    Route::put('/photo/{photo:uid}', [PhotoController::class, 'update'])->name('photos.update');
+    Route::delete('/photo/{photo:uid}', [PhotoController::class, 'destroy'])->name('photos.destroy');
 
     // Board CRUD
     Route::get('/boards/create', [BoardController::class, 'create'])->name('boards.create');
     Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
+    Route::get('/board/{board}', [BoardController::class, 'show'])->name('boards.show');
     Route::get('/board/{board}/edit', [BoardController::class, 'edit'])->name('boards.edit');
     Route::put('/board/{board}', [BoardController::class, 'update'])->name('boards.update');
     Route::delete('/board/{board}', [BoardController::class, 'destroy'])->name('boards.destroy');
 
     // Like toggle (AJAX)
-    Route::post('/photo/{photo}/like', [LikeController::class, 'toggle'])->name('photos.like');
+    Route::post('/photo/{photo:uid}/like', [LikeController::class, 'toggle'])->name('photos.like');
 
     // Pin / Save to board (AJAX)
     Route::post('/pin', [PinController::class, 'store'])->name('pins.store');
     Route::delete('/pin', [PinController::class, 'destroy'])->name('pins.destroy');
 
     // Comments (AJAX)
-    Route::post('/photo/{photo}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::post('/photo/{photo:uid}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
     // Profile Settings
