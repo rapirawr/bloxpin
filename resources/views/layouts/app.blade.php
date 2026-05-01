@@ -50,7 +50,14 @@
     @include('components.navbar')
 
     <!-- Global Announcement Banner -->
-    @php $activeAnnounce = \App\Models\Announcement::active()->latest()->first(); @endphp
+    @php 
+        $activeAnnounce = null;
+        try {
+            $activeAnnounce = \App\Models\Announcement::active()->latest()->first();
+        } catch (\Exception $e) {
+            // Silently fail if table doesn't exist yet
+        }
+    @endphp
     @if($activeAnnounce)
         <div x-data="{ showAnnouncement: true }" x-show="showAnnouncement" 
              class="w-full px-4 pt-4 animate-fade-in"

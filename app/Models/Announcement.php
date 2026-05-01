@@ -21,7 +21,7 @@ class Announcement extends Model
         return $query->whereRaw('is_active = true')
                      ->where(function ($q) {
                          $q->whereNull('ends_at')
-                           ->orWhereRaw('ends_at > ?', [now()->toDateTimeString()]);
+                           ->orWhereRaw('ends_at > CURRENT_TIMESTAMP');
                      });
     }
 }
