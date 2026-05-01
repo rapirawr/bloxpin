@@ -33,6 +33,9 @@ class PhotoService
         // Generate thumbnail
         $thumbnailPath = $this->generateThumbnail($file, $imagePath);
 
+        // Get dominant color
+        $dominantColor = $this->getDominantColor($file);
+
         // Create photo record
         $photo = $user->photos()->create([
             'title' => $title,
@@ -41,6 +44,7 @@ class PhotoService
             'thumbnail_path' => $thumbnailPath,
             'width' => $width,
             'height' => $height,
+            'dominant_color' => $dominantColor,
         ]);
 
         // Auto-tagging AI (suggested tags from title and description)
@@ -214,5 +218,39 @@ class PhotoService
         // Unique and limited to 5 tags
         $suggested = array_unique($suggested);
         return implode(', ', array_slice($suggested, 0, 5));
+    }
+
+    /**
+     * Get the dominant color of an image (average color).
+     */
+    protected function getDominantColor(UploadedFile $file): string
+    {
+        $mimeType = $file->getMimeType();
+        
+        $image = match ($mimeType) {
+            'image/jpeg' => @imagecreatefromjpeg($file->getPathname()),
+            'image/png' => @imagecreatefrompng($file->getPathname()),
+            'image/gif' => @imagecreatefromgif($file->getPathname()),
+            'image/webp' => @imagecreatefromwebp($file->getPathname()),
+            default => null,
+        };
+
+        if (!$image) {
+            return '#e0e0e0'; // Default gray
+        }
+
+        // Resize to 1x1 to get average color
+        $tmp = imagecreatetruecolor(1, 1);
+        imagecopyresampled($tmp, $image, 0, 0, 0, 0, 1, 1, imagesx($image), imagesy($image));
+        $rgb = imagecolorat($tmp, 0, 0);
+        
+        $r = ($rgb >> 16) & 0xFF;
+        $g = ($rgb >> 8) & 0xFF;
+        $b = $rgb & 0xFF;
+
+        imagedestroy($image);
+        imagedestroy($tmp);
+
+        return sprintf('#%02x%02x%02x', $r, $g, $b);
     }
 }

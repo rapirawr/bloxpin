@@ -51,8 +51,19 @@
     <div class="bg-cardlight dark:bg-card md:rounded-[32px] shadow-minimal dark:shadow-minimal-dark border border-borderlight dark:border-borderdark flex flex-col md:flex-row relative z-20 transition-colors md:overflow-hidden">
         
         <!-- Left: Image -->
-        <div class="w-full md:w-1/2 bg-light dark:bg-[#0A0A0A] flex items-center justify-center p-0 md:p-8 shrink-0 min-h-[40vh] md:min-h-[50vh] transition-colors border-r border-borderlight dark:border-borderdark">
-            <img src="{{ $photo->image_url }}" alt="{{ $photo->title }}" class="w-full h-auto object-contain md:rounded-2xl max-h-[70vh] md:max-h-[80vh]">
+        <div class="w-full md:w-1/2 bg-light dark:bg-[#0A0A0A] flex items-center justify-center p-0 md:p-8 shrink-0 min-h-[40vh] md:min-h-[50vh] transition-colors border-r border-borderlight dark:border-borderdark relative overflow-hidden"
+             x-data="{ loaded: false }">
+            
+            <!-- Dominant Color Placeholder (Fades out) -->
+            <div class="absolute inset-0 transition-opacity duration-1000"
+                 :class="loaded ? 'opacity-0' : 'opacity-100'"
+                 style="background-color: {{ $photo->dominant_color ?? '#e0e0e0' }};">
+            </div>
+
+            <img src="{{ $photo->image_url }}" alt="{{ $photo->title }}" 
+                 class="w-full h-auto object-contain md:rounded-2xl max-h-[70vh] md:max-h-[80vh] opacity-0 transition-opacity duration-700 relative z-10"
+                 x-bind:class="{ 'opacity-100': loaded }"
+                 @load="loaded = true">
         </div>
 
         <!-- Right: Info -->
@@ -184,10 +195,20 @@
                     <a href="{{ route('login') }}" class="btn-primary py-3 px-6">Simpan</a>
                 </div>
 
-                <h1 class="text-3xl md:text-4xl font-display font-bold text-dark dark:text-white mb-4 leading-tight">{{ $photo->title }}</h1>
+                <div x-data="{ expanded: false, title: {{ json_encode($photo->title) }}, limit: 60 }">
+                    <h1 class="text-3xl md:text-4xl font-display font-bold text-dark dark:text-white mb-4 leading-tight cursor-pointer"
+                        @click="expanded = !expanded"
+                        x-text="expanded || title.length <= limit ? title : title.substring(0, limit) + '...'">
+                    </h1>
+                </div>
                 
                 @if($photo->description)
-                    <p class="text-dark dark:text-gray-300 whitespace-pre-wrap mb-8 text-base md:text-lg leading-relaxed">{{ $photo->description }}</p>
+                    <div x-data="{ expanded: false, desc: {{ json_encode($photo->description) }}, limit: 160 }">
+                        <p class="text-dark dark:text-gray-300 whitespace-pre-wrap mb-8 text-base md:text-lg leading-relaxed cursor-pointer"
+                           @click="expanded = !expanded"
+                           x-html="expanded || desc.length <= limit ? desc.replace(/@([a-zA-Z0-9_]+)/g, '<a href=\'/user/$1\' class=\'text-pinterest hover:underline font-bold\'>@$1</a>') : desc.substring(0, limit).replace(/@([a-zA-Z0-9_]+)/g, '<a href=\'/user/$1\' class=\'text-pinterest hover:underline font-bold\'>@$1</a>') + '...'">
+                        </p>
+                    </div>
                 @endif
 
                 @if($photo->user)
@@ -381,7 +402,8 @@
                                         </template>
                                         <span class="text-xs text-gray-400" x-text="comment.created_at"></span>
                                     </div>
-                                    <p class="text-sm text-dark dark:text-gray-300 leading-relaxed" x-text="comment.body"></p>
+                                    <p class="text-sm text-dark dark:text-gray-300 leading-relaxed" 
+                                       x-html="comment.body.replace(/@([a-zA-Z0-9_]+)/g, '<a href=\'/user/$1\' class=\'text-pinterest hover:underline font-bold\'>@$1</a>')"></p>
                                     
                                     <div class="flex items-center gap-4 mt-2">
                                         <!-- <button class="text-xs font-bold text-gray-400 hover:text-dark dark:hover:text-white transition-colors">Suka</button>
@@ -418,7 +440,7 @@
         <div class="w-full mx-auto" x-data="{ msnry: null }" x-init="$nextTick(() => {
             const grid = $el.querySelector('.related-grid');
             msnry = new window.Masonry(grid, { itemSelector: '.grid-item', columnWidth: '.w-1\\/2', percentPosition: true });
-            window.imagesLoaded(grid).on('progress', () => msnry.layout());
+            msnry.layout();
         })">
             <div class="related-grid w-full -ml-2 sm:-ml-4 text-left">
                 <div class="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-[16.666%] h-0"></div>

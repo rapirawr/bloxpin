@@ -47,13 +47,10 @@
         @endforelse
     </div>
 
-    <!-- Loading Indicator -->
-    <div x-show="loading" class="w-full flex justify-center py-8">
-        <div class="w-8 h-8 border-4 border-pinterest border-t-transparent rounded-full animate-spin"></div>
-    </div>
+
 
     @if($photos->hasMorePages())
-    <div x-intersect.margin.200px="loadMore()" class="h-10 w-full"></div>
+    <div x-intersect.margin.1000px="loadMore()" class="h-10 w-full"></div>
     @endif
 </div>
 @endsection
@@ -79,9 +76,7 @@ document.addEventListener('alpine:init', () => {
                     transitionDuration: '0.2s'
                 });
 
-                window.imagesLoaded(grid).on('progress', () => {
-                    this.msnry.layout();
-                });
+                this.msnry.layout();
             });
         },
 
@@ -98,7 +93,7 @@ document.addEventListener('alpine:init', () => {
                     
                     const items = Array.from(temp.children).map(child => {
                         const wrapper = document.createElement('div');
-                        wrapper.className = 'grid-item w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-[16.666%] pl-2 sm:pl-4 mb-2 sm:mb-4 opacity-0';
+                        wrapper.className = 'grid-item w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-[16.666%] pl-2 sm:pl-4 mb-2 sm:mb-4';
                         wrapper.appendChild(child);
                         return wrapper;
                     });
@@ -107,9 +102,7 @@ document.addEventListener('alpine:init', () => {
                     items.forEach(item => grid.appendChild(item));
                     this.msnry.appended(items);
                     
-                    window.imagesLoaded(grid).on('progress', () => {
-                        items.forEach(item => item.classList.remove('opacity-0', 'animate-fade-in'));
-                        items.forEach(item => item.classList.add('animate-fade-in'));
+                    requestAnimationFrame(() => {
                         this.msnry.layout();
                     });
 

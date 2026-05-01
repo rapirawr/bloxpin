@@ -4,15 +4,16 @@
      style="padding-bottom: {{ ($photo->height / $photo->width) * 100 }}%;"
 >
     <!-- Image -->
-    <a href="{{ route('photos.show', $photo->uid) }}" class="absolute inset-0 w-full h-full rounded-2xl overflow-hidden">
-        <img src="{{ $photo->thumbnail_url }}" alt="{{ $photo->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]">
+    <a href="{{ route('photos.show', $photo->uid) }}" class="absolute inset-0 w-full h-full rounded-2xl overflow-hidden" style="background-color: {{ $photo->dominant_color ?? '#e0e0e0' }};" x-data="{ loaded: false }" >
+    <img src="{{ $photo->thumbnail_url }}" alt="{{ $photo->title }}" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.02] opacity-0" x-bind:class="{ 'opacity-100': loaded }" @load="loaded = true" />
+
     </a>
 
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col justify-between p-3">
          
          <!-- Top: Save Button -->
-         <div class="flex justify-end pointer-events-auto">
+         <div class="flex justify-end w-max self-end pointer-events-auto">
              @auth
              <div x-data="{ 
                  pinned: {{ ($photo->is_pinned ?? false) ? 'true' : 'false' }}, 

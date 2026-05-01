@@ -31,20 +31,53 @@
         @endforelse
     </div>
 
-    <!-- Loading Spinner -->
-    <div x-show="loading" x-cloak class="w-full flex justify-center py-8">
-        <div class="w-8 h-8 border-4 border-pinterest border-t-transparent rounded-full animate-spin"></div>
-    </div>
+
 
     <!-- End of Feed -->
-    <div x-show="!hasMore && !loading" x-cloak class="w-full text-center text-gray-400 dark:text-gray-600 py-8 text-sm">
-        Semua foto sudah ditampilkan.
+    <div x-show="!hasMore && !loading" x-cloak class="w-full">
+        <div class="text-center text-gray-400 dark:text-gray-600 py-8 text-sm">
+            Semua foto sudah ditampilkan.
+        </div>
+
+        <!-- Decorative Binary Footer -->
+        <div class="relative w-full py-32 overflow-hidden flex flex-col items-center justify-center">
+            <!-- Binary Background (Dense and Full) -->
+            <div class="absolute inset-0 flex flex-col opacity-[0.04] dark:opacity-[0.06] pointer-events-none select-none font-mono text-[6px] md:text-[8px] overflow-hidden break-all leading-none">
+                @for($i = 0; $i < 60; $i++)
+                    <div class="whitespace-nowrap">
+                        @php 
+                            $binary = '';
+                            for($j = 0; $j < 400; $j++) { $binary .= rand(0, 1); }
+                        @endphp
+                        {{ $binary }}
+                    </div>
+                @endfor
+            </div>
+
+            <div class="relative z-10 w-full flex flex-col items-center">
+                <pre class="font-mono text-[1.4vw] md:text-[1.6vw] leading-[1.1] text-dark/20 dark:text-white/10 select-none pointer-events-none text-center">
+██████╗ ██╗      ██████╗ ██╗  ██╗██████╗ ██╗███╗   ██╗
+██╔══██╗██║     ██╔═══██╗╚██╗██╔╝██╔══██╗██║████╗  ██║
+██████╔╝██║     ██║   ██║ ╚███╔╝ ██████╔╝██║██╔██╗ ██║
+██╔══██╗██║     ██║   ██║ ██╔██╗ ██╔═══╝ ██║██║╚██╗██║
+██████╔╝███████╗╚██████╔╝██╔╝ ██╗██║     ██║██║ ╚████║
+╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═══╝
+                </pre>
+                <div class="flex flex-wrap justify-center gap-4 md:gap-8 mt-8 font-mono text-[8px] md:text-xs text-gray-400 dark:text-gray-600 tracking-[0.3em] md:tracking-[0.5em] uppercase">
+                    <span>01052026</span>
+                    <span class="hidden md:inline">&bull;</span>
+                    <span>Visual Discovery</span>
+                    <span class="hidden md:inline">&bull;</span>
+                    <span>01001011</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Sentinel -->
     <div
         x-show="hasMore"
-        x-intersect.margin.200px="loadMore()"
+        x-intersect.margin.600px="loadMore()"
         class="h-10 w-full"
     ></div>
 
@@ -74,9 +107,7 @@ document.addEventListener('alpine:init', () => {
                     transitionDuration: '0.2s',
                 });
 
-                window.imagesLoaded(grid).on('progress', () => {
-                    this.msnry.layout();
-                });
+                this.msnry.layout();
             });
         },
 
@@ -110,7 +141,7 @@ document.addEventListener('alpine:init', () => {
 
                     const newItems = Array.from(temp.children).map(child => {
                         const wrapper = document.createElement('div');
-                        wrapper.className = 'grid-item w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-[16.666%] pl-2 sm:pl-4 mb-2 sm:mb-4 opacity-0 transition-opacity duration-300';
+                        wrapper.className = 'grid-item w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-[16.666%] pl-2 sm:pl-4 mb-2 sm:mb-4';
                         wrapper.appendChild(child);
                         return wrapper;
                     });
@@ -120,8 +151,7 @@ document.addEventListener('alpine:init', () => {
 
                     this.msnry.appended(newItems);
 
-                    window.imagesLoaded(grid).on('always', () => {
-                        newItems.forEach(item => item.classList.remove('opacity-0'));
+                    requestAnimationFrame(() => {
                         this.msnry.layout();
                     });
 
@@ -134,7 +164,7 @@ document.addEventListener('alpine:init', () => {
                     } else {
                         this.nextPageUrl = null;
                     }
-                    this.hasMore = !!data.has_more && !!this.nextPageUrl;
+                    this.hasMore = !!data.has_more;
                 })
                 .catch(error => {
                     console.error('Infinite scroll error:', error);

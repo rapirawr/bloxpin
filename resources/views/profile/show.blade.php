@@ -180,7 +180,7 @@
                 <div class="w-full mx-auto" x-data="{ msnry: null }" x-init="$nextTick(() => {
                     const grid = $el.querySelector('.profile-grid');
                     msnry = new window.Masonry(grid, { itemSelector: '.grid-item', columnWidth: '.w-1\\/2', percentPosition: true });
-                    window.imagesLoaded(grid).on('progress', () => msnry.layout());
+                    msnry.layout();
                 })">
                     <div class="profile-grid w-full -ml-2 sm:-ml-4 text-left">
                         <div class="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-[16.666%] h-0"></div>

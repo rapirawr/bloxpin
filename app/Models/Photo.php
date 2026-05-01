@@ -21,6 +21,7 @@ class Photo extends Model
         'thumbnail_path',
         'width',
         'height',
+        'dominant_color',
     ];
 
     protected $casts = [
