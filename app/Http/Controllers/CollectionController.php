@@ -23,7 +23,7 @@ class CollectionController extends Controller
         $collection = Auth::user()->collections()->create([
             'title' => $request->title,
             'description' => $request->description,
-            'is_public' => $request->is_public ?? true,
+            'is_public' => $request->boolean('is_public', true),
         ]);
 
         if ($request->ajax()) {

@@ -20,6 +20,10 @@ class Collection extends Model
         'is_public',
     ];
 
+    protected $casts = [
+        'is_public' => 'boolean',
+    ];
+
     protected static function boot()
     {
         parent::boot();
