@@ -93,6 +93,13 @@
                         <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-dark dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-all">
                             Pengaturan
                         </a>
+
+                        @if(auth()->user()->is_admin)
+                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all">
+                            <span class="w-4 h-4 flex items-center justify-center">👑</span>
+                            God Mode
+                        </a>
+                        @endif
                         
                         <div class="h-px bg-gray-100 dark:bg-white/5 my-2"></div>
 
