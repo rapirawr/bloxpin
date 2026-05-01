@@ -54,7 +54,7 @@
 
     @stack('head')
 </head>
-<body class="font-sans antialiased bg-light dark:bg-dark text-dark dark:text-gray-100 pb-16 md:pb-0 pt-[80px] min-h-screen flex flex-col">
+<body class="font-sans antialiased bg-light dark:bg-dark text-dark dark:text-gray-100 pb-24 md:pb-0 pt-[80px] min-h-screen flex flex-col">
     
     <!-- Top Navbar -->
     @include('components.navbar')
