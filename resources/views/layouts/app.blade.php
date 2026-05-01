@@ -18,9 +18,14 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="Bloxpin">
     <meta property="og:title" content="@yield('title', config('app.name', 'Bloxpin'))">
     <meta property="og:description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
     <meta property="og:image" content="@yield('meta_image', asset('og-default.png'))">
+    <meta property="og:image:secure_url" content="@yield('meta_image', asset('og-default.png'))">
+    <meta property="og:image:width" content="@yield('meta_image_width', '1200')">
+    <meta property="og:image:height" content="@yield('meta_image_height', '630')">
+    <meta property="og:image:type" content="image/jpeg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
@@ -28,6 +33,11 @@
     <meta property="twitter:title" content="@yield('title', config('app.name', 'Bloxpin'))">
     <meta property="twitter:description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
     <meta property="twitter:image" content="@yield('meta_image', asset('og-default.png'))">
+
+    <!-- WhatsApp Extra -->
+    <meta itemprop="name" content="@yield('title', config('app.name', 'Bloxpin'))">
+    <meta itemprop="description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
+    <meta itemprop="image" content="@yield('meta_image', asset('og-default.png'))">
 
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
