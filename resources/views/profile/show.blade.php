@@ -35,7 +35,11 @@
         <h1 class="text-3xl md:text-4xl font-display font-bold text-dark mb-1 flex items-center gap-2">
             {{ $user->name }}
             @if($user->is_verified)
-                <svg class="w-6 h-6 md:w-8 md:h-8 text-blue-500 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>
+                <div class="flex-shrink-0 flex items-center justify-center w-6 h-6 md:w-7 md:h-7 bg-pinterest rounded-full shadow-sm" title="Akun Terverifikasi">
+                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-white fill-current" viewBox="0 0 20 20">
+                        <path d="M7.629 14.571L3.125 10.068L4.547 8.648L7.629 11.731L15.453 3.906L16.875 5.326L7.629 14.571Z"/>
+                    </svg>
+                </div>
             @endif
         </h1>
         <div class="text-gray-500 mb-4">{{ '@' . $user->username }}</div>
