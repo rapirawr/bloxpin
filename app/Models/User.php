@@ -198,4 +198,21 @@ class User extends Authenticatable
     {
         return $this->hasMany(Report::class);
     }
+
+    /**
+     * Collections created by this user.
+     */
+    public function collections(): HasMany
+    {
+        return $this->hasMany(Collection::class);
+    }
+
+    /**
+     * Conversations this user is part of.
+     */
+    public function conversations()
+    {
+        return Conversation::where('user_one_id', $this->id)
+            ->orWhere('user_two_id', $this->id);
+    }
 }

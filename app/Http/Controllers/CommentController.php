@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Comment;
 use App\Models\Notification;
 use App\Models\Photo;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +29,32 @@ class CommentController extends Controller
         // Load user for the response
         $comment->load('user');
 
-        // Create notification for the photo owner
-        if ($photo->user_id !== Auth::id()) {
+        // Detect mentions (@username)
+        preg_match_all('/@([a-zA-Z0-9_]+)/', $request->body, $matches);
+        $mentionedUsernames = array_unique($matches[1] ?? []);
+        $mentionedUserIds = [];
+
+        foreach ($mentionedUsernames as $username) {
+            $user = \App\Models\User::where('username', $username)->first();
+            if ($user && $user->id !== Auth::id()) {
+                $mentionedUserIds[] = $user->id;
+                Notification::create([
+                    'user_id' => $user->id,
+                    'actor_id' => Auth::id(),
+                    'type' => 'mention',
+                    'notifiable_type' => Photo::class,
+                    'notifiable_id' => $photo->id,
+                    'data' => [
+                        'message' => 'menyebut Anda dalam komentar.',
+                        'comment_body' => str()->limit($comment->body, 50),
+                        'photo_id' => $photo->uid,
+                    ]
+                ]);
+            }
+        }
+
+        // Create notification for the photo owner (if not already mentioned)
+        if ($photo->user_id !== Auth::id() && !in_array($photo->user_id, $mentionedUserIds)) {
             Notification::create([
                 'user_id' => $photo->user_id,
                 'actor_id' => Auth::id(),
@@ -38,7 +63,8 @@ class CommentController extends Controller
                 'notifiable_id' => $photo->id,
                 'data' => [
                     'message' => 'mengomentari postingan Anda.',
-                    'comment_body' => $comment->body,
+                    'comment_body' => str()->limit($comment->body, 50),
+                    'photo_id' => $photo->uid,
                 ]
             ]);
         }

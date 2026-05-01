@@ -23,8 +23,9 @@ if (user_id) {
             table: 'notifications',
             filter: `user_id=eq.${user_id}`
         }, payload => {
+            const data = typeof payload.new.data === 'string' ? JSON.parse(payload.new.data) : payload.new.data;
             if (window.showToast) {
-                window.showToast(payload.new.message || 'Anda mendapat notifikasi baru!');
+                window.showToast(data.message || 'Anda mendapat notifikasi baru!');
             }
         })
         .subscribe();

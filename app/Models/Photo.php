@@ -197,4 +197,12 @@ class Photo extends Model
     {
         return $this->hasMany(Report::class);
     }
+
+    /**
+     * Collections that include this photo.
+     */
+    public function collections(): BelongsToMany
+    {
+        return $this->belongsToMany(Collection::class)->withTimestamps();
+    }
 }

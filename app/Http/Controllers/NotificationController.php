@@ -44,7 +44,7 @@ class NotificationController extends Controller
      */
     public function markAllRead(): JsonResponse
     {
-        Auth::user()->unreadNotifications->markAsRead();
+        Auth::user()->unreadNotifications()->update(['read_at' => now()]);
 
         return response()->json([
             'success' => true,
@@ -61,7 +61,7 @@ class NotificationController extends Controller
             ->notifications()
             ->findOrFail($id);
 
-        $notification->markAsRead();
+        $notification->update(['read_at' => now()]);
 
         return response()->json([
             'success' => true,

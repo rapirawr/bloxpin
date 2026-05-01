@@ -95,6 +95,8 @@ class PhotoController extends Controller
     public function show(Photo $photo)
     {
         $photo->load(['user', 'tags', 'likes', 'comments.user']);
+        
+        $photo->increment('views_count');
 
         // Related photos: same tags or same user
         $relatedPhotos = Photo::where('id', '!=', $photo->id)

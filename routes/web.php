@@ -9,6 +9,8 @@ use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\PinController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\CollectionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -60,6 +62,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Reports
     Route::post('/photo/{photo:uid}/report', [\App\Http\Controllers\ReportController::class, 'store'])->name('photos.report');
+
+    // Collections
+    Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index');
+    Route::post('/collections', [CollectionController::class, 'store'])->name('collections.store');
+    Route::post('/collections/{collection}/toggle-photo', [CollectionController::class, 'togglePhoto'])->name('collections.toggle');
+
+    // Messages
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{user:username}', [MessageController::class, 'show'])->name('messages.show');
+    Route::post('/messages/{user:username}', [MessageController::class, 'store'])->name('messages.store');
 
     // Profile Settings
     Route::get('/settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');

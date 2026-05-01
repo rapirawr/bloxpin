@@ -15,11 +15,29 @@
     shareUrl: window.location.href,
     isShareModalOpen: false,
     isReportModalOpen: false,
+    init() {
+        @auth this.fetchCollections(); @endauth
+    },
+    isCollectionModalOpen: false,
+    userCollections: [],
+    fetchCollections() {
+        axios.get('{{ route('collections.index') }}?photo_id={{ $photo->id }}').then(res => {
+            this.userCollections = res.data;
+        });
+    },
     copyLink() {
         navigator.clipboard.writeText(this.shareUrl).then(() => {
             window.showToast('Tautan disalin!');
             this.isShareModalOpen = false;
         });
+    },
+    toggleInCollection(collection) {
+        axios.post('{{ url('/collections') }}/' + collection.id + '/toggle-photo', { photo_id: {{ $photo->id }} })
+            .then(res => {
+                window.showToast(res.data.message);
+                collection.is_attached = res.data.attached;
+                collection.photos_count = res.data.attached ? collection.photos_count + 1 : Math.max(0, collection.photos_count - 1);
+            });
     }
 }">
     <!-- Back Button (Mobile Fixed) -->
@@ -95,6 +113,13 @@
                     <button @click="isShareModalOpen = true" class="w-10 h-10 rounded-full hover:bg-light dark:hover:bg-borderdark flex items-center justify-center transition-colors text-dark dark:text-white">
                         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
                     </button>
+
+                    <!-- Collection -->
+                    @auth
+                    <button @click="isCollectionModalOpen = true" class="w-10 h-10 rounded-full hover:bg-light dark:hover:bg-borderdark flex items-center justify-center transition-colors text-dark dark:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                    </button>
+                    @endauth
                 </div>
 
                 @auth
@@ -218,7 +243,13 @@
 
                 <!-- Interaction Stats & Like Button -->
                 <div class="flex items-center justify-between pt-6 border-t border-borderlight dark:border-borderdark">
-                    <div class="font-display font-bold text-xl text-dark dark:text-white">Komentar</div>
+                    <div class="flex items-center gap-4">
+                        <div class="font-display font-bold text-xl text-dark dark:text-white">Komentar</div>
+                        <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-sm font-bold bg-light dark:bg-borderdark px-3 py-1.5 rounded-full">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            {{ number_format($photo->views_count) }}
+                        </div>
+                    </div>
                     
                     <button @auth @click="
                                 const previousLiked = liked;
@@ -525,6 +556,69 @@
                 </form>
             </div>
         </div>
+    <!-- Collection Modal -->
+    <div x-show="isCollectionModalOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style="display: none;">
+        
+        <div @click.away="isCollectionModalOpen = false" 
+             class="bg-white dark:bg-card w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl animate-modal-up flex flex-col max-h-[90vh]">
+            
+            <div class="p-6 border-b border-borderlight dark:border-borderdark flex items-center justify-between">
+                <h3 class="text-xl font-bold text-dark dark:text-white">Simpan ke Koleksi</h3>
+                <button @click="isCollectionModalOpen = false" class="text-gray-400 hover:text-dark dark:hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 space-y-4 hide-scrollbar">
+                <!-- Create New Collection Form -->
+                <div x-data="{ showForm: false, title: '' }" class="mb-6">
+                    <button x-show="!showForm" @click="showForm = true" class="w-full py-4 border-2 border-dashed border-borderlight dark:border-borderdark rounded-2xl text-gray-400 hover:text-pinterest hover:border-pinterest transition-all flex items-center justify-center gap-2 font-bold italic uppercase text-xs tracking-widest">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                        Buat Koleksi Baru
+                    </button>
+                    
+                    <div x-show="showForm" class="bg-light dark:bg-borderdark p-4 rounded-2xl">
+                        <input x-model="title" type="text" placeholder="Nama koleksi..." class="w-full bg-white dark:bg-card border-none rounded-xl px-4 py-3 text-sm text-dark dark:text-white mb-3 focus:ring-2 focus:ring-pinterest transition-all">
+                        <div class="flex gap-2">
+                            <button @click="showForm = false" class="flex-1 py-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-dark dark:hover:text-white transition-colors">Batal</button>
+                            <button @click="
+                                if(!title) return;
+                                axios.post('{{ route('collections.store') }}', { title }).then(res => {
+                                    window.showToast(res.data.message);
+                                    fetchCollections();
+                                    title = '';
+                                    showForm = false;
+                                });
+                            " class="flex-1 py-2 bg-pinterest text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-pinterest-hover transition-all">Simpan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collection List -->
+                <template x-for="collection in userCollections" :key="collection.id">
+                    <div class="flex items-center justify-between p-4 bg-light dark:bg-borderdark rounded-2xl group transition-all hover:bg-gray-100 dark:hover:bg-white/5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-gray-200 dark:bg-card rounded-xl flex items-center justify-center overflow-hidden">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9l-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 x-text="collection.title" class="font-bold text-dark dark:text-white"></h4>
+                                <p x-text="collection.photos_count + ' foto'" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest"></p>
+                            </div>
+                        </div>
+                        <button @click="toggleInCollection(collection)" :class="collection.is_attached ? 'bg-pinterest text-white' : 'bg-white dark:bg-card text-gray-400 border border-borderlight dark:border-borderdark'" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-90">
+                            <span x-text="collection.is_attached ? 'Tersimpan' : 'Simpan'"></span>
+                        </button>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 </div>

@@ -36,7 +36,7 @@
                                 </span>
                             </div>
                             
-                            @if(in_array($notification->type, ['like', 'pin']) && isset($notification->data['photo_id']))
+                            @if(in_array($notification->type, ['like', 'pin', 'comment', 'mention']) && isset($notification->data['photo_id']))
                                 <a href="{{ route('photos.show', $notification->data['photo_id']) }}" class="inline-block mt-2 text-xs font-bold text-accent hover:underline">
                                     Lihat foto →
                                 </a>
@@ -65,6 +65,10 @@
                             @elseif($notification->type === 'pin')
                                 <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M16 5l-8 0c-1.1 0-2 .9-2 2v14l6-3 6 3v-14c0-1.1-.9-2-2-2z"/>
+                                </svg>
+                            @elseif(in_array($notification->type, ['comment', 'mention']))
+                                <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
                                 </svg>
                             @else
                                 <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
