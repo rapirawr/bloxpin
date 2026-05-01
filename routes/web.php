@@ -100,4 +100,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
+// ─── Testing Routes (Delete later) ───────────────────────────
+// Route::get('/test-error/{code}', function ($code) {
+//     abort($code);
+// });
+
 require __DIR__.'/auth.php';
