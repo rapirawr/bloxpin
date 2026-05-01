@@ -63,14 +63,14 @@
                 </td>
                 <td class="p-6 text-right space-x-2">
                     @if($report->status === 'pending')
-                        <form action="{{ route('reports.resolve', $report) }}" method="POST" class="inline">
+                        <form action="{{ route('admin.reports.resolve', $report) }}" method="POST" class="inline">
                             @csrf
                             <input type="hidden" name="status" value="resolved">
                             <button type="submit" class="text-[10px] font-black text-green-500 hover:bg-green-500 hover:text-white px-3 py-1.5 rounded-lg border border-green-500/20 transition-all uppercase tracking-tighter">
                                 Resolve
                             </button>
                         </form>
-                        <form action="{{ route('reports.resolve', $report) }}" method="POST" class="inline">
+                        <form action="{{ route('admin.reports.resolve', $report) }}" method="POST" class="inline">
                             @csrf
                             <input type="hidden" name="status" value="dismissed">
                             <button type="submit" class="text-[10px] font-black text-gray-500 hover:bg-white hover:text-black px-3 py-1.5 rounded-lg border border-white/5 transition-all uppercase tracking-tighter">

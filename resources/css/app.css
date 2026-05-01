@@ -86,8 +86,10 @@
     scroll-behavior: smooth;
 }
 /* View Transitions API Animations */
-@view-transition {
-    navigation: auto;
+@media (prefers-reduced-motion: no-preference) {
+    @view-transition {
+        navigation: auto;
+    }
 }
 
 ::view-transition-old(root),

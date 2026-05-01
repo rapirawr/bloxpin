@@ -43,6 +43,15 @@
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
+    <script>
+        // Suppress View Transition AbortErrors (harmless)
+        window.addEventListener('unhandledrejection', (event) => {
+            if (event.reason && event.reason.name === 'AbortError' && event.reason.message.includes('transition')) {
+                event.preventDefault();
+            }
+        });
+    </script>
+
     @stack('head')
 </head>
 <body class="font-sans antialiased bg-light dark:bg-dark text-dark dark:text-gray-100 pb-16 md:pb-0 pt-[80px] min-h-screen flex flex-col">

@@ -481,7 +481,6 @@
              </div>
         </div>
     </div>
-</div>
     <!-- Report Modal -->
     <div x-show="isReportModalOpen" 
          x-transition:enter="transition ease-out duration-300"
@@ -526,5 +525,7 @@
                 </form>
             </div>
         </div>
+        </div>
     </div>
+</div>
 @endsection
