@@ -190,4 +190,13 @@ class PhotoController extends Controller
             return redirect($url);
         }
     }
+
+    /**
+     * Show minimalist embed page.
+     */
+    public function embed(Photo $photo)
+    {
+        $photo->load(['user']);
+        return view('photos.embed', compact('photo'));
+    }
 }

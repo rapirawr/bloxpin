@@ -110,6 +110,11 @@
                                 <span class="font-medium">Unduh Gambar</span>
                             </a>
 
+                            <button @click="isShareModalOpen = true; open = false" class="w-full text-left px-4 py-3 hover:bg-light dark:hover:bg-borderdark flex items-center gap-3 text-dark dark:text-white transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                <span class="font-medium">Embed Postingan</span>
+                            </button>
+
                             @auth
                             @if(auth()->id() !== $photo->user_id)
                                 <button @click="isReportModalOpen = true; open = false" class="w-full text-left px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-3 text-red-500 transition-colors">
@@ -543,6 +548,21 @@
                          </button>
                      </div>
                  </div>
+
+                 <!-- Embed Code -->
+                 <div class="mt-6 pt-6 border-t border-borderlight dark:border-borderdark" x-data="{ 
+                     embedCode: '<iframe src=\'{{ route('photos.embed', $photo->uid) }}\' width=\'100%\' height=\'500\' frameborder=\'0\' scrolling=\'no\' allowfullscreen></iframe>' 
+                 }">
+                     <p class="text-sm font-bold text-dark dark:text-white mb-2 font-display">Embed di website lain</p>
+                     <div class="flex items-center gap-2">
+                         <div class="flex-1 bg-light dark:bg-borderdark rounded-xl px-4 py-3 text-[10px] text-gray-500 dark:text-gray-400 font-mono overflow-x-auto whitespace-nowrap border border-borderlight dark:border-borderdark scrollbar-hide">
+                             <code x-text="embedCode"></code>
+                         </div>
+                         <button @click="navigator.clipboard.writeText(embedCode); window.showToast('Kode embed disalin!');" class="px-6 py-3 bg-dark dark:bg-white text-white dark:text-dark rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all whitespace-nowrap">
+                             Salin
+                         </button>
+                     </div>
+                 </div>
              </div>
         </div>
     </div>
@@ -657,5 +677,6 @@
             </div>
         </div>
     </div>
+
 </div>
 @endsection

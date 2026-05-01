@@ -29,6 +29,7 @@ Route::get('/photo/{photo:uid}', [PhotoController::class, 'show'])->name('photos
 Route::get('/user/{user:username}', [ProfileController::class, 'show'])->name('profile.show');
 Route::get('/board/{board}', [BoardController::class, 'show'])->name('boards.show');
 Route::get('/photo/{photo:uid}/download', [PhotoController::class, 'download'])->name('photos.download');
+Route::get('/photo/{photo:uid}/embed', [PhotoController::class, 'embed'])->name('photos.embed');
 
 // ─── Authenticated Routes ────────────────────────────────────────
 
