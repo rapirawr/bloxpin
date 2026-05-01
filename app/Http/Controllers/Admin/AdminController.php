@@ -135,7 +135,7 @@ class AdminController extends Controller
     public function sendAnnounce(Request $request)
     {
         if ($request->action === 'clear') {
-            \App\Models\Announcement::where('is_active', true)->update(['is_active' => false]);
+            \App\Models\Announcement::whereRaw('is_active = true')->update(['is_active' => false]);
             return back()->with('success', 'Semua pengumuman aktif telah dinonaktifkan.');
         }
 
@@ -145,7 +145,7 @@ class AdminController extends Controller
         ]);
 
         // Deactivate previous ones
-        \App\Models\Announcement::where('is_active', true)->update(['is_active' => false]);
+        \App\Models\Announcement::whereRaw('is_active = true')->update(['is_active' => false]);
 
         $ends_at = null;
         if ($request->duration !== 'permanent') {

@@ -75,6 +75,6 @@ class Board extends Model
      */
     public function scopePublic($query)
     {
-        return $query->where('is_private', false);
+        return $query->whereRaw('is_private = false');
     }
 }

@@ -52,7 +52,7 @@
             @foreach($stats['latest_users'] as $user)
             <div class="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                 <div class="flex items-center gap-4">
-                    <img src="{{ $user->avatar_url }}" class="w-10 h-10 rounded-full border border-border grayscale hover:grayscale-0 transition-all">
+                    <img src="{{ $user->avatar_url }}" class="w-10 h-10 rounded-full border border-border  hover:transition-all">
                     <div>
                         <div class="font-bold text-sm">{{ $user->name }}</div>
                         <div class="text-[10px] text-gray-500">@ {{ $user->username }}</div>
@@ -73,7 +73,7 @@
         <div class="divide-y divide-border">
             @foreach($stats['latest_photos'] as $photo)
             <div class="p-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
-                <img src="{{ $photo->thumbnail_url }}" class="w-12 h-12 rounded-lg object-cover border border-border grayscale hover:grayscale-0 transition-all">
+                <img src="{{ $photo->thumbnail_url }}" class="w-12 h-12 rounded-lg object-cover border border-border  hover:transition-all">
                 <div class="flex-1">
                     <div class="font-bold text-sm truncate">{{ $photo->title }}</div>
                     <div class="text-[10px] text-gray-500 uppercase tracking-tighter">by {{ $photo->user->name }}</div>
