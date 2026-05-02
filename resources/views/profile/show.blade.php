@@ -87,7 +87,7 @@
             }
         }">
             @if(auth()->check() && auth()->id() === $user->id)
-                <a href="{{ route('profile.edit') }}" class="btn-secondary">Pengaturan Profil</a>
+                <a href="{{ route('profile.edit') }}" class="btn-secondary">Edit Profil</a>
             @else
                 <button 
                     @click="toggleFollow()" 

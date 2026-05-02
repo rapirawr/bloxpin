@@ -271,7 +271,64 @@
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
                         </button>
                     </div>
-                    <a href="{{ route('login') }}" class="btn-primary py-3 px-6">Simpan</a>
+                    @auth
+                    <div x-data="{ 
+                        showBoards: false, 
+                        pinned: {{ auth()->user()->hasPinned($photo) ? 'true' : 'false' }},
+                        boards: {{ $userBoards ? $userBoards->toJson() : '[]' }},
+                        saving: false
+                    }" class="relative">
+                        <button @click="showBoards = !showBoards" class="btn-primary py-3 px-6 shadow-lg shadow-pinterest/20 transition-transform active:scale-95">
+                            Simpan
+                        </button>
+
+                        <!-- Dropdown Boards Mobile -->
+                        <div x-show="showBoards" @click.away="showBoards = false" 
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             class="absolute top-full right-0 mt-2 w-64 bg-cardlight dark:bg-card rounded-2xl shadow-2xl border border-borderlight dark:border-borderdark overflow-hidden z-[60]" style="display: none;">
+                            <div class="p-4 text-sm font-bold text-center border-b border-borderlight dark:border-borderdark text-dark dark:text-white bg-light dark:bg-borderdark">Simpan ke board</div>
+                            <div class="max-h-60 overflow-y-auto p-2 scroll-smooth">
+                                <template x-for="board in boards" :key="board.id">
+                                    <button @click="
+                                        saving = true;
+                                        axios.post('{{ route('pins.store') }}', { photo_id: {{ $photo->id }}, board_id: board.id })
+                                            .then(res => {
+                                                window.showToast(res.data.message);
+                                                showBoards = false;
+                                                pinned = true;
+                                            })
+                                            .catch(err => {
+                                                window.showToast(err.response?.data?.message || 'Gagal menyimpan', 'error');
+                                            })
+                                            .finally(() => saving = false);
+                                    " class="w-full text-left px-3 py-2 hover:bg-light dark:hover:bg-borderdark rounded-xl flex items-center justify-between group transition-colors">
+                                        <div class="flex items-center gap-3 overflow-hidden">
+                                            <div class="w-10 h-10 bg-light dark:bg-borderdark rounded border border-borderlight dark:border-borderdark shrink-0 overflow-hidden flex items-center justify-center">
+                                                <template x-if="board.cover_image">
+                                                    <img :src="'/storage/' + board.cover_image" class="w-full h-full object-cover">
+                                                </template>
+                                                <template x-if="!board.cover_image">
+                                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"></path></svg>
+                                                </template>
+                                            </div>
+                                            <span x-text="board.title" class="font-bold text-sm text-dark dark:text-white truncate"></span>
+                                        </div>
+                                    </button>
+                                </template>
+                                <template x-if="boards.length === 0">
+                                    <div class="text-center py-6 text-gray-500 text-sm">
+                                        Belum ada board.<br>Buat board baru dari menu +.
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    @endauth
+                    @guest
+                    <a href="{{ route('login') }}" class="btn-primary py-3 px-6 shadow-lg shadow-pinterest/20 transition-transform active:scale-95">Simpan</a>
+                    @endguest
                 </div>
 
                 <div x-data="{ expanded: false, title: {{ json_encode($photo->title) }}, limit: 30 }">

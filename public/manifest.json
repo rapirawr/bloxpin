@@ -1,0 +1,16 @@
+{
+    "name": "Bloxpin",
+    "short_name": "Bloxpin",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#E60023",
+    "description": "Gallery for our Roblox moments",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "64x64",
+            "type": "image/x-icon"
+        }
+    ]
+}

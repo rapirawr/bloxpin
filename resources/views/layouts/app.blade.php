@@ -15,6 +15,11 @@
     <title>@yield('title', config('app.name', 'Bloxpin'))</title>
     <meta name="description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    
+    <!-- PWA Setup -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#E60023">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -113,6 +118,17 @@
         @if(session('error'))
             setTimeout(() => window.showToast("{{ session('error') }}", 'error'), 500);
         @endif
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
     </script>
 </body>
 </html>

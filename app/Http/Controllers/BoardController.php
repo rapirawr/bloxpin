@@ -25,7 +25,7 @@ class BoardController extends Controller
         $board = Auth::user()->boards()->create([
             'title' => $request->input('title'),
             'description' => $request->input('description'),
-            'is_private' => $request->boolean('is_private'),
+            'is_private' => $request->boolean('is_private') ? 'true' : 'false',
         ]);
 
         if ($request->ajax()) {
@@ -80,7 +80,7 @@ class BoardController extends Controller
         $board->update([
             'title' => $request->input('title'),
             'description' => $request->input('description'),
-            'is_private' => $request->boolean('is_private'),
+            'is_private' => $request->boolean('is_private') ? 'true' : 'false',
         ]);
 
         return redirect()

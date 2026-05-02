@@ -42,9 +42,7 @@
         </a>
         
         <!-- Search -->
-        <a href="{{ route('search') }}" class="relative p-3 flex flex-col items-center justify-center transition-all duration-300"
-        :class="request()->routeIs('search') ? 'scale-110' : 'opacity-40'">
-            
+        <a href="{{ route('search') }}" class="relative p-3 flex flex-col items-center justify-center transition-all duration-300 {{ request()->routeIs('search') ? 'scale-110' : 'opacity-40' }}">
             <!-- Ikon Kompas -->
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />

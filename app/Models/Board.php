@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
 class Board extends Model
 {
     use HasFactory;
@@ -21,9 +23,19 @@ class Board extends Model
     ];
 
     protected $casts = [
-        'is_private' => 'boolean',
         'photos_count' => 'integer',
     ];
+
+    /**
+     * Handle PostgreSQL boolean correctly.
+     */
+    protected function isPrivate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN),
+            set: fn ($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false',
+        );
+    }
 
     /**
      * Get the cover image URL.
