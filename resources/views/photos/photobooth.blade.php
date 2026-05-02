@@ -24,25 +24,57 @@
                         <span>Pilih Layout</span>
                         <span class="text-pinterest capitalize" x-text="activeLayout"></span>
                     </h3>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button @click="activeLayout = 'strip'" class="group flex flex-col items-center gap-2">
-                            <div class="w-full h-12 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-0.5 border-2 p-1"
-                                 :class="activeLayout === 'strip' ? 'border-pinterest bg-pinterest/5 scale-105 shadow-md' : 'border-gray-100 dark:border-white/10 hover:border-gray-200'">
-                                <div class="w-full h-1.5 bg-gray-300 rounded-[1px]"></div>
-                                <div class="w-full h-1.5 bg-gray-300 rounded-[1px]"></div>
-                                <div class="w-full h-1.5 bg-gray-300 rounded-[1px]"></div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <!-- Single -->
+                        <button @click="activeLayout = 'single'" class="group flex flex-col items-center gap-2">
+                            <div class="w-full h-10 rounded-lg transition-all duration-300 flex items-center justify-center border-2 p-1"
+                                 :class="activeLayout === 'single' ? 'border-pinterest bg-pinterest/5 scale-105 shadow-md' : 'border-gray-100 dark:border-white/10 hover:border-gray-200'">
+                                <div class="w-full h-full bg-gray-300 rounded-[1px]"></div>
                             </div>
-                            <span class="text-[8px] font-bold uppercase tracking-tighter" :class="activeLayout === 'strip' ? 'text-dark dark:text-white' : 'text-gray-400'">Strip (1x4)</span>
+                            <span class="text-[7px] font-bold uppercase tracking-tighter" :class="activeLayout === 'single' ? 'text-dark dark:text-white' : 'text-gray-400'">Single</span>
                         </button>
+                        <!-- Double -->
+                        <button @click="activeLayout = 'double'" class="group flex flex-col items-center gap-2">
+                            <div class="w-full h-10 rounded-lg transition-all duration-300 flex flex-col items-center justify-center gap-0.5 border-2 p-1"
+                                 :class="activeLayout === 'double' ? 'border-pinterest bg-pinterest/5 scale-105 shadow-md' : 'border-gray-100 dark:border-white/10 hover:border-gray-200'">
+                                <div class="w-full h-full bg-gray-300 rounded-[1px]"></div>
+                                <div class="w-full h-full bg-gray-300 rounded-[1px]"></div>
+                            </div>
+                            <span class="text-[7px] font-bold uppercase tracking-tighter" :class="activeLayout === 'double' ? 'text-dark dark:text-white' : 'text-gray-400'">Double</span>
+                        </button>
+                        <!-- Trio -->
+                        <button @click="activeLayout = 'trio'" class="group flex flex-col items-center gap-2">
+                            <div class="w-full h-10 rounded-lg transition-all duration-300 flex flex-col items-center justify-center gap-0.5 border-2 p-1"
+                                 :class="activeLayout === 'trio' ? 'border-pinterest bg-pinterest/5 scale-105 shadow-md' : 'border-gray-100 dark:border-white/10 hover:border-gray-200'">
+                                <div class="w-full h-full bg-gray-300 rounded-[1px]"></div>
+                                <div class="w-full h-full bg-gray-300 rounded-[1px]"></div>
+                                <div class="w-full h-full bg-gray-300 rounded-[1px]"></div>
+                            </div>
+                            <span class="text-[7px] font-bold uppercase tracking-tighter" :class="activeLayout === 'trio' ? 'text-dark dark:text-white' : 'text-gray-400'">Trio</span>
+                        </button>
+                        <!-- Strip -->
+                        <button @click="activeLayout = 'strip'" class="group flex flex-col items-center gap-2">
+                            <div class="w-full h-10 rounded-lg transition-all duration-300 flex flex-col items-center justify-center gap-0.5 border-2 p-1"
+                                 :class="activeLayout === 'strip' ? 'border-pinterest bg-pinterest/5 scale-105 shadow-md' : 'border-gray-100 dark:border-white/10 hover:border-gray-200'">
+                                <div class="w-2/3 h-full bg-gray-300 rounded-[1px] flex flex-col gap-0.5">
+                                    <div class="bg-gray-400/50 w-full h-full"></div>
+                                    <div class="bg-gray-400/50 w-full h-full"></div>
+                                    <div class="bg-gray-400/50 w-full h-full"></div>
+                                    <div class="bg-gray-400/50 w-full h-full"></div>
+                                </div>
+                            </div>
+                            <span class="text-[7px] font-bold uppercase tracking-tighter" :class="activeLayout === 'strip' ? 'text-dark dark:text-white' : 'text-gray-400'">Strip</span>
+                        </button>
+                        <!-- Grid -->
                         <button @click="activeLayout = 'grid'" class="group flex flex-col items-center gap-2">
-                            <div class="w-full h-12 rounded-xl transition-all duration-300 grid grid-cols-2 gap-0.5 border-2 p-1.5"
+                            <div class="w-full h-10 rounded-lg transition-all duration-300 grid grid-cols-2 gap-0.5 border-2 p-1"
                                  :class="activeLayout === 'grid' ? 'border-pinterest bg-pinterest/5 scale-105 shadow-md' : 'border-gray-100 dark:border-white/10 hover:border-gray-200'">
                                 <div class="bg-gray-300 rounded-[1px]"></div>
                                 <div class="bg-gray-300 rounded-[1px]"></div>
                                 <div class="bg-gray-300 rounded-[1px]"></div>
                                 <div class="bg-gray-300 rounded-[1px]"></div>
                             </div>
-                            <span class="text-[8px] font-bold uppercase tracking-tighter" :class="activeLayout === 'grid' ? 'text-dark dark:text-white' : 'text-gray-400'">Grid (2x2)</span>
+                            <span class="text-[7px] font-bold uppercase tracking-tighter" :class="activeLayout === 'grid' ? 'text-dark dark:text-white' : 'text-gray-400'">Grid</span>
                         </button>
                     </div>
                 </div>
@@ -91,7 +123,7 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="pt-2 space-y-3" x-show="capturedImages.length === 4">
+                <div class="pt-2 space-y-3" x-show="capturedImages.length === maxCaptures">
                     <button @click="saveToBloxpin" :disabled="isSaving" class="w-full btn-primary py-4 rounded-2xl font-bold flex items-center justify-center gap-3">
                         <template x-if="isSaving">
                             <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
@@ -138,22 +170,23 @@
                 </div>
 
                 <!-- Strip Preview Area -->
-                <div class="flex flex-col items-center justify-center bg-gray-50 dark:bg-white/5 rounded-[40px] p-8 border-2 border-dashed border-gray-200 dark:border-white/10">
+                <div class="flex flex-col items-center justify-center bg-gray-50 dark:bg-white/5 rounded-[40px] p-8 border-2 border-dashed border-gray-200 dark:border-white/10 min-h-[500px]">
                     <div id="strip-preview-wrapper" class="transition-all duration-700" :class="capturedImages.length > 0 ? 'scale-105 shadow-2xl' : 'opacity-20 grayscale'">
-                        <div id="strip-container" :style="getFrameStyle()" class="relative overflow-hidden shadow-2xl transition-all duration-500" :style="activeLayout === 'strip' ? 'width:160px;' : 'width:280px;'" style="padding:15px; border-radius:12px;">
+                        <div id="strip-container" :style="getFrameStyle()" class="relative overflow-hidden shadow-2xl transition-all duration-500" 
+                             :style="activeLayout === 'grid' ? 'width:320px;' : 'width:200px;'" style="padding:15px; border-radius:12px;">
                             <!-- Frame Decoration Top -->
                             <div x-html="getFrameDecorationHTML('top')" class="mb-3 flex items-center justify-center"></div>
 
                             <!-- Dynamic Layout Container -->
-                            <div :class="activeLayout === 'strip' ? 'flex flex-col gap-[6px]' : 'grid grid-cols-2 gap-[8px]'">
-                                <template x-for="(img, index) in [0,1,2,3]">
+                            <div :class="activeLayout === 'grid' ? 'grid grid-cols-2 gap-[8px]' : 'flex flex-col gap-[8px]'">
+                                <template x-for="(img, index) in Array.from({length: maxCaptures})">
                                     <div class="overflow-hidden rounded-sm" style="aspect-ratio:3/4; position:relative;">
                                         <template x-if="capturedImages[index]">
                                             <img :src="capturedImages[index]" class="w-full h-full object-cover" :style="getFilterStyle()">
                                         </template>
                                         <template x-if="!capturedImages[index]">
                                             <div class="w-full h-full flex items-center justify-center" :style="getEmptySlotStyle()">
-                                                <span class="font-black opacity-30" :class="activeLayout === 'strip' ? 'text-xl' : 'text-2xl'" x-text="index + 1"></span>
+                                                <span class="font-black opacity-30 text-2xl" x-text="index + 1"></span>
                                             </div>
                                         </template>
                                         <!-- Corner decorations per frame -->
@@ -161,6 +194,17 @@
                                     </div>
                                 </template>
                             </div>
+
+                            <!-- Frame Decoration Bottom / Footer -->
+                            <div x-html="getFrameDecorationHTML('bottom')" class="mt-3 flex flex-col items-center gap-0.5"></div>
+                        </div>
+                    </div>
+                    <p x-show="capturedImages.length === 0" class="mt-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Hasil foto akan muncul di sini</p>
+                    
+                    <div x-show="capturedImages.length > 0" class="mt-6">
+                        <button @click="capturedImages = []" class="text-[10px] font-bold text-pinterest uppercase tracking-widest hover:underline">Ulangi Sesi</button>
+                    </div>
+                </div>
 
                             <!-- Frame Decoration Bottom / Footer -->
                             <div x-html="getFrameDecorationHTML('bottom')" class="mt-3 flex flex-col items-center gap-0.5"></div>
@@ -185,6 +229,11 @@ function photobooth() {
         activeLayout: 'strip',
         isProcessing: false,
         isSaving: false,
+
+        get maxCaptures() {
+            const map = { single: 1, double: 2, trio: 3, strip: 4, grid: 4 };
+            return map[this.activeLayout] || 4;
+        },
 
         filters: [
             { id: 'none',    name: 'Normal' },
@@ -222,7 +271,7 @@ function photobooth() {
         async startCapture() {
             this.capturedImages = [];
             this.isProcessing = true;
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < this.maxCaptures; i++) {
                 this.countdown = 3;
                 while (this.countdown > 0) {
                     await new Promise(r => setTimeout(r, 1000));
@@ -730,12 +779,15 @@ function photobooth() {
             const topDec   = 60;
             const btmDec   = 100;
 
-            if (this.activeLayout === 'strip') {
-                canvas.width  = imgW + pad * 2;
-                canvas.height = (imgH * 4) + (pad * 5) + topDec + btmDec;
-            } else {
+            const count = this.maxCaptures;
+
+            if (this.activeLayout === 'grid') {
                 canvas.width  = (imgW * 2) + (pad * 3);
                 canvas.height = (imgH * 2) + (pad * 3) + topDec + btmDec;
+            } else {
+                // Single, Double, Trio, or Strip (Vertical Stack)
+                canvas.width  = imgW + pad * 2;
+                canvas.height = (imgH * count) + (pad * (count + 1)) + topDec + btmDec;
             }
 
             // Background fill
@@ -766,20 +818,20 @@ function photobooth() {
             await this._drawSvgDecoration(ctx, 'top', canvas.width, topDec, pad, 0);
 
             // Draw photos
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < count; i++) {
                 const img = new Image();
                 img.src = this.capturedImages[i];
                 await new Promise(r => img.onload = r);
                 
                 let x, y;
-                if (this.activeLayout === 'strip') {
-                    x = pad;
-                    y = topDec + pad + i * (imgH + pad);
-                } else {
+                if (this.activeLayout === 'grid') {
                     const col = i % 2;
                     const row = Math.floor(i / 2);
                     x = pad + col * (imgW + pad);
                     y = topDec + pad + row * (imgH + pad);
+                } else {
+                    x = pad;
+                    y = topDec + pad + i * (imgH + pad);
                 }
 
                 ctx.save();
