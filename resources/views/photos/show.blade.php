@@ -212,14 +212,70 @@
             <div class="flex-1 md:overflow-y-auto hide-scrollbar -mx-6 px-6 md:inertia-scroll overscroll-y-contain">
                 <!-- Mobile Save (Hidden on desktop) -->
                 <div class="md:hidden flex justify-between items-center mb-6 pt-4">
-                    <div class="flex gap-2">
-                        <button class="w-12 h-12 bg-light dark:bg-borderdark rounded-full flex items-center justify-center text-dark dark:text-white transition-colors"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
+                    <div class="flex gap-2" x-data="{ open: false }">
+                        <div class="relative">
+                            <button @click="open = !open" class="w-12 h-12 bg-light dark:bg-borderdark rounded-full flex items-center justify-center text-dark dark:text-white transition-colors active:scale-90">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                            </button>
+
+                            <div x-show="open" @click.away="open = false" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 class="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-card rounded-2xl shadow-2xl border border-borderlight dark:border-borderdark py-2 z-50 overflow-hidden" style="display: none;">
+                                
+                                <button @click="copyLink(); open = false" class="w-full text-left px-4 py-4 hover:bg-light dark:hover:bg-borderdark flex items-center gap-3 text-dark dark:text-white transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                    <span class="font-bold text-sm">Salin Tautan</span>
+                                </button>
+                                
+                                <a href="{{ route('photos.download', $photo) }}" class="w-full text-left px-4 py-4 hover:bg-light dark:hover:bg-borderdark flex items-center gap-3 text-dark dark:text-white transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <span class="font-bold text-sm">Unduh Gambar</span>
+                                </a>
+
+                                <button @click="isShareModalOpen = true; open = false" class="w-full text-left px-4 py-4 hover:bg-light dark:hover:bg-borderdark flex items-center gap-3 text-dark dark:text-white transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                    <span class="font-bold text-sm">Embed Postingan</span>
+                                </button>
+
+                                @auth
+                                    @if(auth()->id() !== $photo->user_id)
+                                        <button @click="isReportModalOpen = true; open = false" class="w-full text-left px-4 py-4 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-3 text-red-500 transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                            <span class="font-bold text-sm">Laporkan</span>
+                                        </button>
+                                    @endif
+
+                                    @can('update', $photo)
+                                        <div class="h-px bg-borderlight dark:bg-borderdark my-1"></div>
+                                        <a href="{{ route('photos.edit', $photo) }}" class="w-full text-left px-4 py-4 hover:bg-light dark:hover:bg-borderdark flex items-center gap-3 text-dark dark:text-white transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            <span class="font-bold text-sm">Edit Postingan</span>
+                                        </a>
+                                        
+                                        <form action="{{ route('photos.destroy', $photo) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus postingan ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="w-full text-left px-4 py-4 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 text-red-600 transition-colors">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                <span class="font-bold text-sm">Hapus</span>
+                                            </button>
+                                        </form>
+                                    @endcan
+                                @endauth
+                            </div>
+                        </div>
+                        
+                        <button @click="isShareModalOpen = true" class="w-12 h-12 bg-light dark:bg-borderdark rounded-full flex items-center justify-center text-dark dark:text-white transition-colors active:scale-90">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+                        </button>
                     </div>
                     <a href="{{ route('login') }}" class="btn-primary py-3 px-6">Simpan</a>
                 </div>
 
-                <div x-data="{ expanded: false, title: {{ json_encode($photo->title) }}, limit: 60 }">
-                    <h1 class="text-3xl md:text-4xl font-display font-bold text-dark dark:text-white mb-4 leading-tight cursor-pointer"
+                <div x-data="{ expanded: false, title: {{ json_encode($photo->title) }}, limit: 30 }">
+                    <h1 class="text-3xl md:text-4xl font-display font-bold text-dark dark:text-white mb-4 leading-tight cursor-pointer break-all"
                         @click="expanded = !expanded"
                         x-text="expanded || title.length <= limit ? title : title.substring(0, limit) + '...'">
                     </h1>

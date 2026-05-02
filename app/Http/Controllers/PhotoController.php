@@ -199,4 +199,12 @@ class PhotoController extends Controller
         $photo->load(['user']);
         return view('photos.embed', compact('photo'));
     }
+
+    /**
+     * Show photobooth page.
+     */
+    public function photobooth()
+    {
+        return view('photos.photobooth');
+    }
 }

@@ -1,11 +1,11 @@
 @props(['photo'])
 
-<div class="relative group mb-4 break-inside-avoid rounded-2xl shadow-sm hover:shadow-pin-hover transition-shadow duration-300 bg-gray-100" 
+<div class="relative group mb-4 break-inside-avoid rounded-2xl shadow-sm hover:shadow-pin-hover transition-shadow duration-300 bg-gray-100 overflow-hidden"
      style="padding-bottom: {{ ($photo->height / $photo->width) * 100 }}%;"
 >
     <!-- Image -->
     <a href="{{ route('photos.show', $photo->uid) }}" 
-       class="absolute inset-0 w-full h-full rounded-2xl overflow-hidden" 
+       class="absolute inset-0 w-full h-full" 
        style="background-color: {{ $photo->dominant_color ?? '#e0e0e0' }};" 
        x-data="{ 
            loaded: false,
