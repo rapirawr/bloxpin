@@ -29,12 +29,12 @@
              }" class="relative">
                  
                  <!-- Quick Save (if no board selected, just show button to open boards) -->
-                 <button @click="showBoards = !showBoards" class="bg-pinterest hover:bg-pinterest-hover text-white font-bold px-4 py-2 rounded-full text-sm transition-transform active:scale-95 shadow-md">
+                 <button @click="showBoards = !showBoards" class="bg-white/25 hover:bg-white/40 backdrop-blur-md text-white font-bold px-5 py-2 rounded-full text-sm transition-all active:scale-95 border border-white/20 shadow-lg ring-1 ring-black/5">
                      Simpan
                  </button>
 
                  <!-- Boards Dropdown -->
-                 <div x-show="showBoards" @click.away="showBoards = false" class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl overflow-hidden z-20" style="display: none;">
+                 <div x-show="showBoards" @click.away="showBoards = false" class="absolute top-full right-0 mt-2 w-48 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden z-20" style="display: none;">
                      <div class="max-h-48 overflow-y-auto">
                          <template x-for="board in window.bloxpinBoards || []" :key="board.id">
                              <button @click="
@@ -49,11 +49,11 @@
                                           window.showToast(err.response?.data?.message || 'Gagal menyimpan', 'error');
                                       })
                                       .finally(() => saving = false);
-                             " class="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm font-medium text-dark flex items-center justify-between">
+                             " class="w-full text-left px-4 py-3 hover:bg-pinterest hover:text-white text-sm font-bold text-dark flex items-center justify-between transition-colors">
                                  <span x-text="board.title" class="truncate"></span>
                              </button>
                          </template>
-                         <div x-show="(window.bloxpinBoards || []).length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">
+                         <div x-show="(window.bloxpinBoards || []).length === 0" class="px-4 py-3 text-sm text-gray-500 text-center font-medium">
                              Belum ada board.
                          </div>
                      </div>
@@ -61,7 +61,7 @@
              </div>
              @endauth
              @guest
-             <a href="{{ route('login') }}" class="bg-pinterest text-white font-bold px-4 py-2 rounded-full text-sm shadow-md pointer-events-auto">
+             <a href="{{ route('login') }}" class="bg-white/25 hover:bg-white/40 backdrop-blur-md text-white font-bold px-5 py-2 rounded-full text-sm transition-all active:scale-95 border border-white/20 shadow-lg ring-1 ring-black/5 pointer-events-auto">
                  Simpan
              </a>
              @endguest
