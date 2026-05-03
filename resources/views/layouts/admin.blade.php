@@ -20,7 +20,7 @@
         .glass-btn:hover { background: rgba(255, 255, 255, 0.05); }
     </style>
 </head>
-<body class="min-h-screen flex antialiased font-sans">
+<body x-data class="min-h-screen flex antialiased font-sans">
 
     <!-- Sidebar -->
     <aside class="w-64 bg-dark border-r border-white/5 flex flex-col p-6 fixed h-full z-50">
