@@ -4,7 +4,7 @@
 <div class="mb-10">
     <h2 class="text-4xl font-black tracking-tighter mb-2 italic">SQL TERMINAL</h2>
     <p class="text-gray-500 text-sm font-medium uppercase tracking-widest flex items-center gap-2">
-        <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+        <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
         Direct Database Access — Use with caution
     </p>
 </div>
@@ -90,7 +90,7 @@
                 <div class="flex gap-4">
                     <button @click="setQuery('SELECT * FROM users LIMIT 10')" class="text-[10px] font-mono text-gray-500 hover:text-white transition-colors uppercase tracking-wider">Quick Select Users</button>
                     <button @click="setQuery('SELECT * FROM photos ORDER BY created_at DESC LIMIT 10')" class="text-[10px] font-mono text-gray-500 hover:text-white transition-colors uppercase tracking-wider">Latest Photos</button>
-                    <button @click="query = ''" class="text-[10px] font-mono text-red-500/50 hover:text-red-500 transition-colors uppercase tracking-wider">Clear Console</button>
+                    <button @click="query = ''" class="text-[10px] font-mono text-gray-500 hover:text-white transition-colors uppercase tracking-wider">Clear Console</button>
                 </div>
                 
                 <button 
@@ -112,7 +112,7 @@
 
     <!-- Results Area -->
     <template x-if="error">
-        <div class="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-red-500 font-mono text-sm overflow-x-auto">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-gray-300 font-mono text-sm overflow-x-auto">
             <div class="font-bold mb-2 uppercase tracking-widest text-[10px]">Error Trace:</div>
             <pre x-text="error" class="whitespace-pre-wrap"></pre>
         </div>

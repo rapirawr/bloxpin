@@ -51,11 +51,11 @@
         <div class="flex items-center justify-between mb-8">
             <h3 class="font-black text-xs uppercase tracking-[0.3em] text-gray-500">Growth Velocity (7D)</h3>
             <div class="flex gap-4">
-                <div class="flex items-center gap-2 text-[10px] font-bold text-pinterest uppercase tracking-widest">
-                    <span class="w-2 h-2 bg-pinterest rounded-full"></span> Photos
-                </div>
                 <div class="flex items-center gap-2 text-[10px] font-bold text-white uppercase tracking-widest">
-                    <span class="w-2 h-2 bg-white rounded-full"></span> Users
+                    <span class="w-2 h-2 bg-white rounded-full"></span> Photos
+                </div>
+                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    <span class="w-2 h-2 bg-gray-500 rounded-full"></span> Users
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@
     <div class="bg-card border border-border rounded-3xl overflow-hidden shadow-2xl">
         <div class="p-8 border-b border-border flex justify-between items-center">
             <h3 class="font-black text-xs uppercase tracking-[0.3em]">Recent Agents</h3>
-            <a href="{{ route('admin.users') }}" class="text-[10px] font-black hover:text-pinterest transition-colors tracking-widest">DECRYPT ALL</a>
+            <a href="{{ route('admin.users') }}" class="text-[10px] font-black hover:text-white transition-colors tracking-widest">DECRYPT ALL</a>
         </div>
         <div class="divide-y divide-border">
             @foreach($stats['latest_users'] as $user)
@@ -100,7 +100,7 @@
     <div class="bg-card border border-border rounded-3xl overflow-hidden shadow-2xl">
         <div class="p-8 border-b border-border flex justify-between items-center">
             <h3 class="font-black text-xs uppercase tracking-[0.3em]">Latest Visuals</h3>
-            <a href="{{ route('admin.photos') }}" class="text-[10px] font-black hover:text-pinterest transition-colors tracking-widest">MODERATE</a>
+            <a href="{{ route('admin.photos') }}" class="text-[10px] font-black hover:text-white transition-colors tracking-widest">MODERATE</a>
         </div>
         <div class="divide-y divide-border">
             @foreach($stats['latest_photos'] as $photo)
@@ -186,8 +186,8 @@
                     {
                         label: 'Photos',
                         data: {!! json_encode($stats['chart']['photos']) !!},
-                        borderColor: '#E60023',
-                        backgroundColor: 'rgba(230, 0, 35, 0.1)',
+                        borderColor: '#FFFFFF',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
                         fill: true,
                         tension: 0.4,
                         borderWidth: 4,
@@ -197,8 +197,8 @@
                     {
                         label: 'Users',
                         data: {!! json_encode($stats['chart']['users']) !!},
-                        borderColor: '#FFFFFF',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: '#444444',
+                        backgroundColor: 'rgba(68, 68, 68, 0.05)',
                         fill: true,
                         tension: 0.4,
                         borderWidth: 4,
@@ -228,7 +228,7 @@
                 labels: ['Photos', 'Users', 'Boards', 'Comments'],
                 datasets: [{
                     data: [{{ $stats['photos_count'] }}, {{ $stats['users_count'] }}, {{ $stats['boards_count'] }}, {{ $stats['comments_count'] }}],
-                    backgroundColor: ['#E60023', '#FFFFFF', '#3B82F6', '#8B5CF6'],
+                    backgroundColor: ['#FFFFFF', '#888888', '#444444', '#222222'],
                     borderColor: '#000000',
                     borderWidth: 10,
                     hoverOffset: 20

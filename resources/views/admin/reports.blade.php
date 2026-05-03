@@ -3,9 +3,9 @@
 @section('content')
 <div class="mb-10">
     <h2 class="text-4xl font-black tracking-tighter mb-2 italic">CONTENT REPORTS</h2>
-    <p class="text-gray-500 text-sm font-medium uppercase tracking-widest flex items-center gap-2">
-        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
-        Pending Moderation Queue
+    <p class="text-gray-500 text-sm font-medium uppercase tracking-[0.2em] flex items-center gap-2">
+        <span class="w-2 h-2 bg-white rounded-full"></span>
+        Reported Content Queue
     </p>
 </div>
 
@@ -32,7 +32,7 @@
                                 <div class="text-[10px] text-gray-500 font-bold uppercase">by {{ $report->photo->user->name }}</div>
                             </div>
                         @else
-                            <div class="text-red-500 text-xs font-bold italic uppercase">[Deleted Photo]</div>
+                            <div class="text-gray-500 text-xs font-bold italic uppercase underline decoration-gray-700 underline-offset-2 tracking-tighter">[Deleted Photo]</div>
                         @endif
                     </div>
                 </td>
@@ -43,7 +43,7 @@
                     </div>
                 </td>
                 <td class="p-6">
-                    <div class="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-black uppercase rounded-full inline-block mb-1">
+                    <div class="px-3 py-1 bg-white/10 text-white text-[10px] font-black uppercase rounded-full inline-block mb-1">
                         {{ $report->reason }}
                     </div>
                     @if($report->description)

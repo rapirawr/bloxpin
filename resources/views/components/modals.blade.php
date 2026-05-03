@@ -17,7 +17,7 @@
              class="relative bg-white dark:bg-dark border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 w-[90%] max-w-sm mx-auto z-10 text-center">
             
             <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                 :class="confirmData.type === 'primary' ? 'bg-blue-100 text-blue-500 dark:bg-blue-500/20' : 'bg-red-100 text-red-500 dark:bg-red-500/20'">
+                 :class="confirmData.type === 'primary' ? 'bg-white text-black' : 'bg-zinc-900 text-white'">
                 <template x-if="confirmData.type === 'primary'">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </template>
@@ -34,8 +34,8 @@
                     Batal
                 </button>
                 <button @click="confirmAction()" 
-                        class="flex-1 py-3 px-4 text-white font-bold rounded-xl transition-colors shadow-lg"
-                        :class="confirmData.type === 'primary' ? 'bg-blue-500 hover:bg-blue-600 shadow-blue-500/30' : 'bg-red-500 hover:bg-red-600 shadow-red-500/30'">
+                        class="flex-1 py-3 px-4 font-bold rounded-xl transition-colors shadow-lg"
+                        :class="confirmData.type === 'primary' ? 'bg-white text-black hover:bg-gray-100' : 'bg-zinc-900 text-white hover:bg-black'">
                     <span x-text="confirmData.confirmText || 'Ya, Lanjutkan'"></span>
                 </button>
             </div>
