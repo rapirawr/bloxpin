@@ -39,7 +39,7 @@
                         Broadcast New
                     </button>
                     @if($current)
-                    <button type="submit" name="action" value="clear" class="px-8 border border-border text-gray-500 hover:text-white hover:border-white font-black text-xs uppercase tracking-[0.2em] py-4 rounded-2xl transition-all">
+                    <button type="submit" name="action" value="clear" @click.prevent="window.appConfirm('Deaktivasi', 'Matikan semua pengumuman aktif?', () => { $el.closest('form').querySelector('button[value=clear]').type='submit'; $el.closest('form').submit(); })" class="px-8 border border-border text-gray-500 hover:text-white hover:border-white font-black text-xs uppercase tracking-[0.2em] py-4 rounded-2xl transition-all">
                         Deactivate All
                     </button>
                     @endif

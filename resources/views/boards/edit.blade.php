@@ -40,18 +40,11 @@
             </div>
 
             <div class="flex items-center justify-between pt-6 border-t border-borderlight dark:border-borderdark">
-                <div x-data="{ openDelete: false }" class="relative">
-                    <button type="button" @click="openDelete = !openDelete" class="text-sm font-bold text-red-600 hover:underline">Hapus Board</button>
-                    
-                    <div x-show="openDelete" @click.away="openDelete = false" class="absolute bottom-full left-0 mb-4 w-64 bg-white dark:bg-card p-4 rounded-2xl shadow-xl border border-borderlight dark:border-borderdark z-50" style="display: none;">
-                        <p class="text-sm text-dark dark:text-white mb-4">Apakah Anda yakin ingin menghapus board ini? Semua pin di dalamnya akan tetap ada di profil Anda.</p>
-                        <form action="{{ route('boards.destroy', $board) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="w-full bg-red-600 text-white font-bold py-2 rounded-xl text-sm hover:bg-red-700 transition-colors">Ya, Hapus Board</button>
-                        </form>
-                    </div>
-                </div>
+                <form action="{{ route('boards.destroy', $board) }}" method="POST" @submit.prevent="window.appConfirm('Hapus Board', 'Apakah Anda yakin ingin menghapus board ini? Semua pin di dalamnya akan tetap ada di profil Anda.', () => $el.submit(), 'Hapus')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-sm font-bold text-red-600 hover:underline">Hapus Board</button>
+                </form>
 
                 <div class="flex gap-3">
                     <button type="submit" class="btn-primary px-8 shadow-minimal dark:shadow-minimal-dark" :class="{ 'opacity-50 pointer-events-none': saving }">
