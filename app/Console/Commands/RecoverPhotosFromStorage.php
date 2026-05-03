@@ -89,7 +89,7 @@ class RecoverPhotosFromStorage extends Command
                     'title'          => $title,
                     'image_path'     => $originalPath,
                     'thumbnail_path' => $thumbPath ?? $originalPath,
-                    'dominant_color' => '#808080',
+                    'dominant_color' => null,
                     'width'          => 1200, // Default fallback
                     'height'         => 1600, // Default fallback
                 ]);

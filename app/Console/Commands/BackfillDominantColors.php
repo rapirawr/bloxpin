@@ -6,8 +6,8 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('app:backfill-dominant-colors')]
-#[Description('Command description')]
+#[Signature('app:backfill-dominant-colors {--force : Process all photos regardless of current color}')]
+#[Description('Calculate and update dominant colors for photos')]
 class BackfillDominantColors extends Command
 {
     /**
@@ -15,7 +15,16 @@ class BackfillDominantColors extends Command
      */
     public function handle()
     {
-        $photos = \App\Models\Photo::whereNull('dominant_color')->get();
+        $query = \App\Models\Photo::query();
+
+        if (!$this->option('force')) {
+            $query->where(function($q) {
+                $q->whereNull('dominant_color')
+                  ->orWhere('dominant_color', '#808080');
+            });
+        }
+
+        $photos = $query->get();
         $this->info("Backfilling " . $photos->count() . " photos...");
 
         foreach ($photos as $photo) {
