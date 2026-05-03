@@ -108,11 +108,11 @@ class PhotoService
         // Create image from file
         $mimeType = $imageInfo['mime'];
         $sourceImage = match ($mimeType) {
-            'image/jpeg' => imagecreatefromjpeg($file->getPathname()),
-            'image/png' => imagecreatefrompng($file->getPathname()),
-            'image/gif' => imagecreatefromgif($file->getPathname()),
-            'image/webp' => imagecreatefromwebp($file->getPathname()),
-            default => imagecreatefromjpeg($file->getPathname()),
+            'image/jpeg' => function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($file->getPathname()) : null,
+            'image/png' => function_exists('imagecreatefrompng') ? @imagecreatefrompng($file->getPathname()) : null,
+            'image/gif' => function_exists('imagecreatefromgif') ? @imagecreatefromgif($file->getPathname()) : null,
+            'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($file->getPathname()) : null,
+            default => null,
         };
 
         if (!$sourceImage) {
@@ -235,10 +235,10 @@ class PhotoService
         $mimeType = $file->getMimeType();
         
         $image = match ($mimeType) {
-            'image/jpeg' => @imagecreatefromjpeg($file->getPathname()),
-            'image/png' => @imagecreatefrompng($file->getPathname()),
-            'image/gif' => @imagecreatefromgif($file->getPathname()),
-            'image/webp' => @imagecreatefromwebp($file->getPathname()),
+            'image/jpeg' => function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($file->getPathname()) : null,
+            'image/png' => function_exists('imagecreatefrompng') ? @imagecreatefrompng($file->getPathname()) : null,
+            'image/gif' => function_exists('imagecreatefromgif') ? @imagecreatefromgif($file->getPathname()) : null,
+            'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($file->getPathname()) : null,
             default => null,
         };
 
