@@ -35,6 +35,11 @@ class AdminController extends Controller
             'photos_count' => Photo::count(),
             'boards_count' => Board::count(),
             'comments_count' => Comment::count(),
+            'db_size' => (function() {
+                try {
+                    return \Illuminate\Support\Facades\DB::select("SELECT pg_size_pretty(pg_database_size(current_database())) as size")[0]->size ?? 'Unknown';
+                } catch (\Exception $e) { return 'Unknown'; }
+            })(),
             'latest_users' => User::latest()->take(5)->get(),
             'latest_photos' => Photo::with('user')->latest()->take(5)->get(),
             'chart' => $chartData,

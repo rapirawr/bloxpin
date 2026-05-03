@@ -117,6 +117,58 @@
     </div>
 </div>
 
+<!-- Supabase Monitor -->
+<div class="mt-8 bg-card border border-border rounded-3xl overflow-hidden shadow-2xl">
+    <div class="p-8 border-b border-border flex justify-between items-center bg-[#1E1E1E]/50">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full bg-[#3ECF8E]/20 flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#3ECF8E]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            </div>
+            <div>
+                <h3 class="font-black text-sm uppercase tracking-[0.2em] text-[#3ECF8E]">Supabase Monitor</h3>
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Database & Storage Engine</p>
+            </div>
+        </div>
+        @php
+            $supabaseUrl = env('SUPABASE_URL', '');
+            $projectId = '';
+            if($supabaseUrl) {
+                preg_match('/https:\/\/(.*?)\.supabase\.co/', $supabaseUrl, $matches);
+                $projectId = $matches[1] ?? '';
+            }
+        @endphp
+        @if($projectId)
+        <a href="https://supabase.com/dashboard/project/{{ $projectId }}" target="_blank" class="px-6 py-3 bg-[#3ECF8E]/10 hover:bg-[#3ECF8E]/20 text-[#3ECF8E] rounded-xl text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-2">
+            <span>Buka Supabase Studio</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>
+        @endif
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
+        <div class="p-8">
+            <div class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Postgres Size</div>
+            <div class="text-3xl font-black italic">{{ $stats['db_size'] ?? 'N/A' }}</div>
+            <div class="mt-4 flex items-center gap-2 text-xs font-bold text-[#3ECF8E]">
+                <span class="w-2 h-2 rounded-full bg-[#3ECF8E] animate-pulse"></span>
+                Connected
+            </div>
+        </div>
+        <div class="p-8">
+            <div class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Storage Provider</div>
+            <div class="text-3xl font-black italic">S3 API</div>
+            <div class="mt-4 flex items-center gap-2 text-xs font-bold text-[#3ECF8E]">
+                <span class="w-2 h-2 rounded-full bg-[#3ECF8E] animate-pulse"></span>
+                Bucket: {{ env('AWS_BUCKET', 'bloxpin-bucket') }}
+            </div>
+        </div>
+        <div class="p-8">
+            <div class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Project Reference</div>
+            <div class="text-xl font-mono font-bold text-white mt-2">{{ $projectId ?: 'Unknown' }}</div>
+            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-2">Region: {{ env('AWS_DEFAULT_REGION', 'ap-northeast-1') }}</div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const ctxGrowth = document.getElementById('growthChart').getContext('2d');
