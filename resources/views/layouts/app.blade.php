@@ -88,20 +88,35 @@
     @stack('scripts')
     
     <script>
-        // Global Modal Logic
+        // Global Modal Helpers
+        window.appConfirm = (title, message, onConfirm, confirmText = 'Ya, Lanjutkan') => {
+            window.dispatchEvent(new CustomEvent('app-confirm', { detail: { title, message, onConfirm, confirmText } }));
+        };
+
+        window.appPrompt = (title, message, onConfirm, defaultValue = '', placeholder = '', confirmText = 'Simpan') => {
+            window.dispatchEvent(new CustomEvent('app-prompt', { detail: { title, message, onConfirm, defaultValue, placeholder, confirmText } }));
+        };
+
+        // Alpine Modal Controller
         document.addEventListener('alpine:init', () => {
             Alpine.data('appModals', () => ({
                 confirmData: { show: false, title: '', message: '', confirmText: '', onConfirm: null },
                 promptData: { show: false, title: '', message: '', input: '', confirmText: '', placeholder: '', onConfirm: null },
 
-                init() {
-                    window.appConfirm = (title, message, onConfirm, confirmText = 'Ya, Lanjutkan') => {
-                        this.confirmData = { show: true, title, message, onConfirm, confirmText };
+                openConfirm(detail) {
+                    this.confirmData = { show: true, ...detail };
+                },
+                openPrompt(detail) {
+                    this.promptData = { 
+                        show: true, 
+                        title: detail.title, 
+                        message: detail.message, 
+                        input: detail.defaultValue, 
+                        onConfirm: detail.onConfirm, 
+                        confirmText: detail.confirmText, 
+                        placeholder: detail.placeholder 
                     };
-                    window.appPrompt = (title, message, onConfirm, defaultValue = '', placeholder = '', confirmText = 'Simpan') => {
-                        this.promptData = { show: true, title, message, input: defaultValue, onConfirm, confirmText, placeholder };
-                        setTimeout(() => this.$refs.promptInput?.focus(), 100);
-                    };
+                    setTimeout(() => this.$refs.promptInput?.focus(), 100);
                 },
                 closeModal() {
                     this.confirmData.show = false;

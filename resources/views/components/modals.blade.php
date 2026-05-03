@@ -1,4 +1,7 @@
-<div x-data="appModals()" @keydown.escape.window="closeModal()">
+<div x-data="appModals" 
+     @app-confirm.window="openConfirm($event.detail)"
+     @app-prompt.window="openPrompt($event.detail)"
+     @keydown.escape.window="closeModal()">
     <!-- Confirm Modal -->
     <div x-show="confirmData.show" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center">
         <!-- Backdrop -->

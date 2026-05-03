@@ -34,6 +34,11 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+    // Skip non-GET requests (like POST uploads)
+    if (event.request.method !== 'GET') {
+        return;
+    }
+
     // Only handle navigation requests (HTML pages) for the offline fallback
     if (event.request.mode === 'navigate') {
         event.respondWith(
