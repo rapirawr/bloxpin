@@ -74,7 +74,9 @@
     </main>
 
     <!-- Bottom Mobile Nav -->
-    @include('components.bottom-nav')
+    @if(!request()->routeIs('photos.photobooth'))
+        @include('components.bottom-nav')
+    @endif
 
     <!-- Toast Notifications Container -->
     <div id="toast-container" class="fixed bottom-20 md:bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none">

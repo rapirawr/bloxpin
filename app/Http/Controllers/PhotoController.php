@@ -43,22 +43,33 @@ class PhotoController extends Controller
             $files = $files ? [$files] : [];
         }
 
-        foreach ($files as $index => $file) {
-            $title = $request->input('title') ?: pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            
-            \Illuminate\Support\Facades\Log::info("Uploading file {$index}", ['filename' => $file->getClientOriginalName(), 'title' => $title]);
+        try {
+            foreach ($files as $index => $file) {
+                $title = $request->input('title') ?: pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                
+                \Illuminate\Support\Facades\Log::info("Uploading file {$index}", ['filename' => $file->getClientOriginalName(), 'title' => $title]);
 
-            $photo = $this->photoService->upload(
-                user: Auth::user(),
-                file: $file,
-                title: $title,
-                description: $request->input('description'),
-                tags: $request->input('tags', ''),
-                boardId: $request->input('board_id'),
-            );
-            
-            $uploadedPhotos[] = $photo;
-            \Illuminate\Support\Facades\Log::info("Uploaded file {$index} success", ['photo_id' => $photo->id]);
+                $photo = $this->photoService->upload(
+                    user: Auth::user(),
+                    file: $file,
+                    title: $title,
+                    description: $request->input('description'),
+                    tags: $request->input('tags', ''),
+                    boardId: $request->input('board_id'),
+                );
+                
+                $uploadedPhotos[] = $photo;
+                \Illuminate\Support\Facades\Log::info("Uploaded file {$index} success", ['photo_id' => $photo->id]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Upload failed: ' . $e->getMessage());
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Upload failed: ' . $e->getMessage()
+                ], 500);
+            }
+            return back()->with('error', 'Upload failed: ' . $e->getMessage());
         }
 
         // Determine where to redirect

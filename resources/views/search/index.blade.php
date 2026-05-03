@@ -60,7 +60,13 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('searchGallery', () => ({
         msnry: null,
-        nextPageUrl: ('{{ $photos->nextPageUrl() }}' || '').replace(/^http:\/\//i, 'https://'),
+        nextPageUrl: (() => {
+            let url = '{{ $photos->nextPageUrl() }}';
+            if (url && window.location.protocol === 'https:') {
+                return url.replace(/^http:\/\//i, 'https://');
+            }
+            return url;
+        })(),
         hasMore: {{ $photos->hasMorePages() ? 'true' : 'false' }},
         loading: false,
 
@@ -106,7 +112,11 @@ document.addEventListener('alpine:init', () => {
                         this.msnry.layout();
                     });
 
-                    this.nextPageUrl = (data.next_page || '').replace(/^http:\/\//i, 'https://');
+                    let nextUrl = data.next_page || '';
+                    if (nextUrl && window.location.protocol === 'https:') {
+                        nextUrl = nextUrl.replace(/^http:\/\//i, 'https://');
+                    }
+                    this.nextPageUrl = nextUrl;
                     this.hasMore = data.has_more;
                 })
                 .finally(() => {

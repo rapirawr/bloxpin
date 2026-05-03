@@ -117,7 +117,7 @@ document.addEventListener('alpine:init', () => {
             this.loading = true;
 
             let url = this.nextPageUrl;
-            if (!window.location.hostname.includes('127.0.0.1') && !window.location.hostname.includes('localhost')) {
+            if (window.location.protocol === 'https:') {
                 url = url.replace(/^http:\/\//i, 'https://');
             }
 
@@ -157,7 +157,7 @@ document.addEventListener('alpine:init', () => {
 
                     if (data.next_page) {
                         let nextUrl = data.next_page;
-                        if (!window.location.hostname.includes('127.0.0.1') && !window.location.hostname.includes('localhost')) {
+                        if (window.location.protocol === 'https:') {
                             nextUrl = nextUrl.replace(/^http:\/\//i, 'https://');
                         }
                         this.nextPageUrl = nextUrl;
