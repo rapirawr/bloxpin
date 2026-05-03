@@ -19,6 +19,17 @@
     execute() {
         if (!this.query.trim() || this.loading) return;
         
+        // Destructive check
+        const isDestructive = /delete|drop|truncate|update/i.test(this.query);
+        if (isDestructive) {
+            window.appConfirm('PERINGATAN SQL', 'Query ini berpotensi merubah atau menghapus data secara permanen. Lanjutkan?', () => this.runQuery(), 'Jalankan');
+            return;
+        }
+
+        this.runQuery();
+    },
+
+    runQuery() {
         this.loading = true;
         this.error = null;
         this.results = null;
