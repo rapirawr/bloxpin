@@ -1,5 +1,6 @@
 @extends('layouts.app')
 
+@section('title', 'Upload'. ' — Bloxpin')
 @section('content')
 <div class="max-w-5xl mx-auto px-4 py-8 md:py-12">
     <div class="bg-cardlight dark:bg-card rounded-2xl shadow-minimal dark:shadow-minimal-dark border border-borderlight dark:border-borderdark overflow-hidden transition-colors">

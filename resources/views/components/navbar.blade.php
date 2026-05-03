@@ -7,7 +7,11 @@
         </a>
         
         <div class="hidden lg:flex items-center gap-1">
-            <a href="{{ route('search') }}" class="nav-link">Explore</a>
+            <a href="{{ route('search') }}" class="nav-link" title="Explore">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 13l3-4-4 3-3 4 4-3 3-4z" />
+                </svg>
+            </a>
         </div>
     </div>
 
