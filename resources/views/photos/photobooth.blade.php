@@ -536,10 +536,10 @@ function photobooth() {
             const fr      = this.frames.find(f => f.id === this.activeFrame) ?? this.frames[0];
             const max     = this.maxCaptures;
             const isGrid  = this.activeLayout === 'grid';
-            const photoW  = isGrid ? 80 : 75;
+            const photoW  = isGrid ? 110 : 100;
             const photoH  = Math.round(photoW * (4 / 3));
-            const pad     = 8;
-            const gap     = 4;
+            const pad     = 12;
+            const gap     = 6;
             const filterV = this.filterCSS[this.activeFilter] ?? '';
 
             const containerW = isGrid
@@ -554,7 +554,7 @@ function photobooth() {
                     </div>`;
                 } else {
                     slotsHTML += `<div style="width:${photoW}px;height:${photoH}px;border-radius:2px;background:rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.05em;color:${fr.color}30;">${i + 1}</span>
+                        <span style="font-family:'Space Mono',monospace;font-size:14px;letter-spacing:0.05em;color:${fr.color}30;">${i + 1}</span>
                     </div>`;
                 }
             }
@@ -574,8 +574,8 @@ function photobooth() {
                     <div style="${gridOrFlex}">${slotsHTML}</div>
                     <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px ${pad}px 10px;">
                         <div style="width:100%;height:1px;background:${fr.color}20;margin-bottom:4px;"></div>
-                        <span style="font-family:'DM Serif Display',serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:${fr.color};opacity:0.8;">filmbooth</span>
-                        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:0.08em;color:${fr.color};opacity:0.4;">${dateStr}</span>
+                        <span style="font-family:'DM Serif Display',serif;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:${fr.color};opacity:0.8;">filmbooth</span>
+                        <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;color:${fr.color};opacity:0.4;">${dateStr}</span>
                     </div>
                 </div>`;
 
@@ -781,7 +781,7 @@ function photobooth() {
 .sprocket-strip {
     position: fixed;
     top: 0; bottom: 0;
-    width: 26px;
+    width: 32px;
     background: #0f0d0b;
     display: flex;
     flex-direction: column;
@@ -797,7 +797,7 @@ function photobooth() {
 .sprocket-left  { left: 0;  border-right: 1px solid rgba(255,255,255,0.05); }
 .sprocket-right { right: 0; border-left:  1px solid rgba(255,255,255,0.05); }
 .pb-sprocket-hole {
-    width: 12px; height: 9px;
+    width: 15px; height: 11px;
     border-radius: 2px;
     background: #242018;
     border: 1px solid rgba(255,255,255,0.07);
@@ -806,7 +806,7 @@ function photobooth() {
 
 /* ── Main wrapper ──────────────────────────── */
 .pb-main {
-    margin: 0 26px;
+    margin: 0 32px;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -825,7 +825,7 @@ function photobooth() {
 }
 .pb-logo {
     font-family: 'DM Serif Display', serif;
-    font-size: 22px;
+    font-size: 28px;
     letter-spacing: -0.02em;
     color: #f5f0e8;
 }
@@ -848,7 +848,7 @@ function photobooth() {
 
 .pb-frame-counter {
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
+    font-size: 14px;
     color: #8a8278;
     letter-spacing: 0.12em;
     display: flex;
@@ -867,7 +867,7 @@ function photobooth() {
 
 .pb-iso-badge {
     font-family: 'Space Mono', monospace;
-    font-size: 10px;
+    font-size: 12px;
     color: #c8a96e;
     background: rgba(200,169,110,0.1);
     border: 1px solid rgba(200,169,110,0.2);
@@ -879,7 +879,7 @@ function photobooth() {
 /* ── Studio ────────────────────────────────── */
 .pb-studio {
     display: grid;
-    grid-template-columns: 1fr 300px;
+    grid-template-columns: 1fr 380px;
     flex: 1;
 }
 
@@ -889,14 +889,14 @@ function photobooth() {
     border-right: 1px solid rgba(255,255,255,0.06);
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 32px;
     align-items: center;
 }
 
 .pb-viewport {
     position: relative;
     width: 100%;
-    max-width: 360px;
+    max-width: 480px;
     aspect-ratio: 3/4;
     background: #0d0b09;
     border-radius: 4px;
@@ -938,7 +938,7 @@ function photobooth() {
     justify-content: space-between;
     padding: 0 16px;
     font-family: 'Space Mono', monospace;
-    font-size: 9px;
+    font-size: 12px;
     color: rgba(200,169,110,0.65);
     letter-spacing: 0.1em;
 }
@@ -998,13 +998,13 @@ function photobooth() {
     font-size: 15px; color: #f5f0e8;
 }
 .pb-cam-error p {
-    font-size: 11px; color: #8a8278; line-height: 1.6; max-width: 200px;
+    font-size: 14px; color: #8a8278; line-height: 1.6; max-width: 280px;
 }
 .pb-cam-error button {
     background: #f5f0e8; color: #1a1714; border: none;
     padding: 8px 20px; border-radius: 3px;
     font-family: 'Space Mono', monospace;
-    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
     cursor: pointer; margin-top: 4px;
     transition: background 0.2s;
 }
@@ -1056,14 +1056,14 @@ function photobooth() {
     justify-content: center;
     gap: 24px;
     width: 100%;
-    max-width: 360px;
+    max-width: 520px;
 }
 .pb-reset-btn {
     background: none;
     border: 1px solid rgba(255,255,255,0.14);
     color: #8a8278;
     font-family: 'Space Mono', monospace;
-    font-size: 9px; letter-spacing: 0.14em;
+    font-size: 12px; letter-spacing: 0.14em;
     padding: 8px 14px; border-radius: 3px;
     cursor: pointer; text-transform: uppercase;
     transition: all 0.2s;
@@ -1071,7 +1071,7 @@ function photobooth() {
 .pb-reset-btn:hover { border-color: rgba(255,255,255,0.3); color: #f5f0e8; }
 
 .pb-shutter-btn {
-    width: 70px; height: 70px;
+    width: 90px; height: 90px;
     border-radius: 50%;
     background: none;
     border: 2px solid rgba(255,255,255,0.18);
@@ -1083,7 +1083,7 @@ function photobooth() {
 .pb-shutter-btn:active { transform: scale(0.93); }
 .pb-shutter-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 .pb-shutter-inner {
-    width: 50px; height: 50px;
+    width: 64px; height: 64px;
     border-radius: 50%;
     background: #f5f0e8;
     transition: all 0.12s;
@@ -1093,7 +1093,7 @@ function photobooth() {
 
 .pb-shot-label {
     font-family: 'Space Mono', monospace;
-    font-size: 10px; color: #8a8278;
+    font-size: 13px; color: #8a8278;
     letter-spacing: 0.1em;
     min-width: 60px; text-align: center;
 }
@@ -1111,7 +1111,7 @@ function photobooth() {
 }
 .pb-panel-label {
     font-family: 'Space Mono', monospace;
-    font-size: 9px; letter-spacing: 0.2em;
+    font-size: 12px; letter-spacing: 0.2em;
     color: #8a8278; text-transform: uppercase;
     margin-bottom: 12px;
     display: flex; align-items: center; gap: 8px;
@@ -1156,7 +1156,7 @@ function photobooth() {
 .pb-layout-btn.active .pb-grid-cell { background: #c9363a; }
 .pb-layout-name {
     font-family: 'Space Mono', monospace;
-    font-size: 7px; color: #8a8278;
+    font-size: 9px; color: #8a8278;
     letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1px;
 }
 .pb-layout-btn.active .pb-layout-name { color: #c9363a; }
@@ -1186,7 +1186,7 @@ function photobooth() {
 }
 .pb-filter-label {
     font-family: 'Space Mono', monospace;
-    font-size: 7px; color: #8a8278;
+    font-size: 10px; color: #8a8278;
     letter-spacing: 0.08em; text-transform: uppercase;
 }
 .pb-filter-btn.active .pb-filter-label { color: #c8a96e; }
@@ -1216,7 +1216,7 @@ function photobooth() {
 }
 .pb-frame-label {
     font-family: 'Space Mono', monospace;
-    font-size: 7px; color: #8a8278;
+    font-size: 10px; color: #8a8278;
     letter-spacing: 0.06em; text-transform: uppercase;
 }
 .pb-frame-btn.active .pb-frame-label { color: #c8a96e; }
@@ -1242,7 +1242,7 @@ function photobooth() {
     background: #c9363a; color: white; border: none;
     border-radius: 3px;
     font-family: 'Space Mono', monospace;
-    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase;
     cursor: pointer; transition: all 0.18s;
     display: flex; align-items: center; justify-content: center; gap: 8px;
 }
@@ -1256,7 +1256,7 @@ function photobooth() {
     color: #8a8278; border: 1px solid rgba(255,255,255,0.1);
     border-radius: 3px;
     font-family: 'Space Mono', monospace;
-    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
     cursor: pointer; transition: all 0.18s;
 }
 .pb-btn-secondary:hover   { background: rgba(255,255,255,0.1); color: #f5f0e8; }
