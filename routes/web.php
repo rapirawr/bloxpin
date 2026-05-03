@@ -75,12 +75,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/messages/{user:username}', [MessageController::class, 'show'])->name('messages.show');
     Route::post('/messages/{user:username}', [MessageController::class, 'store'])->name('messages.store');
 
-    // Profile Settings
-    Route::get('/settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/settings/profile', [ProfileController::class, 'update'])->name('profile.update');
-    
-    // Default Breeze profile destroy
-    Route::delete('/settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // Settings
+    Route::get('/settings', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/settings', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Follow toggle (AJAX)
     Route::post('/user/{user:username}/follow', [\App\Http\Controllers\FollowController::class, 'toggle'])->name('user.follow');

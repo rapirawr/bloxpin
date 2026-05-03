@@ -129,56 +129,15 @@
                     <div class="pb-panel-label">Layout</div>
                     <div class="pb-layout-grid">
 
-                        <button @click="setLayout('single')"
-                                :class="activeLayout === 'single' ? 'active' : ''"
-                                class="pb-layout-btn">
-                            <div class="pb-icon-row">
-                                <div class="pb-icon-bar"></div>
-                            </div>
-                            <span class="pb-layout-name">1</span>
-                        </button>
-
-                        <button @click="setLayout('double')"
-                                :class="activeLayout === 'double' ? 'active' : ''"
-                                class="pb-layout-btn">
-                            <div class="pb-icon-row">
-                                <div class="pb-icon-bar"></div>
-                                <div class="pb-icon-bar"></div>
-                            </div>
-                            <span class="pb-layout-name">2</span>
-                        </button>
-
-                        <button @click="setLayout('strip')"
-                                :class="activeLayout === 'strip' ? 'active' : ''"
-                                class="pb-layout-btn">
-                            <div class="pb-icon-row">
-                                <div class="pb-icon-bar"></div>
-                                <div class="pb-icon-bar"></div>
-                                <div class="pb-icon-bar"></div>
-                                <div class="pb-icon-bar"></div>
-                            </div>
-                            <span class="pb-layout-name">strip</span>
-                        </button>
-
-                        <button @click="setLayout('trio')"
-                                :class="activeLayout === 'trio' ? 'active' : ''"
-                                class="pb-layout-btn">
-                            <div class="pb-icon-row">
-                                <div class="pb-icon-bar"></div>
-                                <div class="pb-icon-bar"></div>
-                                <div class="pb-icon-bar"></div>
-                            </div>
-                            <span class="pb-layout-name">3</span>
-                        </button>
-
-                        <button @click="setLayout('grid')"
-                                :class="activeLayout === 'grid' ? 'active' : ''"
-                                class="pb-layout-btn pb-layout-grid-icon">
-                            <div class="pb-grid-cell"></div>
-                            <div class="pb-grid-cell"></div>
-                            <div class="pb-grid-cell"></div>
-                            <div class="pb-grid-cell"></div>
-                        </button>
+                        <template x-for="l in layoutOptions" :key="l.id">
+                            <button @click="setLayout(l.id)"
+                                    :class="activeLayout === l.id ? 'active' : ''"
+                                    class="pb-layout-btn"
+                                    :title="l.label">
+                                <div class="pb-dynamic-icon" x-html="l.iconHtml"></div>
+                                <span class="pb-layout-name" x-text="l.label"></span>
+                            </button>
+                        </template>
 
                     </div>
                 </div>
@@ -349,46 +308,81 @@ function photobooth() {
         clockInterval:   null,
 
         // ── Layout map
-        get maxCaptures() {
-            return { single:1, double:2, trio:3, strip:4, grid:4 }[this.activeLayout] ?? 4;
-        },
+get maxCaptures() {
+    return {
+        single:1, double:2, trio:3, strip:4, grid:4,
+        scattered:4, overlap:3, collage:3, diagonal:4, zine:3, stack:4
+    }[this.activeLayout] ?? 4;
+},
 
         // ── Data
-        filters: [
-            { id:'none',    name:'Normal',  swatchStyle:'background:linear-gradient(135deg,#2a2724,#4a4540)' },
-            { id:'vintage', name:'Kodak',   swatchStyle:'background:linear-gradient(135deg,#8b6a40,#c4955a)' },
-            { id:'bw',      name:'Ilford',  swatchStyle:'background:linear-gradient(135deg,#3a3a3a,#888888)' },
-            { id:'sepia',   name:'Sepia',   swatchStyle:'background:linear-gradient(135deg,#704214,#b07030)' },
-            { id:'dreamy',  name:'Dreamy',  swatchStyle:'background:linear-gradient(135deg,#c8a0e8,#80c0f0)' },
-            { id:'faded',   name:'Faded',   swatchStyle:'background:linear-gradient(135deg,#b8c8c0,#d8e8e0)' },
-        ],
+filters: [
+    { id:'none',     name:'Normal',   swatchStyle:'background:linear-gradient(135deg,#2a2724,#4a4540)' },
+    { id:'vintage',  name:'Kodak',    swatchStyle:'background:linear-gradient(135deg,#8b6a40,#c4955a)' },
+    { id:'bw',       name:'Ilford',   swatchStyle:'background:linear-gradient(135deg,#3a3a3a,#888888)' },
+    { id:'sepia',    name:'Sepia',    swatchStyle:'background:linear-gradient(135deg,#704214,#b07030)' },
+    { id:'dreamy',   name:'Dreamy',   swatchStyle:'background:linear-gradient(135deg,#c8a0e8,#80c0f0)' },
+    { id:'faded',    name:'Faded',    swatchStyle:'background:linear-gradient(135deg,#b8c8c0,#d8e8e0)' },
 
-        frames: [
-            { id:'classic',  name:'Classic',  thumbStyle:'background:#f5f0e8;border-color:rgba(200,169,110,0.5)', bg:'#f5f0e8', color:'#2a2018', accent:'#c8a96e' },
-            { id:'dark',     name:'Dark',     thumbStyle:'background:#111;border-color:rgba(255,255,255,0.15)',   bg:'#111010', color:'#ffffff', accent:'#888888' },
-            { id:'blush',    name:'Blush',    thumbStyle:'background:linear-gradient(160deg,#ffe4ef,#ffd4e4);border-color:rgba(255,150,180,0.4)', bg:'linear-gradient(160deg,#ffe4ef,#ffd4e4)', color:'#7a3050', accent:'#ff90b8' },
-            { id:'forest',   name:'Forest',   thumbStyle:'background:#1a2e1a;border-color:rgba(100,180,80,0.3)', bg:'#1a2e1a', color:'#c8e8a8', accent:'#6ab050' },
-            { id:'polaroid', name:'Polaroid', thumbStyle:'background:#fafaf5;border-color:#ddd',                 bg:'#fafaf5', color:'#333333', accent:'#999999' },
-            { id:'cinema',   name:'Cinema',   thumbStyle:'background:#1a1209;border-color:rgba(200,168,75,0.4)', bg:'#1a1209', color:'#c8a84b', accent:'#c8a84b' },
-        ],
+    // ✅ BARU
+    { id:'lomo',     name:'Lomo',     swatchStyle:'background:linear-gradient(135deg,#1a0030,#c020c0)' },
+    { id:'golden',   name:'Golden',   swatchStyle:'background:linear-gradient(135deg,#7a4a00,#f0c060)' },
+    { id:'cool',     name:'Cool',     swatchStyle:'background:linear-gradient(135deg,#002060,#4080e0)' },
+    { id:'fade35',   name:'35mm',     swatchStyle:'background:linear-gradient(135deg,#604020,#d0a878)' },
+    { id:'mist',     name:'Mist',     swatchStyle:'background:linear-gradient(135deg,#8090a0,#c8d8e8)' },
+    { id:'velvia',   name:'Velvia',   swatchStyle:'background:linear-gradient(135deg,#402000,#e06020)' },
+    { id:'portra',   name:'Portra',   swatchStyle:'background:linear-gradient(135deg,#806040,#e8c8a0)' },
+    { id:'cross',    name:'Cross',    swatchStyle:'background:linear-gradient(135deg,#403000,#a0c020)' },
+],
 
+frames: [
+    { id:'classic',  name:'Classic',  thumbStyle:'background:#f5f0e8;border-color:rgba(200,169,110,0.5)',                        bg:'#f5f0e8',                              color:'#2a2018', accent:'#c8a96e' },
+    { id:'dark',     name:'Dark',     thumbStyle:'background:#111;border-color:rgba(255,255,255,0.15)',                          bg:'#111010',                              color:'#ffffff', accent:'#888888' },
+    { id:'blush',    name:'Blush',    thumbStyle:'background:linear-gradient(160deg,#ffe4ef,#ffd4e4);border-color:rgba(255,150,180,0.4)', bg:'linear-gradient(160deg,#ffe4ef,#ffd4e4)', color:'#7a3050', accent:'#ff90b8' },
+    { id:'forest',   name:'Forest',   thumbStyle:'background:#1a2e1a;border-color:rgba(100,180,80,0.3)',                         bg:'#1a2e1a',                              color:'#c8e8a8', accent:'#6ab050' },
+    { id:'polaroid', name:'Polaroid', thumbStyle:'background:#fafaf5;border-color:#ddd',                                        bg:'#fafaf5',                              color:'#333333', accent:'#999999' },
+    { id:'cinema',   name:'Cinema',   thumbStyle:'background:#1a1209;border-color:rgba(200,168,75,0.4)',                         bg:'#1a1209',                              color:'#c8a84b', accent:'#c8a84b' },
+
+    // ✅ BARU
+    { id:'diaryfm',  name:'Diary',    thumbStyle:'background:#f0e8d8;border-color:rgba(160,120,70,0.5)',                         bg:'#f0e8d8',                              color:'#5c3d1e', accent:'#a0783c' },
+    { id:'y2k',      name:'Y2K',      thumbStyle:'background:linear-gradient(135deg,#e0c8ff,#c8e8ff);border-color:rgba(180,120,255,0.5)', bg:'linear-gradient(135deg,#e8d8ff,#d0ecff)', color:'#5020a0', accent:'#9060e0' },
+    { id:'matcha',   name:'Matcha',   thumbStyle:'background:#d4e8c8;border-color:rgba(80,140,60,0.4)',                          bg:'#d4e8c8',                              color:'#2a4a1a', accent:'#5a8c40' },
+    { id:'midnight', name:'Night',    thumbStyle:'background:linear-gradient(160deg,#0a0a1e,#101030);border-color:rgba(100,120,255,0.4)', bg:'linear-gradient(160deg,#0a0a1e,#101030)', color:'#a0b0ff', accent:'#6070e0' },
+    { id:'washi',    name:'Washi',    thumbStyle:'background:#fdf6ec;border-color:rgba(220,100,80,0.4)',                         bg:'#fdf6ec',                              color:'#8c3020', accent:'#dc6450' },
+    { id:'lomo',     name:'Lomo',     thumbStyle:'background:#120c18;border-color:rgba(200,50,200,0.4)',                         bg:'#120c18',                              color:'#e060e0', accent:'#c030c0' },
+],
         layoutOptions: [
             { id:'single', label:'1',     iconHtml:'<div style="display:flex;flex-direction:column;gap:2px;width:18px;"><div style="height:4px;border-radius:1px;background:currentColor;opacity:0.6;"></div></div>' },
             { id:'double', label:'2',     iconHtml:'<div style="display:flex;flex-direction:column;gap:2px;width:18px;"><div style="height:4px;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="height:4px;border-radius:1px;background:currentColor;opacity:0.6;"></div></div>' },
             { id:'strip',  label:'Strip', iconHtml:'<div style="display:flex;flex-direction:column;gap:1.5px;width:18px;"><div style="height:3px;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="height:3px;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="height:3px;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="height:3px;border-radius:1px;background:currentColor;opacity:0.6;"></div></div>' },
             { id:'trio',   label:'3',     iconHtml:'<div style="display:flex;flex-direction:column;gap:2px;width:18px;"><div style="height:4px;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="height:4px;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="height:4px;border-radius:1px;background:currentColor;opacity:0.6;"></div></div>' },
             { id:'grid',   label:'Grid',  iconHtml:'<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;width:18px;"><div style="height:8px;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="height:8px;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="height:8px;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="height:8px;border-radius:1px;background:currentColor;opacity:0.6;"></div></div>' },
+            { id:'scattered', label:'Scatter', iconHtml:'<div style="position:relative;width:22px;height:22px;"><div style="position:absolute;top:0;left:2px;width:14px;height:10px;border-radius:1px;background:currentColor;opacity:0.6;transform:rotate(-8deg);"></div><div style="position:absolute;bottom:0;right:0;width:14px;height:10px;border-radius:1px;background:currentColor;opacity:0.6;transform:rotate(6deg);"></div></div>' },
+{ id:'overlap',   label:'Overlap', iconHtml:'<div style="position:relative;width:22px;height:18px;"><div style="position:absolute;top:0;left:0;width:16px;height:12px;border-radius:1px;background:currentColor;opacity:0.4;"></div><div style="position:absolute;top:4px;left:4px;width:16px;height:12px;border-radius:1px;background:currentColor;opacity:0.6;"></div></div>' },
+{ id:'collage',   label:'Collage', iconHtml:'<div style="display:grid;grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr;gap:2px;width:22px;height:18px;"><div style="grid-row:span 2;border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="border-radius:1px;background:currentColor;opacity:0.5;"></div><div style="border-radius:1px;background:currentColor;opacity:0.4;"></div></div>' },
+{ id:'diagonal',  label:'Diag',   iconHtml:'<div style="display:flex;flex-direction:column;gap:2px;width:22px;">' + [0,1,2,3].map(i=>`<div style="height:3px;border-radius:1px;background:currentColor;opacity:0.6;width:${10+i*4}px;margin-left:${i*2}px;"></div>`).join('') + '</div>' },
+{ id:'zine',      label:'Zine',   iconHtml:'<div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1.4fr;gap:2px;width:22px;height:20px;"><div style="border-radius:1px;background:currentColor;opacity:0.6;"></div><div style="grid-row:span 2;border-radius:1px;background:currentColor;opacity:0.5;"></div><div style="border-radius:1px;background:currentColor;opacity:0.4;"></div></div>' },
+{ id:'stack',     label:'Stack',  iconHtml:'<div style="position:relative;width:22px;height:20px;">' + [3,2,1,0].map(i=>`<div style="position:absolute;top:${i*3}px;left:${i*2}px;width:18px;height:13px;border-radius:1px;background:currentColor;opacity:${0.3+i*0.15};"></div>`).join('') + '</div>' },
         ],
 
-        // ── Filter CSS
-        filterCSS: {
-            none:    '',
-            vintage: 'sepia(0.25) contrast(1.1) brightness(0.92) saturate(0.85)',
-            bw:      'grayscale(1) contrast(1.15)',
-            sepia:   'sepia(0.9) brightness(0.95)',
-            dreamy:  'brightness(1.08) saturate(1.3) contrast(0.95)',
-            faded:   'saturate(0.5) brightness(1.05) contrast(0.9)',
-        },
+filterCSS: {
+    none:    '',
+    vintage: 'sepia(0.25) contrast(1.1) brightness(0.92) saturate(0.85)',
+    bw:      'grayscale(1) contrast(1.15)',
+    sepia:   'sepia(0.9) brightness(0.95)',
+    dreamy:  'brightness(1.08) saturate(1.3) contrast(0.95)',
+    faded:   'saturate(0.5) brightness(1.05) contrast(0.9)',
+
+    // ✅ BARU
+    lomo:    'contrast(1.5) saturate(1.6) brightness(0.85)',
+    golden:  'sepia(0.4) saturate(1.4) brightness(1.05) hue-rotate(-10deg)',
+    cool:    'saturate(0.9) brightness(1.02) hue-rotate(190deg) contrast(1.05)',
+    fade35:  'sepia(0.3) saturate(0.75) brightness(1.1) contrast(0.88)',
+    mist:    'saturate(0.4) brightness(1.12) contrast(0.85) blur(0.3px)',
+    velvia:  'saturate(1.8) contrast(1.2) brightness(0.9)',
+    portra:  'sepia(0.15) saturate(1.1) brightness(1.05) contrast(0.95) hue-rotate(5deg)',
+    cross:   'saturate(1.4) hue-rotate(30deg) contrast(1.15) brightness(0.95)',
+},
 
         // ── Init
         async init() {
@@ -506,10 +500,10 @@ function photobooth() {
         },
 
         // ── Layout / filter / frame setters
-        setLayout(l) {
-            this.activeLayout = l;
-            this.resetSession();
-        },
+setLayout(l) {
+    this.activeLayout = l;
+    this.resetSession();
+},
 
         setFilter(f) {
             this.activeFilter = f;
@@ -529,60 +523,223 @@ function photobooth() {
         },
 
         // ── Render strip preview
-        renderStrip() {
-            const wraps = document.querySelectorAll('.pb-strip-wrap');
-            if (!wraps.length) return;
+ renderStrip() {
+    const wraps = document.querySelectorAll('.pb-strip-wrap');
+    if (!wraps.length) return;
 
-            const fr      = this.frames.find(f => f.id === this.activeFrame) ?? this.frames[0];
-            const max     = this.maxCaptures;
-            const isGrid  = this.activeLayout === 'grid';
-            const photoW  = isGrid ? 110 : 100;
-            const photoH  = Math.round(photoW * (4 / 3));
-            const pad     = 12;
-            const gap     = 6;
-            const filterV = this.filterCSS[this.activeFilter] ?? '';
+    const fr      = this.frames.find(f => f.id === this.activeFrame) ?? this.frames[0];
+    const max     = this.maxCaptures;
+    const filterV = this.filterCSS[this.activeFilter] ?? '';
+    const filterStyle = filterV ? `filter:${filterV};` : '';
+    const dateStr = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'2-digit' });
+    const bgStyle = fr.bg.startsWith('linear') ? `background:${fr.bg};` : `background-color:${fr.bg};`;
 
-            const containerW = isGrid
-                ? pad * 2 + photoW * 2 + gap
-                : pad * 2 + photoW;
+    const imgOrSlot = (i, w, h, extra='') => {
+        if (this.capturedImages[i]) {
+            return `<img src="${this.capturedImages[i]}" style="width:100%;height:100%;object-fit:cover;display:block;${filterStyle}" />`;
+        }
+        return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.1);"><span style="font-family:'Space Mono',monospace;font-size:11px;color:${fr.color}40;">${i+1}</span></div>`;
+    };
 
-            let slotsHTML = '';
-            for (let i = 0; i < max; i++) {
-                if (this.capturedImages[i]) {
-                    slotsHTML += `<div style="width:${photoW}px;height:${photoH}px;border-radius:2px;overflow:hidden;flex-shrink:0;">
-                        <img src="${this.capturedImages[i]}" style="width:100%;height:100%;object-fit:cover;display:block;${filterV ? 'filter:'+filterV+';' : ''}" />
-                    </div>`;
-                } else {
-                    slotsHTML += `<div style="width:${photoW}px;height:${photoH}px;border-radius:2px;background:rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <span style="font-family:'Space Mono',monospace;font-size:14px;letter-spacing:0.05em;color:${fr.color}30;">${i + 1}</span>
-                    </div>`;
-                }
-            }
+    const footer = `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px 12px;">
+            <div style="width:100%;height:1px;background:${fr.color}20;margin-bottom:4px;"></div>
+            <span style="font-family:'DM Serif Display',serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:${fr.color};opacity:0.8;">filmbooth</span>
+            <span style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.08em;color:${fr.color};opacity:0.4;">${dateStr}</span>
+        </div>`;
 
-            const gridOrFlex = isGrid
-                ? `display:grid;grid-template-columns:1fr 1fr;gap:${gap}px;padding:${pad}px;`
-                : `display:flex;flex-direction:column;gap:${gap}px;padding:${pad}px;`;
+    let innerHTML = '';
+    let containerW = 0;
 
-            const dateStr = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'2-digit' });
-
-            const bgStyle = fr.bg.startsWith('linear')
-                ? `background:${fr.bg};`
-                : `background-color:${fr.bg};`;
-
-            const finalHTML = `
-                <div style="width:${containerW}px;${bgStyle}border-radius:3px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06);transition:all 0.4s;">
-                    <div style="${gridOrFlex}">${slotsHTML}</div>
-                    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px ${pad}px 10px;">
-                        <div style="width:100%;height:1px;background:${fr.color}20;margin-bottom:4px;"></div>
-                        <span style="font-family:'DM Serif Display',serif;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:${fr.color};opacity:0.8;">filmbooth</span>
-                        <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;color:${fr.color};opacity:0.4;">${dateStr}</span>
-                    </div>
+    if (this.activeLayout === 'scattered') {
+        // Foto ditaruh miring-miring acak di dalam kotak
+        const rotations = [-8, 5, -4, 7];
+        const offsets   = [{x:4,y:0},{x:-4,y:6},{x:6,y:4},{x:-2,y:8}];
+        const iW = 90, iH = 120;
+        containerW = 200;
+        const scatH = 200;
+        let slots = '';
+        for (let i = max-1; i >= 0; i--) {
+            const r = rotations[i] ?? 0;
+            const o = offsets[i] ?? {x:0,y:0};
+            const left = 20 + i * 22 + o.x;
+            const top  = 20 + o.y;
+            slots += `
+                <div style="position:absolute;left:${left}px;top:${top}px;width:${iW}px;height:${iH}px;
+                    border-radius:2px;overflow:hidden;transform:rotate(${r}deg);
+                    box-shadow:0 4px 16px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.08);
+                    transition:all 0.4s;">
+                    ${imgOrSlot(i, iW, iH)}
                 </div>`;
+        }
+        innerHTML = `
+            <div style="position:relative;width:${containerW}px;height:${scatH}px;">
+                ${slots}
+            </div>
+            <div style="width:${containerW}px;">${footer}</div>`;
 
-            wraps.forEach(wrap => {
-                wrap.innerHTML = finalHTML;
-            });
-        },
+        const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            ${innerHTML}
+        </div>`;
+        wraps.forEach(w => w.innerHTML = finalHTML);
+        return;
+
+    } else if (this.activeLayout === 'overlap') {
+        // Foto tumpuk saling overlap
+        const iW = 100, iH = 133;
+        containerW = 140;
+        let slots = '';
+        for (let i = 0; i < max; i++) {
+            const topOffset = i * 38;
+            slots += `
+                <div style="position:absolute;left:10px;top:${topOffset}px;width:${iW}px;height:${iH}px;
+                    border-radius:2px;overflow:hidden;
+                    box-shadow:0 6px 20px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.07);
+                    z-index:${i};">
+                    ${imgOrSlot(i, iW, iH)}
+                </div>`;
+        }
+        const totalH = iH + (max-1)*38;
+        innerHTML = `
+            <div style="position:relative;width:${containerW}px;height:${totalH+16}px;">
+                ${slots}
+            </div>`;
+
+        const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            ${innerHTML}${footer}
+        </div>`;
+        wraps.forEach(w => w.innerHTML = finalHTML);
+        return;
+
+    } else if (this.activeLayout === 'collage') {
+        // 1 foto besar di kiri, 2 kecil di kanan
+        const bigW=110, bigH=160, smallW=72, smallH=77, gap=4, pad=10;
+        containerW = pad*2 + bigW + gap + smallW;
+        innerHTML = `
+            <div style="display:flex;gap:${gap}px;padding:${pad}px ${pad}px 6px;">
+                <div style="width:${bigW}px;height:${bigH}px;border-radius:2px;overflow:hidden;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+                    ${imgOrSlot(0, bigW, bigH)}
+                </div>
+                <div style="display:flex;flex-direction:column;gap:${gap}px;flex:1;">
+                    <div style="width:${smallW}px;height:${smallH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+                        ${imgOrSlot(1, smallW, smallH)}
+                    </div>
+                    <div style="width:${smallW}px;height:${smallH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+                        ${imgOrSlot(2, smallW, smallH)}
+                    </div>
+                </div>
+            </div>`;
+
+        const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            ${innerHTML}${footer}
+        </div>`;
+        wraps.forEach(w => w.innerHTML = finalHTML);
+        return;
+
+    } else if (this.activeLayout === 'diagonal') {
+        // Foto disusun diagonal offset ke kanan bawah
+        const iW=100, iH=133, offsetX=18, offsetY=14, pad=12;
+        containerW = pad*2 + iW + offsetX*(max-1);
+        const totalH = pad + iH + offsetY*(max-1) + 16;
+        let slots = '';
+        for (let i = 0; i < max; i++) {
+            slots += `
+                <div style="position:absolute;left:${pad + i*offsetX}px;top:${pad/2 + i*offsetY}px;
+                    width:${iW}px;height:${iH}px;border-radius:2px;overflow:hidden;
+                    box-shadow:0 4px 16px rgba(0,0,0,0.35);z-index:${i};">
+                    ${imgOrSlot(i, iW, iH)}
+                </div>`;
+        }
+        innerHTML = `<div style="position:relative;width:${containerW}px;height:${totalH}px;">${slots}</div>`;
+
+        const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            ${innerHTML}${footer}
+        </div>`;
+        wraps.forEach(w => w.innerHTML = finalHTML);
+        return;
+
+    } else if (this.activeLayout === 'zine') {
+        // Layout zine: 1 wide di atas, 2 kecil bawah
+        const topW=176, topH=110, botW=84, botH=90, gap=4, pad=10;
+        containerW = pad*2 + topW;
+        innerHTML = `
+            <div style="padding:${pad}px ${pad}px 6px;display:flex;flex-direction:column;gap:${gap}px;">
+                <div style="width:${topW}px;height:${topH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+                    ${imgOrSlot(0, topW, topH)}
+                </div>
+                <div style="display:flex;gap:${gap}px;">
+                    <div style="width:${botW}px;height:${botH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+                        ${imgOrSlot(1, botW, botH)}
+                    </div>
+                    <div style="width:${botW}px;height:${botH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+                        ${imgOrSlot(2, botW, botH)}
+                    </div>
+                </div>
+            </div>`;
+
+        const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            ${innerHTML}${footer}
+        </div>`;
+        wraps.forEach(w => w.innerHTML = finalHTML);
+        return;
+
+    } else if (this.activeLayout === 'stack') {
+        // Foto ditumpuk dengan offset kecil dan rotasi tipis, kayak lagi dipegang
+        const rotations = [3, -2, 1, -4];
+        const iW=100, iH=133, pad=20;
+        containerW = 160;
+        let slots = '';
+        for (let i = max-1; i >= 0; i--) {
+            const r = rotations[i] ?? 0;
+            slots += `
+                <div style="position:absolute;left:${pad + i*2}px;top:${pad + i*2}px;
+                    width:${iW}px;height:${iH}px;border-radius:2px;overflow:hidden;
+                    transform:rotate(${r}deg);
+                    box-shadow:0 4px 16px rgba(0,0,0,0.4);z-index:${i};">
+                    ${imgOrSlot(i, iW, iH)}
+                </div>`;
+        }
+        innerHTML = `<div style="position:relative;width:${containerW}px;height:${iH+pad*2+10}px;">${slots}</div>`;
+
+        const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            ${innerHTML}${footer}
+        </div>`;
+        wraps.forEach(w => w.innerHTML = finalHTML);
+        return;
+    }
+
+    // ── fallback: layout lama (single, double, trio, strip, grid)
+    const isGrid  = this.activeLayout === 'grid';
+    const photoW  = isGrid ? 110 : 100;
+    const photoH  = Math.round(photoW * (4/3));
+    const pad     = 12, gap = 6;
+    containerW = isGrid ? pad*2 + photoW*2 + gap : pad*2 + photoW;
+
+    let slotsHTML = '';
+    for (let i = 0; i < max; i++) {
+        if (this.capturedImages[i]) {
+            slotsHTML += `<div style="width:${photoW}px;height:${photoH}px;border-radius:2px;overflow:hidden;flex-shrink:0;">
+                <img src="${this.capturedImages[i]}" style="width:100%;height:100%;object-fit:cover;display:block;${filterStyle}" />
+            </div>`;
+        } else {
+            slotsHTML += `<div style="width:${photoW}px;height:${photoH}px;border-radius:2px;background:rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-family:'Space Mono',monospace;font-size:14px;letter-spacing:0.05em;color:${fr.color}30;">${i+1}</span>
+            </div>`;
+        }
+    }
+
+    const gridOrFlex = isGrid
+        ? `display:grid;grid-template-columns:1fr 1fr;gap:${gap}px;padding:${pad}px;`
+        : `display:flex;flex-direction:column;gap:${gap}px;padding:${pad}px;`;
+
+    const finalHTML = `
+        <div style="width:${containerW}px;${bgStyle}border-radius:3px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06);transition:all 0.4s;">
+            <div style="${gridOrFlex}">${slotsHTML}</div>
+            ${footer}
+        </div>`;
+
+    wraps.forEach(wrap => { wrap.innerHTML = finalHTML; });
+},
 
         // ── Download
         async downloadStrip() {
@@ -612,13 +769,23 @@ function photobooth() {
             }
             ctx.fillRect(0, 0, c.width, c.height);
 
-            const filterMap = {
-                vintage: 'sepia(0.25) contrast(1.1) brightness(0.92)',
-                bw:      'grayscale(1) contrast(1.15)',
-                sepia:   'sepia(0.9)',
-                dreamy:  'brightness(1.08) saturate(1.3)',
-                faded:   'saturate(0.5) brightness(1.05)',
-            };
+const filterMap = {
+    vintage: 'sepia(0.25) contrast(1.1) brightness(0.92)',
+    bw:      'grayscale(1) contrast(1.15)',
+    sepia:   'sepia(0.9)',
+    dreamy:  'brightness(1.08) saturate(1.3)',
+    faded:   'saturate(0.5) brightness(1.05)',
+
+    // ✅ BARU — canvas ctx.filter tidak support blur, jadi mist tanpa blur
+    lomo:    'contrast(1.5) saturate(1.6) brightness(0.85)',
+    golden:  'sepia(0.4) saturate(1.4) brightness(1.05) hue-rotate(-10deg)',
+    cool:    'saturate(0.9) brightness(1.02) hue-rotate(190deg) contrast(1.05)',
+    fade35:  'sepia(0.3) saturate(0.75) brightness(1.1) contrast(0.88)',
+    mist:    'saturate(0.4) brightness(1.12) contrast(0.85)',
+    velvia:  'saturate(1.8) contrast(1.2) brightness(0.9)',
+    portra:  'sepia(0.15) saturate(1.1) brightness(1.05) contrast(0.95) hue-rotate(5deg)',
+    cross:   'saturate(1.4) hue-rotate(30deg) contrast(1.15) brightness(0.95)',
+};
 
             for (let i = 0; i < this.capturedImages.length; i++) {
                 const img = new Image();
@@ -1143,17 +1310,7 @@ function photobooth() {
     background: rgba(201,54,58,0.12);
     border-color: rgba(201,54,58,0.5);
 }
-.pb-icon-row { display: flex; flex-direction: column; gap: 2px; width: 20px; }
-.pb-icon-bar { height: 4px; border-radius: 1px; background: rgba(255,255,255,0.28); width: 100%; }
-.pb-layout-btn.active .pb-icon-bar { background: #c9363a; }
-.pb-layout-grid-icon {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px; padding: 7px;
-    flex-direction: unset;
-}
-.pb-grid-cell { border-radius: 1px; background: rgba(255,255,255,0.28); aspect-ratio: 1; }
-.pb-layout-btn.active .pb-grid-cell { background: #c9363a; }
+.pb-layout-btn.active .pb-dynamic-icon { color: #c9363a; }
 .pb-layout-name {
     font-family: 'Space Mono', monospace;
     font-size: 9px; color: #8a8278;

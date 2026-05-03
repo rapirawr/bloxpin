@@ -68,7 +68,7 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         // Breeze default profile edit view
-        return view('profile.edit', [
+        return view('settings.index', [
             'user' => $request->user(),
         ]);
     }

@@ -11,6 +11,12 @@
             "src": "/favicon.ico",
             "sizes": "64x64",
             "type": "image/x-icon"
+        },
+        {
+            "src": "/images/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ]
 }

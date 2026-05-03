@@ -129,11 +129,11 @@
                             <span class="group-hover:translate-x-1 transition-transform">Photobooth Studio</span>
                         </a>
                         
-                        <a href="#" class="group flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 hover:text-dark dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-white/10 rounded-2xl transition-all">
+                        <a href="{{ route('profile.edit') }}" class="group flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 hover:text-dark dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-white/10 rounded-2xl transition-all">
                             <div class="w-8 h-8 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-white transition-all shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             </div>
-                            <span class="group-hover:translate-x-1 transition-transform">Pengaturan Aplikasi</span>
+                            <span class="group-hover:translate-x-1 transition-transform">Pengaturan</span>
                         </a>
 
                         @if(auth()->user()->is_admin)
