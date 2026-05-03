@@ -84,18 +84,26 @@ class RecoverPhotosFromStorage extends Command
             }
 
             if (!$this->option('dry-run')) {
-                Photo::create([
-                    'user_id'        => $userId,
-                    'title'          => $title,
-                    'image_path'     => $originalPath,
-                    'thumbnail_path' => $thumbPath ?? $originalPath,
-                    'dominant_color' => null,
-                    'width'          => 1200, // Default fallback
-                    'height'         => 1600, // Default fallback
-                ]);
+                $exists = Photo::where('image_path', $originalPath)->exists();
+
+                if ($exists) {
+                    $skipped++;
+                } else {
+                    Photo::create([
+                        'user_id'        => $userId,
+                        'title'          => $title,
+                        'image_path'     => $originalPath,
+                        'thumbnail_path' => $thumbPath ?? $originalPath,
+                        'dominant_color' => null,
+                        'width'          => 1200, // Default fallback
+                        'height'         => 1600, // Default fallback
+                    ]);
+                    $imported++;
+                }
+            } else {
+                $imported++;
             }
 
-            $imported++;
             $bar->advance();
         }
 

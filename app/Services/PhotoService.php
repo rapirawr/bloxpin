@@ -184,8 +184,15 @@ class PhotoService
     public function delete(Photo $photo): void
     {
         // Delete files from storage
-        Storage::delete($photo->image_path);
-        Storage::delete($photo->thumbnail_path);
+        try {
+            Storage::delete($photo->image_path);
+            if ($photo->thumbnail_path && $photo->thumbnail_path !== $photo->image_path) {
+                Storage::delete($photo->thumbnail_path);
+            }
+        } catch (\Exception $e) {
+            // Ignore if file not found or storage error - we want to proceed with database deletion
+            \Log::warning("Failed to delete storage file for photo {$photo->id}: " . $e->getMessage());
+        }
 
         // Delete the record (cascade will handle likes, pins, tags)
         $photo->delete();

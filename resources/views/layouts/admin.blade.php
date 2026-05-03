@@ -13,23 +13,6 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dark: '#000000',
-                        card: '#0A0A0A',
-                        border: 'rgba(255, 255, 255, 0.05)'
-                    },
-                    fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body { background-color: #000000; color: #ffffff; }
         .sidebar-link.active { background: #ffffff; color: #000000; }
