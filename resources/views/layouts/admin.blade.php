@@ -89,8 +89,8 @@
 
     <script>
         // Global Modal Helpers
-        window.appConfirm = (title, message, onConfirm, confirmText = 'Ya, Lanjutkan') => {
-            window.dispatchEvent(new CustomEvent('app-confirm', { detail: { title, message, onConfirm, confirmText } }));
+        window.appConfirm = (title, message, onConfirm, confirmText = 'Ya, Lanjutkan', type = 'danger') => {
+            window.dispatchEvent(new CustomEvent('app-confirm', { detail: { title, message, onConfirm, confirmText, type } }));
         };
 
         window.appPrompt = (title, message, onConfirm, defaultValue = '', placeholder = '', confirmText = 'Simpan') => {
@@ -158,6 +158,14 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         };
+
+        // Handle Session Flash Messages
+        @if(session('success'))
+            window.showToast("{{ session('success') }}", 'success');
+        @endif
+        @if(session('error'))
+            window.showToast("{{ session('error') }}", 'error');
+        @endif
     </script>
 </body>
 </html>

@@ -54,15 +54,15 @@
                         </form>
 
                         <!-- Toggle Verified -->
-                        <form id="toggle-verified-{{ $user->id }}" action="{{ route('admin.users.toggle-verified', $user) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Verifikasi User', 'Ubah status verifikasi untuk {{ $user->name }}?', () => document.getElementById('toggle-verified-{{ $user->id }}').submit(), 'Lanjutkan')">
+                        <form id="toggle-verified-{{ $user->id }}" action="{{ route('admin.users.toggle-verified', $user) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Verifikasi User', 'Ubah status verifikasi untuk {{ addslashes($user->name) }}?', () => $el.submit(), 'Lanjutkan', 'primary')">
                             @csrf
                             <button type="submit" class="p-2 hover:bg-white hover:text-black rounded-lg transition-all {{ $user->is_verified ? 'text-white bg-white/10' : 'text-gray-500' }}" title="Verify User">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
                             </button>
                         </form>
 
                         <!-- Toggle Shadowban -->
-                        <form id="toggle-shadowban-{{ $user->id }}" action="{{ route('admin.users.toggle-shadowban', $user) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Shadowban User', 'Ubah status shadowban untuk {{ $user->name }}?', () => document.getElementById('toggle-shadowban-{{ $user->id }}').submit(), 'Lanjutkan')">
+                        <form id="toggle-shadowban-{{ $user->id }}" action="{{ route('admin.users.toggle-shadowban', $user) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Shadowban User', 'Ubah status shadowban untuk {{ addslashes($user->name) }}?', () => $el.submit(), 'Lanjutkan')">
                             @csrf
                             <button type="submit" class="p-2 hover:bg-white hover:text-black rounded-lg transition-all {{ $user->is_shadowbanned ? 'text-white bg-white/10' : 'text-gray-500' }}" title="Shadowban">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 14.12l4.242-4.242M3 3l18 18"></path></svg>
@@ -70,10 +70,10 @@
                         </form>
 
                         <!-- Toggle Admin -->
-                        <form id="toggle-admin-{{ $user->id }}" action="{{ route('admin.users.toggle-admin', $user) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Toggle Admin', 'Ubah hak akses admin untuk {{ $user->name }}?', () => document.getElementById('toggle-admin-{{ $user->id }}').submit(), 'Lanjutkan')">
+                        <form id="toggle-admin-{{ $user->id }}" action="{{ route('admin.users.toggle-admin', $user) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Toggle Admin', 'Ubah hak akses admin untuk {{ addslashes($user->name) }}?', () => $el.submit(), 'Lanjutkan', 'primary')">
                             @csrf
                             <button type="submit" class="p-2 hover:bg-white hover:text-black rounded-lg transition-all {{ $user->is_admin ? 'text-white bg-white/10' : 'text-gray-500' }}" title="Make Admin">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751A11.959 11.959 0 0112 2.714z"></path></svg>
                             </button>
                         </form>
 
@@ -88,7 +88,7 @@
                             <input type="hidden" name="password" id="reset-input-{{ $user->id }}">
                         </form>
 
-                        <form id="delete-user-{{ $user->id }}" action="{{ route('admin.users.delete', $user) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Hapus User', 'Yakin ingin menghapus user ini?', () => document.getElementById('delete-user-{{ $user->id }}').submit(), 'Hapus')">
+                        <form id="delete-user-{{ $user->id }}" action="{{ route('admin.users.delete', $user) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Hapus User', 'Yakin ingin menghapus user ini?', () => $el.submit(), 'Hapus')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 hover:bg-red-500 hover:text-white rounded-lg transition-all text-gray-500">

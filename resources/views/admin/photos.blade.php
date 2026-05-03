@@ -12,7 +12,7 @@
         <div class="relative aspect-[3/4] transition-all duration-500">
             <img src="{{ $photo->thumbnail_url }}" class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                <form id="delete-photo-{{ $photo->id }}" action="{{ route('admin.photos.delete', $photo) }}" method="POST" class="w-full" @submit.prevent="window.appConfirm('Hapus Foto', 'Yakin ingin menghapus foto ini?', () => document.getElementById('delete-photo-{{ $photo->id }}').submit(), 'Hapus')">
+                <form id="delete-photo-{{ $photo->id }}" action="{{ route('admin.photos.delete', $photo) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Hapus Foto', 'Yakin ingin menghapus foto ini?', () => $el.submit(), 'Hapus')">
                     @csrf
                     @method('DELETE')
                     <button class="w-full bg-white text-black py-2 rounded-lg text-[9px] font-black uppercase tracking-[0.15em] hover:scale-105 transition-transform active:scale-95">

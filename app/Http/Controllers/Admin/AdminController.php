@@ -66,10 +66,13 @@ class AdminController extends Controller
             return back()->with('error', 'Anda tidak bisa menghapus status admin diri sendiri!');
         }
 
-        $user->is_admin = !$user->is_admin;
-        $user->save();
-
-        return back()->with('success', 'Status admin user berhasil diperbarui.');
+        try {
+            $user->is_admin = !$user->is_admin;
+            $user->save();
+            return back()->with('success', 'Status admin user berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal update status admin: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -82,7 +85,7 @@ class AdminController extends Controller
             $user->save();
             return back()->with('success', 'Status verifikasi user diperbarui.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal update: Sepertinya Anda perlu menjalankan "php artisan migrate" di terminal.');
+            return back()->with('error', 'Gagal update verifikasi: ' . $e->getMessage());
         }
     }
 
@@ -96,7 +99,7 @@ class AdminController extends Controller
             $user->save();
             return back()->with('success', 'Status shadowban user diperbarui.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal update: Sepertinya Anda perlu menjalankan "php artisan migrate" di terminal.');
+            return back()->with('error', 'Gagal update shadowban: ' . $e->getMessage());
         }
     }
 
