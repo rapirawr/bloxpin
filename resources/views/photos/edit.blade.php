@@ -78,7 +78,7 @@
                         <div class="text-sm font-bold text-red-800 dark:text-red-400">Hapus Postingan Ini</div>
                         <div class="text-xs text-red-600/70 dark:text-red-400/60">Tindakan ini tidak dapat dibatalkan.</div>
                     </div>
-                    <form action="{{ route('photos.destroy', $photo) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus postingan ini selamanya?')">
+                    <form action="{{ route('photos.destroy', $photo) }}" method="POST" @submit.prevent="window.appConfirm('Hapus Postingan', 'Apakah Anda yakin ingin menghapus postingan ini selamanya?', () => $el.submit(), 'Hapus')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors">Hapus</button>

@@ -88,7 +88,7 @@
                             <input type="hidden" name="password" id="reset-input-{{ $user->id }}">
                         </form>
 
-                        <form action="{{ route('admin.users.delete', $user) }}" method="POST" class="inline" onsubmit="return confirm('Delete user?')">
+                        <form action="{{ route('admin.users.delete', $user) }}" method="POST" class="inline" @submit.prevent="window.appConfirm('Hapus User', 'Yakin ingin menghapus user ini?', () => $el.submit(), 'Hapus')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 hover:bg-red-500 hover:text-white rounded-lg transition-all text-gray-500">
@@ -109,13 +109,20 @@
 
 <script>
 function adminResetPassword(userId, userName) {
-    const newPassword = prompt(`Masukkan password baru untuk ${userName}:`, "");
-    if (newPassword && newPassword.length >= 8) {
-        document.getElementById(`reset-input-${userId}`).value = newPassword;
-        document.getElementById(`reset-form-${userId}`).submit();
-    } else if (newPassword) {
-        alert("Password minimal 8 karakter!");
-    }
+    window.appPrompt(
+        'Reset Password', 
+        `Masukkan password baru untuk ${userName}:`, 
+        (newPassword) => {
+            if (newPassword && newPassword.length >= 8) {
+                document.getElementById(`reset-input-${userId}`).value = newPassword;
+                document.getElementById(`reset-form-${userId}`).submit();
+            } else if (newPassword) {
+                window.showToast("Password minimal 8 karakter!", "error");
+            }
+        }, 
+        '', 
+        'Password Baru (min 8 karakter)'
+    );
 }
 </script>
 @endsection

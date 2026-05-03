@@ -79,7 +79,7 @@
                             {{ $item->ends_at ? $item->ends_at->diffForHumans() : 'Never' }}
                         </td>
                         <td class="p-6 text-right">
-                            <form action="{{ route('admin.announce.delete', $item) }}" method="POST" onsubmit="return confirm('Delete from history?')">
+                            <form action="{{ route('admin.announce.delete', $item) }}" method="POST" @submit.prevent="window.appConfirm('Hapus Riwayat', 'Yakin ingin menghapus riwayat pengumuman ini?', () => $el.submit(), 'Hapus')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-gray-500 hover:text-red-500 transition-colors">

@@ -186,19 +186,24 @@ class PhotoController extends Controller
     {
         $url = $photo->image_url;
         $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-        $filename = \Illuminate\Support\Str::slug($photo->title) . '.' . $extension;
+        $filename = \Illuminate\Support\Str::slug($photo->title ?: 'bloxpin-photo') . '.' . $extension;
 
         try {
-            // Fetch content and stream to browser
-            $contents = file_get_contents($url);
-            if ($contents === false) throw new \Exception("Failed to fetch image");
+            // Fetch using Laravel HTTP client, disable verify for local dev environments
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])->get($url);
+            
+            if (!$response->successful()) {
+                throw new \Exception("Failed to fetch image");
+            }
 
-            return response($contents)
-                ->header('Content-Type', 'image/' . $extension)
+            return response($response->body())
+                ->header('Content-Type', $response->header('Content-Type') ?: 'image/' . $extension)
                 ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
         } catch (\Exception $e) {
-            // Fallback: if proxy fails, at least redirect to the direct URL
-            return redirect($url);
+            \Illuminate\Support\Facades\Log::error('Download proxy failed: ' . $e->getMessage());
+            // Fallback: append download parameter if supported by storage provider
+            $separator = parse_url($url, PHP_URL_QUERY) ? '&' : '?';
+            return redirect($url . $separator . 'download=' . urlencode($filename));
         }
     }
 

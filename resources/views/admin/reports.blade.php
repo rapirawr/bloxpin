@@ -38,7 +38,7 @@
                 </td>
                 <td class="p-6">
                     <div class="flex items-center gap-3">
-                        <img src="{{ $report->user->avatar_url }}" class="w-8 h-8 rounded-full border border-white/5 grayscale group-hover:grayscale-0 transition-all">
+                        <img src="{{ $report->user->avatar_url }}" class="w-8 h-8 rounded-full border border-white/5 transition-all">
                         <div class="text-xs font-bold">{{ $report->user->name }}</div>
                     </div>
                 </td>

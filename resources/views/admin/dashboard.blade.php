@@ -84,7 +84,7 @@
             @foreach($stats['latest_users'] as $user)
             <div class="p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors group">
                 <div class="flex items-center gap-5">
-                    <img src="{{ $user->avatar_url }}" class="w-12 h-12 rounded-full border border-border grayscale group-hover:grayscale-0 transition-all">
+                    <img src="{{ $user->avatar_url }}" class="w-12 h-12 rounded-full border border-border transition-all">
                     <div>
                         <div class="font-black text-sm tracking-tight">{{ $user->name }}</div>
                         <div class="text-[10px] text-gray-500 font-bold tracking-widest uppercase">@ {{ $user->username }}</div>
@@ -105,7 +105,7 @@
         <div class="divide-y divide-border">
             @foreach($stats['latest_photos'] as $photo)
             <div class="p-6 flex items-center gap-5 hover:bg-white/[0.02] transition-colors group">
-                <img src="{{ $photo->thumbnail_url }}" class="w-14 h-14 rounded-xl object-cover border border-border grayscale group-hover:grayscale-0 transition-all">
+                <img src="{{ $photo->thumbnail_url }}" class="w-14 h-14 rounded-xl object-cover border border-border transition-all">
                 <div class="flex-1 min-w-0">
                     <div class="font-black text-sm truncate tracking-tight uppercase italic">{{ $photo->title }}</div>
                     <div class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">by {{ $photo->user->name }}</div>
@@ -176,7 +176,7 @@
                 labels: ['Photos', 'Users', 'Boards', 'Comments'],
                 datasets: [{
                     data: [{{ $stats['photos_count'] }}, {{ $stats['users_count'] }}, {{ $stats['boards_count'] }}, {{ $stats['comments_count'] }}],
-                    backgroundColor: ['#E60023', '#FFFFFF', '#333333', '#111111'],
+                    backgroundColor: ['#E60023', '#FFFFFF', '#3B82F6', '#8B5CF6'],
                     borderColor: '#000000',
                     borderWidth: 10,
                     hoverOffset: 20

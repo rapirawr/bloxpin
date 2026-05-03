@@ -101,7 +101,40 @@
     <!-- Toast Notifications Container -->
     <div id="toast-container" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- Global Modals Component -->
+    @include('components.modals')
+
     <script>
+        // Global Modal Logic
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('appModals', () => ({
+                confirmData: { show: false, title: '', message: '', confirmText: '', onConfirm: null },
+                promptData: { show: false, title: '', message: '', input: '', confirmText: '', placeholder: '', onConfirm: null },
+
+                init() {
+                    window.appConfirm = (title, message, onConfirm, confirmText = 'Ya, Lanjutkan') => {
+                        this.confirmData = { show: true, title, message, onConfirm, confirmText };
+                    };
+                    window.appPrompt = (title, message, onConfirm, defaultValue = '', placeholder = '', confirmText = 'Simpan') => {
+                        this.promptData = { show: true, title, message, input: defaultValue, onConfirm, confirmText, placeholder };
+                        setTimeout(() => this.$refs.promptInput?.focus(), 100);
+                    };
+                },
+                closeModal() {
+                    this.confirmData.show = false;
+                    this.promptData.show = false;
+                },
+                confirmAction() {
+                    if (this.confirmData.onConfirm) this.confirmData.onConfirm();
+                    this.closeModal();
+                },
+                promptAction() {
+                    if (this.promptData.onConfirm) this.promptData.onConfirm(this.promptData.input);
+                    this.closeModal();
+                }
+            }));
+        });
+
         // Global Toast Notification Helper
         window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toast-container');

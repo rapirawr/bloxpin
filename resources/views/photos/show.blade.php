@@ -131,7 +131,7 @@
                                     <span class="font-medium">Edit Postingan</span>
                                 </a>
                                 
-                                <form action="{{ route('photos.destroy', $photo) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus postingan ini?')">
+                                <form action="{{ route('photos.destroy', $photo) }}" method="POST" @submit.prevent="window.appConfirm('Hapus Postingan', 'Apakah Anda yakin ingin menghapus postingan ini?', () => $el.submit(), 'Hapus')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="w-full text-left px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 text-red-600 transition-colors">
@@ -254,7 +254,7 @@
                                             <span class="font-bold text-sm">Edit Postingan</span>
                                         </a>
                                         
-                                        <form action="{{ route('photos.destroy', $photo) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus postingan ini?')">
+                                        <form action="{{ route('photos.destroy', $photo) }}" method="POST" @submit.prevent="window.appConfirm('Hapus Postingan', 'Apakah Anda yakin ingin menghapus postingan ini?', () => $el.submit(), 'Hapus')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="w-full text-left px-4 py-4 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 text-red-600 transition-colors">
@@ -481,16 +481,16 @@
                     },
 
                     deleteComment(id) {
-                        if (!confirm('Hapus komentar ini?')) return;
-                        
-                        axios.delete('/comments/' + id)
-                            .then(res => {
-                                this.comments = this.comments.filter(c => c.id !== id);
-                                window.showToast('Komentar dihapus!');
-                            })
-                            .catch(err => {
-                                window.showToast(err.response?.data?.message || 'Gagal menghapus komentar', 'error');
-                            });
+                        window.appConfirm('Hapus Komentar', 'Apakah Anda yakin ingin menghapus komentar ini?', () => {
+                            axios.delete('/comments/' + id)
+                                .then(res => {
+                                    this.comments = this.comments.filter(c => c.id !== id);
+                                    window.showToast('Komentar dihapus!');
+                                })
+                                .catch(err => {
+                                    window.showToast(err.response?.data?.message || 'Gagal menghapus komentar', 'error');
+                                });
+                        }, 'Hapus');
                     }
                 }">
                     <div class="flex items-center justify-between mb-6">
