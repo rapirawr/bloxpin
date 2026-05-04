@@ -67,10 +67,35 @@
                     {{-- Flash --}}
                     <div class="pb-flash" :class="flash ? 'active' : ''"></div>
 
-                    {{-- Camera Loading --}}
-                    <div class="pb-cam-loading" x-show="!isStreaming && !cameraError" style="display:none">
+                    {{-- Camera Loading (init pertama kali) --}}
+                    <div class="pb-cam-loading" x-show="!isStreaming && !cameraError && !isSwitching" style="display:none">
                         <div class="pb-loading-spin"></div>
                         <span>INITIALIZING...</span>
+                    </div>
+
+                    {{--
+                        KAMERA MATI — overlay hitam yang muncul saat switching.
+                        Tampil ketika isSwitching = true.
+                        Fase 1 (cameraOff=true)  : layar gelap + teks "SWITCHING..."
+                        Fase 2 (cameraOff=false) : spinner loading kamera baru
+                    --}}
+                    <div class="pb-cam-switching"
+                         x-show="isSwitching"
+                         style="display:none">
+                        <template x-if="cameraOff">
+                            {{-- Fase 1: kamera sudah mati, belum mulai stream baru --}}
+                            <div class="pb-switching-off">
+                                <div class="pb-switching-shutter"></div>
+                                <span>SWITCHING...</span>
+                            </div>
+                        </template>
+                        <template x-if="!cameraOff">
+                            {{-- Fase 2: stream baru sedang dimuat --}}
+                            <div class="pb-switching-on">
+                                <div class="pb-loading-spin"></div>
+                                <span>LOADING...</span>
+                            </div>
+                        </template>
                     </div>
 
                     {{-- Camera Error --}}
@@ -292,7 +317,8 @@ function photobooth() {
         // ── State
         isStreaming:     false,
         cameraError:     false,
-        isSwitching:     false,  // ← BARU: flag khusus switch kamera
+        isSwitching:     false,  // true selama proses switch (dari klik sampai stream baru ready)
+        cameraOff:       false,  // true saat kamera sudah mati tapi stream baru belum dimulai (Fase 1)
         capturedImages:  [],
         flash:           false,
         shakeCam:        false,
@@ -415,26 +441,24 @@ function photobooth() {
             this.clockInterval = setInterval(update, 10000);
         },
 
-        // ── Stop semua track yang aktif (helper)
+        // ── Helper: stop semua track dan kosongkan srcObject
         stopAllTracks() {
-            if (this.$refs.video?.srcObject) {
-                this.$refs.video.srcObject.getTracks().forEach(t => {
-                    t.stop();
-                    t.enabled = false;
-                });
-                this.$refs.video.srcObject = null;
+            const video = this.$refs.video;
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
             }
         },
 
-        // ── Camera stream
+        // ── Camera stream (dipanggil init dan setelah switch)
         async startStream() {
-            // Stop & clear stream lama dulu
+            // Stop stream lama
             this.stopAllTracks();
 
-            // Tunggu hardware release (lebih lama = lebih aman di Android/iOS)
-            await new Promise(r => setTimeout(r, 400));
-
             this.cameraError = false;
+
+            // Tunggu hardware release — 400ms cukup untuk Android/iOS
+            await new Promise(r => setTimeout(r, 400));
 
             try {
                 const constraints = {
@@ -467,39 +491,51 @@ function photobooth() {
                     if (this.$refs.video) {
                         this.$refs.video.srcObject = fallbackStream;
                         await this.$refs.video.play().catch(() => {});
-                        this.isStreaming  = true;
-                        this.cameraError  = false;
+                        this.isStreaming = true;
+                        this.cameraError = false;
                     }
                 } catch (err2) {
                     console.error('Fallback Camera Error:', err2.name, err2.message);
-                    this.cameraError  = true;
-                    this.isStreaming   = false;
+                    this.cameraError = true;
+                    this.isStreaming  = false;
                     window.showToast?.('Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
                 }
             }
         },
 
-        // ── Switch kamera (front ↔ rear) — FIX UTAMA
+        // ── Switch kamera (front ↔ rear)
+        // Alur visual yang dirasakan user:
+        //   1. Tap tombol flip
+        //   2. Layar GELAP + teks "SWITCHING..." (cameraOff = true)
+        //   3. Jeda 350ms — kamera lama mati, hardware release
+        //   4. Overlay berubah ke spinner "LOADING..." (cameraOff = false)
+        //   5. Stream kamera baru dimuat
+        //   6. Overlay hilang, video live tampil
         async switchCamera() {
             // Guard: jangan double-click
             if (this.isSwitching || this.isProcessing) return;
 
+            // ── FASE 1: Kamera mati ──
             this.isSwitching  = true;
+            this.cameraOff    = true;   // tampilkan overlay gelap "SWITCHING..."
             this.isStreaming   = false;
 
-            // 1. Stop tracks SEBELUM ganti facingMode
+            // Stop tracks — kamera fisik benar-benar mati di sini
             this.stopAllTracks();
 
-            // 2. Tunggu hardware benar-benar release
-            await new Promise(r => setTimeout(r, 300));
+            // Beri jeda visual supaya user merasakan kamera "mati"
+            await new Promise(r => setTimeout(r, 350));
 
-            // 3. Baru ganti kamera
+            // ── FASE 2: Ganti kamera, mulai loading ──
             this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+            this.cameraOff  = false;   // ganti overlay ke spinner "LOADING..."
 
-            // 4. Start stream baru
+            // Start stream kamera baru
             await this.startStream();
 
+            // ── Selesai ──
             this.isSwitching = false;
+            // cameraOff sudah false dari fase 2, tidak perlu di-reset lagi
         },
 
         // ── Manual single-shot snap
@@ -1105,6 +1141,76 @@ function photobooth() {
 }
 .cam-shake { animation: pb-cam-shake 0.38s ease-out; }
 
+/* ── Camera switching overlay ──────────────── */
+/* Overlay utama — menutup seluruh viewport saat switching */
+.pb-cam-switching {
+    position: absolute; inset: 0;
+    background: #000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 30;
+    /* Fade in saat muncul */
+    animation: pb-switching-fadein 0.15s ease-out forwards;
+}
+@keyframes pb-switching-fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Fase 1: kamera mati — ikon shutter + teks */
+.pb-switching-off {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+/* Ikon "shutter menutup" — lingkaran dengan iris animasi */
+.pb-switching-shutter {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.25);
+    position: relative;
+    animation: pb-shutter-close 0.3s ease-in-out forwards;
+}
+.pb-switching-shutter::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    animation: pb-shutter-iris 0.3s ease-in-out forwards;
+}
+@keyframes pb-shutter-close {
+    0%   { border-color: rgba(255,255,255,0.5); transform: scale(1); }
+    100% { border-color: rgba(255,255,255,0.15); transform: scale(0.85); }
+}
+@keyframes pb-shutter-iris {
+    0%   { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+}
+.pb-switching-off span {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+}
+
+/* Fase 2: loading kamera baru — spinner + teks */
+.pb-switching-on {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+.pb-switching-on span {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: rgba(200,169,110,0.6);
+    text-transform: uppercase;
+}
+
 /* Camera error */
 .pb-cam-error {
     position: absolute; inset: 0;
@@ -1139,7 +1245,7 @@ function photobooth() {
 }
 .pb-cam-error button:hover { background: white; }
 
-/* Camera loading */
+/* Camera loading (init pertama kali) */
 .pb-cam-loading {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
@@ -1177,7 +1283,7 @@ function photobooth() {
 .pb-flip-btn:hover  { background: rgba(0,0,0,0.65); color: white; }
 .pb-flip-btn:active { transform: scale(0.9); }
 .pb-flip-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.pb-flip-btn.switching { opacity: 0.6; cursor: wait; }
+.pb-flip-btn.switching { opacity: 0.5; cursor: wait; pointer-events: none; }
 
 /* ── Desktop shutter row ───────────────────── */
 .pb-capture-row {
