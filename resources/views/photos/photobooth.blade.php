@@ -569,11 +569,6 @@ function photobooth() {
                 }
             }
 
-            // PERCOBAAN 4: Last Resort
-            if (!success) {
-                success = await tryConstraints({ video: true, audio: false });
-            }
-
             if (success) {
                 this.isStreaming = true;
                 this.cameraError = false;
@@ -590,12 +585,18 @@ function photobooth() {
             this.isSwitching = true;
             
             // Toggle mode
+            const prevFacingMode = this.facingMode;
             this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
 
             try {
                 await this.startStream();
+                // Kalau stream gagal (cameraError), rollback facingMode
+                if (this.cameraError) {
+                    this.facingMode = prevFacingMode;
+                }
             } catch (err) {
                 console.error("Switch Camera Error:", err);
+                this.facingMode = prevFacingMode;
             } finally {
                 this.isSwitching = false;
             }
