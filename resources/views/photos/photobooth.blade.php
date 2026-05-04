@@ -41,7 +41,8 @@
 
                     <video x-ref="video" autoplay playsinline muted
                            class="pb-video"
-                           :style="facingMode === 'user' ? 'transform:scaleX(-1)' : ''"></video>
+                           :style="(facingMode === 'user' ? 'transform:scaleX(-1);' : '') + (isCameraOff ? 'opacity:0;' : 'opacity:1;')"
+                           style="transition: opacity 0.25s ease;"></video>
                     <canvas x-ref="canvas" style="display:none"></canvas>
 
                     {{-- Overlays --}}
@@ -292,7 +293,8 @@ function photobooth() {
         // ── State
         isStreaming:     false,
         cameraError:     false,
-        isSwitching:     false,  // ← BARU: flag khusus switch kamera
+        isSwitching:     false,
+        isCameraOff:     false,   // ← BARU: flag khusus switch kamera
         capturedImages:  [],
         flash:           false,
         shakeCam:        false,
@@ -433,7 +435,6 @@ function photobooth() {
 
             // Tunggu hardware release (lebih lama = lebih aman di Android/iOS)
             await new Promise(r => setTimeout(r, 400));
-
             this.cameraError = false;
 
             try {
@@ -480,27 +481,28 @@ function photobooth() {
         },
 
         // ── Switch kamera (front ↔ rear) — FIX UTAMA
-        async switchCamera() {
-            // Guard: jangan double-click
-            if (this.isSwitching || this.isProcessing) return;
+async switchCamera() {
+    if (this.isSwitching || this.isProcessing) return;
 
-            this.isSwitching  = true;
-            this.isStreaming   = false;
+    this.isSwitching  = true;
+    this.isStreaming   = false;
+    this.isCameraOff  = true;   // ← matiin video dulu (layar hitam)
 
-            // 1. Stop tracks SEBELUM ganti facingMode
-            this.stopAllTracks();
+    // Stop tracks
+    this.stopAllTracks();
 
-            // 2. Tunggu hardware benar-benar release
-            await new Promise(r => setTimeout(r, 300));
+    // Tunggu hardware release + biar efek "mati" keliatan
+    await new Promise(r => setTimeout(r, 500));
 
-            // 3. Baru ganti kamera
-            this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+    // Ganti kamera
+    this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
 
-            // 4. Start stream baru
-            await this.startStream();
+    // Start stream baru
+    await this.startStream();
 
-            this.isSwitching = false;
-        },
+    this.isCameraOff  = false;  // ← nyalain lagi
+    this.isSwitching  = false;
+},
 
         // ── Manual single-shot snap
         takeSnap() {
@@ -599,7 +601,7 @@ function photobooth() {
             const footer = `
                 <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px 12px;">
                     <div style="width:100%;height:1px;background:${fr.color}20;margin-bottom:4px;"></div>
-                    <span style="font-family:'DM Serif Display',serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:${fr.color};opacity:0.8;">filmbooth</span>
+                    <span style="font-family:'DM Serif Display',serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:${fr.color};opacity:0.8;">bloxpinbooth</span>
                     <span style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.08em;color:${fr.color};opacity:0.4;">${dateStr}</span>
                 </div>`;
 
@@ -774,7 +776,7 @@ function photobooth() {
             ctx.fillStyle = fr.color ?? '#2a2018';
             ctx.font      = 'italic 18px Georgia, serif';
             ctx.textAlign = 'center';
-            ctx.fillText('filmbooth', c.width / 2, c.height - 40);
+            ctx.fillText('bloxpinbooth', c.width / 2, c.height - 40);
             ctx.font = '12px monospace';
             ctx.globalAlpha = 0.5;
             ctx.fillText(new Date().toLocaleDateString(), c.width / 2, c.height - 18);
@@ -784,7 +786,7 @@ function photobooth() {
                 const url = URL.createObjectURL(blob);
                 const a   = document.createElement('a');
                 a.href    = url;
-                a.download = `filmbooth-${this.activeFrame}-${Date.now()}.jpg`;
+                a.download = `bloxpinbooth-${this.activeFrame}-${Date.now()}.jpg`;
                 a.click();
             }, 'image/jpeg', 0.92);
         },
@@ -887,7 +889,7 @@ function photobooth() {
             ctx.fillStyle = fr.color ?? '#2a2018';
             ctx.font      = 'italic 22px Georgia, serif';
             ctx.textAlign = 'center';
-            ctx.fillText('filmbooth', c.width / 2, c.height - 44);
+            ctx.fillText('bloxpinbooth', c.width / 2, c.height - 44);
             ctx.font = '14px monospace';
             ctx.globalAlpha = 0.45;
             ctx.fillText(new Date().toLocaleDateString(), c.width / 2, c.height - 20);
