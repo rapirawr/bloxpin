@@ -424,17 +424,22 @@ function photobooth() {
                 });
                 this.$refs.video.srcObject = null;
             }
+            // Reset video element
+            if (this.$refs.video) {
+                this.$refs.video.load();
+            }
         },
 
         // ── Camera stream
         async startStream() {
+            this.cameraError = false;
+            this.isStreaming = false;
+
             // Stop & clear stream lama dulu
             this.stopAllTracks();
 
-            // Tunggu hardware release (lebih lama = lebih aman di Android/iOS)
+            // Tunggu hardware release (cukup satu kali tunggu yang konsisten)
             await new Promise(r => setTimeout(r, 400));
-
-            this.cameraError = false;
 
             try {
                 const constraints = {
@@ -452,11 +457,19 @@ function photobooth() {
                 if (this.$refs.video) {
                     this.$refs.video.srcObject = stream;
                     // Paksa play — Safari iOS kadang tidak autoplay setelah srcObject di-set ulang
-                    await this.$refs.video.play().catch(() => {});
+                    await this.$refs.video.play();
                     this.isStreaming = true;
+                    this.cameraError = false;
                 }
             } catch (e) {
                 console.error('Camera Error:', e.name, e.message);
+
+                // Jika error adalah Permission Denied, jangan langsung fallback tapi beri peringatan
+                if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+                    this.cameraError = true;
+                    this.isStreaming = false;
+                    return;
+                }
 
                 // Fallback: constraints paling minimal
                 try {
@@ -466,7 +479,7 @@ function photobooth() {
                     });
                     if (this.$refs.video) {
                         this.$refs.video.srcObject = fallbackStream;
-                        await this.$refs.video.play().catch(() => {});
+                        await this.$refs.video.play();
                         this.isStreaming  = true;
                         this.cameraError  = false;
                     }
@@ -474,29 +487,20 @@ function photobooth() {
                     console.error('Fallback Camera Error:', err2.name, err2.message);
                     this.cameraError  = true;
                     this.isStreaming   = false;
-                    window.showToast?.('Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
                 }
             }
         },
 
-        // ── Switch kamera (front ↔ rear) — FIX UTAMA
+        // ── Switch kamera (front ↔ rear)
         async switchCamera() {
-            // Guard: jangan double-click
             if (this.isSwitching || this.isProcessing) return;
 
-            this.isSwitching  = true;
-            this.isStreaming   = false;
-
-            // 1. Stop tracks SEBELUM ganti facingMode
-            this.stopAllTracks();
-
-            // 2. Tunggu hardware benar-benar release
-            await new Promise(r => setTimeout(r, 300));
-
-            // 3. Baru ganti kamera
+            this.isSwitching = true;
+            
+            // Ganti mode dulu
             this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
 
-            // 4. Start stream baru
+            // Panggil startStream yang sudah menangani stop tracks & wait
             await this.startStream();
 
             this.isSwitching = false;
