@@ -5,6 +5,9 @@ import intersect from '@alpinejs/intersect';
 import Masonry from 'masonry-layout';
 import imagesLoaded from 'imagesloaded';
 import { supabase } from './supabase';
+import { inject } from "@vercel/analytics";
+
+inject();
 
 window.Alpine = Alpine;
 window.Masonry = Masonry;
