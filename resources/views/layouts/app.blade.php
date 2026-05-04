@@ -12,8 +12,7 @@
         </script>
     @endauth
 
-    <meta name="google-site-verification" content="l2_VdK6MgfX_CxcOkJpLgL0YLh8r7dYQWJLPzPcDjr8" />
-
+    <meta name="google-site-verification" content="hNO97B-C80-QOjJzN3G53tLYwdRqd6j93fG5n5pELqE" />
 
     <title>@yield('title', config('app.name', 'Bloxpin'))</title>
     <meta name="description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
