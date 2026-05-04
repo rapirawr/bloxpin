@@ -480,6 +480,7 @@ function photobooth() {
         },
 
         // ── Camera stream
+// ── Camera stream
         async startStream() {
             if (!this.isSwitching) this.isStreaming = false;
             this.cameraError = false;
@@ -511,10 +512,10 @@ function photobooth() {
                 return false;
             };
 
-            // PERCOBAAN 1: Ideal with facingMode
+            // PERCOBAAN 1: Paksa (Exact) ganti lensa kamera. Ini wajib buat HP!
             let success = await tryConstraints({
                 video: {
-                    facingMode: { ideal: this.facingMode },
+                    facingMode: { exact: this.facingMode }, // <-- Kunci utamanya disini
                     width: { ideal: 1080 },
                     height: { ideal: 1440 },
                     aspectRatio: { ideal: 0.75 }
@@ -522,7 +523,20 @@ function photobooth() {
                 audio: false
             });
 
-            // PERCOBAAN 2: Fallback device enumeration (Sangat berguna di Android)
+            // PERCOBAAN 2: Fallback ke Ideal. Kalau Exact gagal (contohnya web dibuka di Laptop yg gak punya kamera belakang)
+            if (!success) {
+                success = await tryConstraints({
+                    video: {
+                        facingMode: { ideal: this.facingMode },
+                        width: { ideal: 1080 },
+                        height: { ideal: 1440 },
+                        aspectRatio: { ideal: 0.75 }
+                    },
+                    audio: false
+                });
+            }
+
+            // PERCOBAAN 3: Fallback device enumeration (Sangat berguna di Android)
             if (!success) {
                 try {
                     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -535,7 +549,6 @@ function photobooth() {
                         );
 
                         // Jika tidak ketemu berdasarkan label, coba tebak berdasarkan urutan
-                        // Biasanya [0] front, [1] back atau sebaliknya.
                         if (!targetDevice) {
                             if (this.facingMode === 'user') {
                                 targetDevice = videoDevices[0];
@@ -556,14 +569,6 @@ function photobooth() {
                 }
             }
 
-            // PERCOBAAN 3: Basic Facing Mode
-            if (!success) {
-                success = await tryConstraints({
-                    video: { facingMode: this.facingMode },
-                    audio: false
-                });
-            }
-
             // PERCOBAAN 4: Last Resort
             if (!success) {
                 success = await tryConstraints({ video: true, audio: false });
@@ -578,7 +583,6 @@ function photobooth() {
                 window.showToast?.('Gagal memuat kamera. Coba refresh halaman.', 'error');
             }
         },
-
         // ── Switch kamera (front ↔ rear)
         async switchCamera() {
             if (this.isSwitching || this.isProcessing) return;
