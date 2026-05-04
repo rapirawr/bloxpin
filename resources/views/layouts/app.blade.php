@@ -51,6 +51,15 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <script>
+        // Theme & Layout initial state
+        (function() {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+            
+            const compact = localStorage.getItem('compact-mode') === 'true';
+            if (compact) document.documentElement.classList.add('compact-mode');
+        })();
+
         // Suppress View Transition AbortErrors (harmless)
         window.addEventListener('unhandledrejection', (event) => {
             if (event.reason && event.reason.name === 'AbortError' && event.reason.message.includes('transition')) {
@@ -58,6 +67,13 @@
             }
         });
     </script>
+
+    <style>
+        .compact-mode .max-w-7xl, .compact-mode .max-w-5xl { max-width: 100% !important; padding-left: 1rem; padding-right: 1rem; }
+        .compact-mode .py-8, .compact-mode .py-12 { padding-top: 1rem; padding-bottom: 1rem; }
+        .compact-mode .mb-8, .compact-mode .mb-12 { margin-bottom: 1rem; }
+        .compact-mode .gap-6, .compact-mode .gap-8 { gap: 0.75rem; }
+    </style>
 
     @stack('head')
 </head>

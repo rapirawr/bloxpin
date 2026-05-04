@@ -4,7 +4,10 @@
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 py-8 md:py-12">
-    <div class="flex flex-col md:flex-row gap-8 lg:gap-12" x-data="{ tab: 'profile' }">
+    <div class="flex flex-col md:flex-row gap-8 lg:gap-12" x-data="{ 
+        tab: 'profile', 
+        isCompact: document.documentElement.classList.contains('compact-mode') 
+    }">
         
         {{-- ── Sidebar Navigation ── --}}
         <aside class="w-full md:w-64 flex-shrink-0">
@@ -44,6 +47,13 @@
                         class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 whitespace-nowrap">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     Display
+                </button>
+
+                <button @click="tab = 'privacy'" 
+                        :class="tab === 'privacy' ? 'bg-dark/5 dark:bg-white/5 text-dark dark:text-white font-semibold' : 'text-gray-500 hover:text-dark dark:hover:text-white hover:bg-dark/5 dark:hover:bg-white/5'"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 whitespace-nowrap">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    Privacy
                 </button>
                 
                 <div class="h-px bg-dark/5 dark:bg-white/5 my-4 mx-4"></div>
@@ -240,13 +250,27 @@
                     </div>
 
                     <div class="p-6 bg-dark/5 dark:bg-white/5 rounded-3xl space-y-4">
-                        <h3 class="font-bold">Tentang Aplikasi</h3>
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold">Tentang Aplikasi</h3>
+                            <div class="px-2 py-0.5 bg-green-500/10 text-green-500 text-[10px] font-bold rounded-full uppercase tracking-wider">Up to date</div>
+                        </div>
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div class="text-gray-500">Versi</div>
                             <div class="text-right font-mono">1.2.0-stable</div>
                             <div class="text-gray-500">Build</div>
-                            <div class="text-right font-mono">2026.05.03</div>
+                            <div class="text-right font-mono">2026.05.04.14</div>
                         </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 border border-dark/10 dark:border-white/10 rounded-2xl">
+                        <div>
+                            <div class="font-semibold text-sm">Hapus Cache Aplikasi</div>
+                            <div class="text-xs text-gray-500 mt-0.5">Bersihkan data tersimpan untuk memperbaiki masalah tampilan.</div>
+                        </div>
+                        <button @click="localStorage.clear(); sessionStorage.clear(); window.location.reload();" 
+                                class="px-4 py-2 bg-dark/5 dark:bg-white/5 hover:bg-dark/10 dark:hover:bg-white/10 text-xs font-bold rounded-lg transition-all">
+                            Clear Cache
+                        </button>
                     </div>
 
                     {{-- iOS Instructions (Safari doesn't support beforeinstallprompt) --}}
@@ -287,7 +311,71 @@
                             <div class="font-semibold">Compact View</div>
                             <div class="text-xs text-gray-500 mt-0.5">Tampilkan lebih banyak konten dengan margin yang lebih kecil.</div>
                         </div>
-                        <div class="text-xs font-mono text-gray-400">Coming Soon</div>
+                        <button @click="isCompact = !isCompact; document.documentElement.classList.toggle('compact-mode', isCompact); localStorage.setItem('compact-mode', isCompact)" 
+                                class="w-12 h-6 rounded-full relative transition-all"
+                                :class="isCompact ? 'bg-primary' : 'bg-gray-300 dark:bg-white/10'">
+                            <div class="absolute top-1 w-4 h-4 bg-white rounded-full transition-all"
+                                 :style="isCompact ? 'left: 28px' : 'left: 4px'"></div>
+                        </button>
+                    </div>
+
+                    <div class="p-4 bg-dark/5 dark:bg-white/5 rounded-2xl space-y-4">
+                        <div class="font-semibold">Grid Density</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="p-2 text-xs font-bold bg-primary text-white rounded-lg">Comfortable</button>
+                            <button class="p-2 text-xs font-bold bg-dark/5 dark:bg-white/5 text-gray-500 rounded-lg opacity-50 cursor-not-allowed">Standard</button>
+                            <button class="p-2 text-xs font-bold bg-dark/5 dark:bg-white/5 text-gray-500 rounded-lg opacity-50 cursor-not-allowed">Dense</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-dark/5 dark:bg-white/5 rounded-2xl">
+                        <div>
+                            <div class="font-semibold">Language</div>
+                            <div class="text-xs text-gray-500 mt-0.5">Pilih bahasa antarmuka aplikasi.</div>
+                        </div>
+                        <select class="bg-transparent border-none text-sm font-bold focus:ring-0 cursor-pointer">
+                            <option>Bahasa Indonesia</option>
+                            <option>English</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            {{-- Privacy Tab --}}
+            <section x-show="tab === 'privacy'" style="display:none" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                <header class="mb-8">
+                    <h2 class="text-xl font-bold mb-1">Privacy & Visibility</h2>
+                    <p class="text-gray-500 text-sm">Kontrol siapa yang bisa melihat profil dan aktivitasmu.</p>
+                </header>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between p-4 bg-dark/5 dark:bg-white/5 rounded-2xl">
+                        <div>
+                            <div class="font-semibold">Private Profile</div>
+                            <div class="text-xs text-gray-500 mt-0.5">Hanya pengikut yang disetujui yang bisa melihat board kamu.</div>
+                        </div>
+                        <button class="w-12 h-6 rounded-full bg-gray-300 relative transition-all opacity-50 cursor-not-allowed">
+                            <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all"></div>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-dark/5 dark:bg-white/5 rounded-2xl">
+                        <div>
+                            <div class="font-semibold">Tampilkan di Hasil Pencarian</div>
+                            <div class="text-xs text-gray-500 mt-0.5">Izinkan mesin pencari seperti Google mengindeks profilmu.</div>
+                        </div>
+                        <button class="w-12 h-6 rounded-full bg-primary relative transition-all">
+                            <div class="absolute top-1 right-1 w-4 h-4 bg-white rounded-full transition-all"></div>
+                        </button>
+                    </div>
+
+                    <div class="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl flex gap-4">
+                        <div class="text-amber-500 flex-shrink-0 mt-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div class="text-xs text-amber-600 leading-relaxed">
+                            Beberapa fitur privasi masih dalam pengembangan. Saat ini, semua foto yang diunggah ke Bloxpin bersifat publik kecuali disimpan di Board rahasia.
+                        </div>
                     </div>
                 </div>
             </section>
