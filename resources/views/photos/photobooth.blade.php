@@ -472,6 +472,24 @@ function photobooth() {
             }
         },
 
+        // ── Cari deviceId berdasarkan facingMode (helper)
+        _findDeviceId(targetFacing) {
+            if (this._videoDevices.length <= 1) return null;
+
+            const isBack = targetFacing === 'environment';
+            const keywords = isBack
+                ? ['back', 'rear', 'belakang', 'environment', 'camera2', 'wide', 'ultra']
+                : ['front', 'depan', 'user', 'selfie', 'facetime'];
+
+            for (const dev of this._videoDevices) {
+                const lbl = (dev.label || '').toLowerCase();
+                if (keywords.some(kw => lbl.includes(kw))) {
+                    return dev.deviceId;
+                }
+            }
+            return null;
+        },
+
         // ── Camera stream (hanya untuk INIT pertama kali)
         async startStream() {
             this.cameraError = false;
@@ -532,166 +550,115 @@ function photobooth() {
             }
         },
 
-        // ── Switch kamera (front ↔ rear) — JANGAN UBAH facingMode SEBELUM STREAM BARU BERHASIL
+        // ── Switch kamera (front ↔ rear) — BRUTE FORCE MOBILE COMPATIBILITY
         async switchCamera() {
             if (this.isSwitching || this.isProcessing) return;
 
             this.isSwitching = true;
-            this.isCameraOff = true;  // fade out video dulu
+            this.isCameraOff = true; // Efek fade out
 
             const wantFacing = this.facingMode === 'user' ? 'environment' : 'user';
-            const oldStream = this.$refs.video?.srcObject;
+            console.log('[Switch] Starting switch to:', wantFacing);
+
+            // 1. Matikan total stream lama
+            this.stopAllTracks();
+
+            // 2. Jeda Hardware Release (Penting untuk Android/iOS agar tidak 'Camera in use')
+            await new Promise(r => setTimeout(r, 800));
+
+            // 3. Update daftar device terbaru
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                this._videoDevices = devices.filter(d => d.kind === 'videoinput');
+            } catch (_) {}
+
             let newStream = null;
 
-            console.log('[Switch] Want:', wantFacing, '— Current device:', this._currentDeviceId?.slice(0, 8));
-
-            // ══════════════════════════════════════════════
-            // STRATEGI 1: facingMode exact (TANPA stop stream lama)
-            // Banyak HP Android bisa buka 2 kamera sekaligus sebentar
-            // ══════════════════════════════════════════════
-            try {
-                console.log('[Switch] Strategy 1: facingMode exact (keep old stream)');
-                newStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: { exact: wantFacing } },
-                    audio: false
-                });
-            } catch (e) {
-                console.warn('[Switch] Strategy 1 failed:', e.name);
-            }
-
-            // ══════════════════════════════════════════════
-            // STRATEGI 2: deviceId exact (cari device lain dari enumerate)
-            // ══════════════════════════════════════════════
-            if (!newStream && this._videoDevices.length > 1) {
-                // Cari device yang BUKAN current
-                const otherDevice = this._videoDevices.find(d => d.deviceId !== this._currentDeviceId);
-                if (otherDevice) {
-                    try {
-                        console.log('[Switch] Strategy 2: deviceId exact:', otherDevice.label || otherDevice.deviceId.slice(0, 8));
-                        newStream = await navigator.mediaDevices.getUserMedia({
-                            video: { deviceId: { exact: otherDevice.deviceId } },
-                            audio: false
-                        });
-                    } catch (e) {
-                        console.warn('[Switch] Strategy 2 failed:', e.name);
-                    }
-                }
-            }
-
-            // ══════════════════════════════════════════════
-            // STRATEGI 3: Stop stream lama dulu, lalu coba lagi
-            // Beberapa HP hanya bisa 1 kamera aktif
-            // ══════════════════════════════════════════════
-            if (!newStream) {
-                console.log('[Switch] Strategy 3: stop old stream first, then retry');
-                this._stopStream(oldStream);
-                if (this.$refs.video) this.$refs.video.srcObject = null;
-                this.isStreaming = false;
-
-                await new Promise(r => setTimeout(r, 600)); // tunggu hardware release
-
-                // 3a: facingMode exact
+            // STRATEGI A: Cari deviceId yang pas dari label
+            const targetId = this._findDeviceId(wantFacing);
+            if (targetId) {
                 try {
+                    console.log('[Switch] Try DeviceID:', targetId.slice(0, 8));
                     newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: { exact: wantFacing } },
+                        video: { 
+                            deviceId: { exact: targetId },
+                            aspectRatio: { ideal: 0.75 }
+                        },
                         audio: false
                     });
                 } catch (e) {
-                    console.warn('[Switch] Strategy 3a failed:', e.name);
-                }
-
-                // 3b: enumerate lagi & coba deviceId
-                if (!newStream) {
-                    try {
-                        const devices = await navigator.mediaDevices.enumerateDevices();
-                        const videoDevs = devices.filter(d => d.kind === 'videoinput');
-                        const other = videoDevs.find(d => d.deviceId !== this._currentDeviceId);
-                        if (other) {
-                            newStream = await navigator.mediaDevices.getUserMedia({
-                                video: { deviceId: { exact: other.deviceId } },
-                                audio: false
-                            });
-                        }
-                    } catch (e) {
-                        console.warn('[Switch] Strategy 3b failed:', e.name);
-                    }
-                }
-
-                // 3c: facingMode ideal (might give same camera tho)
-                if (!newStream) {
-                    try {
-                        newStream = await navigator.mediaDevices.getUserMedia({
-                            video: { facingMode: wantFacing },
-                            audio: false
-                        });
-                    } catch (e) {
-                        console.warn('[Switch] Strategy 3c failed:', e.name);
-                    }
+                    console.warn('[Switch] DeviceID failed:', e.name);
                 }
             }
 
-            // ══════════════════════════════════════════════
-            // Berhasil dapat stream baru?
-            // ══════════════════════════════════════════════
-            if (newStream) {
-                // Verifikasi: apakah BENAR-BENAR beda kamera?
-                const newTrack = newStream.getVideoTracks()[0];
-                const newSettings = newTrack?.getSettings() || {};
-                const newDeviceId = newSettings.deviceId || null;
-                const actualFacing = newSettings.facingMode || null;
-
-                console.log('[Switch] Got new stream — device:', newDeviceId?.slice(0, 8),
-                    'facing:', actualFacing, 'wanted:', wantFacing);
-
-                // Stop stream lama (kalau belum di-stop di strategy 3)
-                if (oldStream && this.$refs.video?.srcObject === oldStream) {
-                    this._stopStream(oldStream);
+            // STRATEGI B: facingMode exact
+            if (!newStream) {
+                try {
+                    console.log('[Switch] Try facingMode exact:', wantFacing);
+                    newStream = await navigator.mediaDevices.getUserMedia({
+                        video: { 
+                            facingMode: { exact: wantFacing },
+                            aspectRatio: { ideal: 0.75 }
+                        },
+                        audio: false
+                    });
+                } catch (e) {
+                    console.warn('[Switch] facingMode exact failed:', e.name);
                 }
+            }
 
-                // Pasang stream baru
+            // STRATEGI C: facingMode ideal
+            if (!newStream) {
+                try {
+                    console.log('[Switch] Try facingMode ideal:', wantFacing);
+                    newStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: { ideal: wantFacing } },
+                        audio: false
+                    });
+                } catch (e) {
+                    console.warn('[Switch] facingMode ideal failed:', e.name);
+                }
+            }
+
+            // STRATEGI D: Apa aja yang penting nyala
+            if (!newStream) {
+                try {
+                    console.log('[Switch] Final fallback');
+                    newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                } catch (e) {
+                    console.error('[Switch] Hard failure:', e.name);
+                }
+            }
+
+            // 4. Handle Result
+            if (newStream) {
                 this.$refs.video.srcObject = newStream;
                 await this.$refs.video.play().catch(() => {});
+                
+                const track = newStream.getVideoTracks()[0];
+                const settings = track?.getSettings() || {};
+                
+                this._currentDeviceId = settings.deviceId || null;
                 this.isStreaming = true;
                 this.cameraError = false;
-                this._currentDeviceId = newDeviceId;
 
-                // Update facingMode berdasarkan apa yang BENAR-BENAR aktif
-                if (actualFacing) {
-                    this.facingMode = actualFacing;
-                } else if (newDeviceId && newDeviceId !== this._currentDeviceId) {
-                    // Kamera beda tapi browser tidak report facingMode — trust user intent
+                // Sync facingMode dengan hardware asli
+                if (settings.facingMode) {
+                    this.facingMode = settings.facingMode;
+                } else {
+                    // Kalau browser gak lapor, kita asumsi berhasil ke target
                     this.facingMode = wantFacing;
                 }
-                // Kalau deviceId sama = kamera tidak berubah, jangan ubah facingMode
-
-                console.log('[Switch] ✓ facingMode is now:', this.facingMode);
+                console.log('[Switch] Success! Active facing:', this.facingMode);
             } else {
-                // Semua gagal — restore stream lama kalau masih ada
-                console.error('[Switch] ALL strategies failed');
-                if (oldStream && oldStream.active) {
-                    this.$refs.video.srcObject = oldStream;
-                    await this.$refs.video.play().catch(() => {});
-                    this.isStreaming = true;
-                } else {
-                    // Coba start ulang kamera apa aja
-                    try {
-                        const fallback = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                        this.$refs.video.srcObject = fallback;
-                        await this.$refs.video.play().catch(() => {});
-                        this.isStreaming = true;
-                    } catch (_) {
-                        this.cameraError = true;
-                        this.isStreaming = false;
-                    }
-                }
-                window.showToast?.('Tidak bisa mengganti kamera.', 'error');
+                this.cameraError = true;
+                this.isStreaming = false;
+                window.showToast?.('Gagal mengakses kamera.', 'error');
             }
 
             this.isCameraOff = false;
             this.isSwitching = false;
-
-            // Reset torch kalau pindah kamera
-            this.torchActive = false;
+            this.torchActive = false; // Reset senter
         },
 
         // ── Toggle Torch (Senter Kamera Belakang)
