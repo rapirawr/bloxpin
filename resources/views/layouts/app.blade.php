@@ -12,7 +12,7 @@
         </script>
     @endauth
 
-    <meta name="google-site-verification" content="google-site-verification=l2_VdK6MgfX_CxcOkJpLgL0YLh8r7dYQWJLPzPcDjr8" />
+    <meta name="google-site-verification" content="l2_VdK6MgfX_CxcOkJpLgL0YLh8r7dYQWJLPzPcDjr8" />
 
 
     <title>@yield('title', config('app.name', 'Bloxpin'))</title>
