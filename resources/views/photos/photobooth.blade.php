@@ -550,115 +550,103 @@ function photobooth() {
             }
         },
 
-        // ── Switch kamera (front ↔ rear) — BRUTE FORCE MOBILE COMPATIBILITY
+        // ── Switch kamera (front ↔ rear) — VERIFIED HARDWARE SWITCH
         async switchCamera() {
             if (this.isSwitching || this.isProcessing) return;
 
             this.isSwitching = true;
-            this.isCameraOff = true; // Efek fade out
+            this.isCameraOff = true;
 
+            const oldDeviceId = this._currentDeviceId;
             const wantFacing = this.facingMode === 'user' ? 'environment' : 'user';
-            console.log('[Switch] Starting switch to:', wantFacing);
+            
+            console.log('[Switch] Current:', oldDeviceId?.slice(0, 8), 'Want:', wantFacing);
 
-            // 1. Matikan total stream lama
+            // 1. Matikan total
             this.stopAllTracks();
+            await new Promise(r => setTimeout(r, 850)); // Jeda lebih lama agar hardware release
 
-            // 2. Jeda Hardware Release (Penting untuk Android/iOS agar tidak 'Camera in use')
-            await new Promise(r => setTimeout(r, 800));
-
-            // 3. Update daftar device terbaru
+            // 2. Refresh daftar device
             try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                this._videoDevices = devices.filter(d => d.kind === 'videoinput');
+                const devs = await navigator.mediaDevices.enumerateDevices();
+                this._videoDevices = devs.filter(d => d.kind === 'videoinput');
             } catch (_) {}
 
             let newStream = null;
 
-            // STRATEGI A: Cari deviceId yang pas dari label
-            const targetId = this._findDeviceId(wantFacing);
+            // STRATEGI 1: Cari device yang BENAR-BENAR beda dari sebelumnya (berdasarkan ID)
+            const otherDevice = this._videoDevices.find(d => d.deviceId !== oldDeviceId);
+            const targetId = this._findDeviceId(wantFacing) || (otherDevice ? otherDevice.deviceId : null);
+
             if (targetId) {
                 try {
-                    console.log('[Switch] Try DeviceID:', targetId.slice(0, 8));
+                    console.log('[Switch] Strategy 1: Target DeviceId', targetId.slice(0, 8));
                     newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { 
-                            deviceId: { exact: targetId },
-                            aspectRatio: { ideal: 0.75 }
-                        },
+                        video: { deviceId: { exact: targetId }, aspectRatio: { ideal: 0.75 } },
                         audio: false
                     });
                 } catch (e) {
-                    console.warn('[Switch] DeviceID failed:', e.name);
+                    console.warn('[Switch] Strategy 1 failed');
                 }
             }
 
-            // STRATEGI B: facingMode exact
+            // STRATEGI 2: facingMode exact
             if (!newStream) {
                 try {
-                    console.log('[Switch] Try facingMode exact:', wantFacing);
+                    console.log('[Switch] Strategy 2: facingMode exact', wantFacing);
                     newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { 
-                            facingMode: { exact: wantFacing },
-                            aspectRatio: { ideal: 0.75 }
-                        },
+                        video: { facingMode: { exact: wantFacing }, aspectRatio: { ideal: 0.75 } },
                         audio: false
                     });
                 } catch (e) {
-                    console.warn('[Switch] facingMode exact failed:', e.name);
+                    console.warn('[Switch] Strategy 2 failed');
                 }
             }
 
-            // STRATEGI C: facingMode ideal
+            // STRATEGI 3: Minimal fallback
             if (!newStream) {
                 try {
-                    console.log('[Switch] Try facingMode ideal:', wantFacing);
-                    newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: { ideal: wantFacing } },
-                        audio: false
-                    });
-                } catch (e) {
-                    console.warn('[Switch] facingMode ideal failed:', e.name);
-                }
-            }
-
-            // STRATEGI D: Apa aja yang penting nyala
-            if (!newStream) {
-                try {
-                    console.log('[Switch] Final fallback');
+                    console.log('[Switch] Strategy 3: Fallback');
                     newStream = await navigator.mediaDevices.getUserMedia({ video: true });
                 } catch (e) {
-                    console.error('[Switch] Hard failure:', e.name);
+                    console.error('[Switch] All failed');
                 }
             }
 
-            // 4. Handle Result
+            // 3. Verifikasi Hasil
             if (newStream) {
-                this.$refs.video.srcObject = newStream;
-                await this.$refs.video.play().catch(() => {});
-                
                 const track = newStream.getVideoTracks()[0];
                 const settings = track?.getSettings() || {};
-                
-                this._currentDeviceId = settings.deviceId || null;
-                this.isStreaming = true;
-                this.cameraError = false;
+                const newDeviceId = settings.deviceId || null;
+                const actualFacing = settings.facingMode || null;
 
-                // Sync facingMode dengan hardware asli
-                if (settings.facingMode) {
-                    this.facingMode = settings.facingMode;
-                } else {
-                    // Kalau browser gak lapor, kita asumsi berhasil ke target
+                console.log('[Switch] Result Device:', newDeviceId?.slice(0, 8), 'Facing:', actualFacing);
+
+                this.$refs.video.srcObject = newStream;
+                await this.$refs.video.play().catch(() => {});
+                this.isStreaming = true;
+                this._currentDeviceId = newDeviceId;
+
+                // CRITICAL FIX: Hanya ganti facingMode (mirroring) kalau ID kameranya BERBEDA
+                // atau kalau browser eksplisit lapor facingMode-nya.
+                if (actualFacing) {
+                    this.facingMode = actualFacing;
+                } else if (newDeviceId && newDeviceId !== oldDeviceId) {
+                    // Berhasil ganti kamera fisik, asumsikan arahnya benar
                     this.facingMode = wantFacing;
+                } else {
+                    // Masih di kamera yang sama! Tetap pakai facingMode lama agar tidak invert
+                    console.warn('[Switch] Camera ID did NOT change. Keeping old facingMode to avoid inversion.');
+                    // window.showToast?.('Gagal pindah lensa, tetap di kamera saat ini.', 'info');
                 }
-                console.log('[Switch] Success! Active facing:', this.facingMode);
             } else {
                 this.cameraError = true;
-                this.isStreaming = false;
-                window.showToast?.('Gagal mengakses kamera.', 'error');
+                window.showToast?.('Gagal ganti kamera.', 'error');
             }
 
             this.isCameraOff = false;
             this.isSwitching = false;
-            this.torchActive = false; // Reset senter
+            this.torchActive = false;
         },
 
         // ── Toggle Torch (Senter Kamera Belakang)
