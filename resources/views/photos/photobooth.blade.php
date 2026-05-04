@@ -528,17 +528,28 @@ function photobooth() {
                     const devices = await navigator.mediaDevices.enumerateDevices();
                     const videoDevices = devices.filter(d => d.kind === 'videoinput');
                     
-                    // Cari device yang labelnya mengandung 'back' atau 'front' sesuai facingMode
-                    const targetLabel = this.facingMode === 'user' ? 'front' : 'back';
-                    const targetDevice = videoDevices.find(d => 
-                        d.label.toLowerCase().includes(targetLabel)
-                    ) || videoDevices[0];
+                    if (videoDevices.length > 1) {
+                        const targetLabel = this.facingMode === 'user' ? 'front' : 'back';
+                        let targetDevice = videoDevices.find(d => 
+                            d.label.toLowerCase().includes(targetLabel)
+                        );
 
-                    if (targetDevice) {
-                        success = await tryConstraints({
-                            video: { deviceId: { exact: targetDevice.deviceId } },
-                            audio: false
-                        });
+                        // Jika tidak ketemu berdasarkan label, coba tebak berdasarkan urutan
+                        // Biasanya [0] front, [1] back atau sebaliknya.
+                        if (!targetDevice) {
+                            if (this.facingMode === 'user') {
+                                targetDevice = videoDevices[0];
+                            } else {
+                                targetDevice = videoDevices[videoDevices.length - 1];
+                            }
+                        }
+
+                        if (targetDevice) {
+                            success = await tryConstraints({
+                                video: { deviceId: { exact: targetDevice.deviceId } },
+                                audio: false
+                            });
+                        }
                     }
                 } catch (err) {
                     console.warn("Enumeration failed", err);
