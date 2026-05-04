@@ -417,6 +417,10 @@ function photobooth() {
             this.clockInterval = setInterval(update, 10000);
         },
 
+        // ── Cache daftar kamera (diisi saat init pertama kali)
+        _videoDevices: [],
+        _currentDeviceId: null,
+
         // ── Stop semua track yang aktif (helper)
         stopAllTracks() {
             if (this.$refs.video?.srcObject) {
@@ -428,17 +432,134 @@ function photobooth() {
             }
         },
 
-        // ── Camera stream
-        async startStream() {
-            // Stop & clear stream lama dulu
-            this.stopAllTracks();
+        // ── Enumerate semua kamera yang tersedia
+        async _enumerateDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                this._videoDevices = devices.filter(d => d.kind === 'videoinput');
+                console.log('[Camera] Found devices:', this._videoDevices.map(d => ({
+                    id: d.deviceId.slice(0, 8) + '…',
+                    label: d.label || '(no label)'
+                })));
+            } catch (e) {
+                console.warn('[Camera] enumerateDevices failed:', e);
+                this._videoDevices = [];
+            }
+        },
 
-            // Tunggu hardware release (lebih lama = lebih aman di Android/iOS)
-            await new Promise(r => setTimeout(r, 400));
+        // ── Cari deviceId berdasarkan facingMode
+        _findDeviceId(targetFacing) {
+            if (this._videoDevices.length <= 1) return null;
+
+            // Heuristic: label biasanya mengandung "back"/"rear"/"environment" atau "front"/"user"
+            const isBack = targetFacing === 'environment';
+            const keywords = isBack
+                ? ['back', 'rear', 'belakang', 'environment', 'camera2', 'wide']
+                : ['front', 'depan', 'user', 'selfie', 'facetime'];
+
+            for (const dev of this._videoDevices) {
+                const lbl = (dev.label || '').toLowerCase();
+                if (keywords.some(kw => lbl.includes(kw))) {
+                    return dev.deviceId;
+                }
+            }
+
+            // Fallback: pada kebanyakan device, index 0 = back, index 1 = front (atau sebaliknya)
+            // Kalau kita pakai kamera depan (user) sekarang, ambil device lain yg bukan current
+            if (this._currentDeviceId) {
+                const other = this._videoDevices.find(d => d.deviceId !== this._currentDeviceId);
+                if (other) return other.deviceId;
+            }
+
+            return null;
+        },
+
+        // ── Attach stream ke video element
+        async _attachStream(stream) {
+            if (!this.$refs.video) return;
+            this.$refs.video.srcObject = stream;
+            await this.$refs.video.play().catch(() => {});
+            this.isStreaming  = true;
             this.cameraError = false;
 
+            // Simpan deviceId aktif
+            const track = stream.getVideoTracks()[0];
+            if (track) {
+                const settings = track.getSettings();
+                this._currentDeviceId = settings.deviceId || null;
+                console.log('[Camera] Active device:', settings.deviceId?.slice(0, 8) + '…',
+                    'facing:', settings.facingMode || 'unknown');
+            }
+        },
+
+        // ── Camera stream (dipanggil saat init & switch)
+        async startStream(isSwitch = false) {
+            // Stop & clear stream lama
+            this.stopAllTracks();
+
+            // Tunggu hardware release — penting di Android/iOS
+            await new Promise(r => setTimeout(r, isSwitch ? 600 : 300));
+            this.cameraError = false;
+
+            // Enumerate devices (butuh permission dulu baru dapat label)
+            await this._enumerateDevices();
+
+            // ── STRATEGI 1: Pakai deviceId exact (paling reliable di mobile)
+            if (isSwitch && this._videoDevices.length > 1) {
+                const targetDeviceId = this._findDeviceId(this.facingMode);
+                if (targetDeviceId) {
+                    try {
+                        console.log('[Camera] Trying exact deviceId:', targetDeviceId.slice(0, 8) + '…');
+                        const stream = await navigator.mediaDevices.getUserMedia({
+                            video: {
+                                deviceId: { exact: targetDeviceId },
+                                aspectRatio: { ideal: 0.75 },
+                                width:  { ideal: 1080 },
+                                height: { ideal: 1440 }
+                            },
+                            audio: false
+                        });
+                        await this._attachStream(stream);
+                        return; // Berhasil!
+                    } catch (e) {
+                        console.warn('[Camera] Exact deviceId failed:', e.name, '— trying fallback…');
+                        // Coba lagi tanpa resolution constraints
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({
+                                video: { deviceId: { exact: targetDeviceId } },
+                                audio: false
+                            });
+                            await this._attachStream(stream);
+                            return;
+                        } catch (e2) {
+                            console.warn('[Camera] Exact deviceId minimal also failed:', e2.name);
+                        }
+                    }
+                }
+            }
+
+            // ── STRATEGI 2: Pakai facingMode exact (reliable di banyak device modern)
             try {
-                const constraints = {
+                console.log('[Camera] Trying facingMode exact:', this.facingMode);
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { exact: this.facingMode },
+                        aspectRatio: { ideal: 0.75 },
+                        width:  { ideal: 1080 },
+                        height: { ideal: 1440 }
+                    },
+                    audio: false
+                });
+                await this._attachStream(stream);
+                return;
+            } catch (e) {
+                console.warn('[Camera] facingMode exact failed:', e.name, e.message);
+            }
+
+            // ── STRATEGI 3: facingMode ideal (fallback paling aman)
+            try {
+                console.log('[Camera] Trying facingMode ideal:', this.facingMode);
+                const stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: { ideal: this.facingMode },
                         aspectRatio: { ideal: 0.75 },
@@ -446,63 +567,55 @@ function photobooth() {
                         height: { ideal: 1440 }
                     },
                     audio: false
-                };
-
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-                if (this.$refs.video) {
-                    this.$refs.video.srcObject = stream;
-                    // Paksa play — Safari iOS kadang tidak autoplay setelah srcObject di-set ulang
-                    await this.$refs.video.play().catch(() => {});
-                    this.isStreaming = true;
-                }
+                });
+                await this._attachStream(stream);
+                return;
             } catch (e) {
-                console.error('Camera Error:', e.name, e.message);
-
-                // Fallback: constraints paling minimal
-                try {
-                    const fallbackStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: { ideal: this.facingMode } },
-                        audio: false
-                    });
-                    if (this.$refs.video) {
-                        this.$refs.video.srcObject = fallbackStream;
-                        await this.$refs.video.play().catch(() => {});
-                        this.isStreaming  = true;
-                        this.cameraError  = false;
-                    }
-                } catch (err2) {
-                    console.error('Fallback Camera Error:', err2.name, err2.message);
-                    this.cameraError  = true;
-                    this.isStreaming   = false;
-                    window.showToast?.('Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
-                }
+                console.warn('[Camera] facingMode ideal failed:', e.name, e.message);
             }
+
+            // ── STRATEGI 4: Constraints paling minimal
+            try {
+                console.log('[Camera] Trying minimal constraints');
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+                await this._attachStream(stream);
+                return;
+            } catch (e) {
+                console.error('[Camera] ALL strategies failed:', e.name, e.message);
+            }
+
+            // Semua gagal — baru sekarang tampilkan error
+            this.cameraError = true;
+            this.isStreaming  = false;
+            window.showToast?.('Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
         },
 
-        // ── Switch kamera (front ↔ rear) — FIX UTAMA
-async switchCamera() {
-    if (this.isSwitching || this.isProcessing) return;
+        // ── Switch kamera (front ↔ rear)
+        async switchCamera() {
+            if (this.isSwitching || this.isProcessing) return;
 
-    this.isSwitching  = true;
-    this.isStreaming   = false;
-    this.isCameraOff  = true;   // ← matiin video dulu (layar hitam)
+            this.isSwitching = true;
+            this.isStreaming  = false;
+            this.isCameraOff = true;
 
-    // Stop tracks
-    this.stopAllTracks();
+            // Stop tracks lama
+            this.stopAllTracks();
 
-    // Tunggu hardware release + biar efek "mati" keliatan
-    await new Promise(r => setTimeout(r, 500));
+            // Tunggu hardware release + efek visual "mati"
+            await new Promise(r => setTimeout(r, 400));
 
-    // Ganti kamera
-    this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+            // Flip facingMode
+            this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
 
-    // Start stream baru
-    await this.startStream();
+            // Start stream baru (isSwitch = true → pakai strategi deviceId dulu)
+            await this.startStream(true);
 
-    this.isCameraOff  = false;  // ← nyalain lagi
-    this.isSwitching  = false;
-},
+            this.isCameraOff = false;
+            this.isSwitching = false;
+        },
 
         // ── Manual single-shot snap
         takeSnap() {
