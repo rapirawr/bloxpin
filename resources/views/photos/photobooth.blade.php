@@ -130,24 +130,24 @@
                     <div class="pb-shot-label" x-text="shotLabel">READY</div>
                 </div>
 
-            </div>{{-- /camera-section --}}
-
-            {{-- ── RECENT CLIPS / MINI GALLERY ── --}}
-            <div class="pb-mini-gallery" x-show="capturedImages.length > 0" x-transition>
-                <div class="pb-gallery-label">RECENT CLIPS</div>
-                <div class="pb-gallery-scroll">
-                    <template x-for="(img, index) in capturedImages" :key="index">
-                        <div class="pb-gallery-item">
-                            <img :src="img" :style="filterCSS[activeFilter] ? `filter:${filterCSS[activeFilter]}` : ''" />
-                            <button @click="removeImage(index)" class="pb-item-del">
-                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                    </template>
+                {{-- ── RECENT CLIPS / MINI GALLERY ── --}}
+                <div class="pb-mini-gallery" x-show="capturedImages.length > 0" x-transition>
+                    <div class="pb-gallery-label">RECENT CLIPS</div>
+                    <div class="pb-gallery-scroll">
+                        <template x-for="(img, index) in capturedImages" :key="index">
+                            <div class="pb-gallery-item">
+                                <img :src="img" :style="filterCSS[activeFilter] ? `filter:${filterCSS[activeFilter]}` : ''" />
+                                <button @click="removeImage(index)" class="pb-item-del">
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
                 </div>
-            </div>
+
+            </div>{{-- /camera-section --}}
 
             {{-- ── MOBILE PREVIEW SECTION ── --}}
             <div class="pb-mobile-preview-area lg:hidden" x-show="capturedImages.length > 0" x-transition>
@@ -896,83 +896,12 @@ function photobooth() {
         // ── Download
         async downloadStrip() {
             if (!this.capturedImages.length) return;
-
-            const fr       = this.frames.find(f => f.id === this.activeFrame) ?? this.frames[0];
-            const isGrid   = this.activeLayout === 'grid';
-            const max      = this.maxCaptures;
-            const c        = document.createElement('canvas');
-            const ctx      = c.getContext('2d');
-            const iW = 300, iH = 400, pad = 30, gap = 8, topDec = 60, btmDec = 80;
-
-            if (isGrid) {
-                c.width  = iW * 2 + pad * 3;
-                c.height = iH * 2 + pad * 3 + topDec + btmDec;
-            } else {
-                c.width  = iW + pad * 2;
-                c.height = iH * max + gap * (max - 1) + pad * 2 + topDec + btmDec;
-            }
-
-            if (fr.bg.startsWith('linear')) {
-                const g = ctx.createLinearGradient(0, 0, 0, c.height);
-                g.addColorStop(0, '#ffe4ef'); g.addColorStop(1, '#ffd4e4');
-                ctx.fillStyle = g;
-            } else {
-                ctx.fillStyle = fr.bg;
-            }
-            ctx.fillRect(0, 0, c.width, c.height);
-
-            const filterMap = {
-                vintage: 'sepia(0.25) contrast(1.1) brightness(0.92)',
-                bw:      'grayscale(1) contrast(1.15)',
-                sepia:   'sepia(0.9)',
-                dreamy:  'brightness(1.08) saturate(1.3)',
-                faded:   'saturate(0.5) brightness(1.05)',
-                lomo:    'contrast(1.5) saturate(1.6) brightness(0.85)',
-                golden:  'sepia(0.4) saturate(1.4) brightness(1.05) hue-rotate(-10deg)',
-                cool:    'saturate(0.9) brightness(1.02) hue-rotate(190deg) contrast(1.05)',
-                fade35:  'sepia(0.3) saturate(0.75) brightness(1.1) contrast(0.88)',
-                mist:    'saturate(0.4) brightness(1.12) contrast(0.85)',
-                velvia:  'saturate(1.8) contrast(1.2) brightness(0.9)',
-                portra:  'sepia(0.15) saturate(1.1) brightness(1.05) contrast(0.95) hue-rotate(5deg)',
-                cross:   'saturate(1.4) hue-rotate(30deg) contrast(1.15) brightness(0.95)',
-            };
-
-            for (let i = 0; i < this.capturedImages.length; i++) {
-                const img = new Image();
-                img.src   = this.capturedImages[i];
-                await new Promise(r => img.onload = r);
-
-                let x, y;
-                if (isGrid) {
-                    x = pad + (i % 2) * (iW + pad);
-                    y = topDec + pad + Math.floor(i / 2) * (iH + gap);
-                } else {
-                    x = pad;
-                    y = topDec + pad + i * (iH + gap);
-                }
-
-                ctx.save();
-                if (filterMap[this.activeFilter]) ctx.filter = filterMap[this.activeFilter];
-                ctx.drawImage(img, x, y, iW, iH);
-                ctx.restore();
-            }
-
-            ctx.fillStyle = fr.color ?? '#2a2018';
-            ctx.font      = 'italic 18px Georgia, serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('bloxpinbooth', c.width / 2, c.height - 40);
-            ctx.font = '12px monospace';
-            ctx.globalAlpha = 0.5;
-            ctx.fillText(new Date().toLocaleDateString(), c.width / 2, c.height - 18);
-            ctx.globalAlpha = 1;
-
-            c.toBlob(blob => {
-                const url = URL.createObjectURL(blob);
-                const a   = document.createElement('a');
-                a.href    = url;
-                a.download = `bloxpinbooth-${this.activeFrame}-${Date.now()}.jpg`;
-                a.click();
-            }, 'image/jpeg', 0.92);
+            const blob = await this.generateStripBlob();
+            const url = URL.createObjectURL(blob);
+            const a   = document.createElement('a');
+            a.href    = url;
+            a.download = `bloxpinbooth-${this.activeFrame}-${Date.now()}.jpg`;
+            a.click();
         },
 
         // ── Save to backend
@@ -1007,24 +936,102 @@ function photobooth() {
             }
         },
 
-        // ── Generate canvas blob for upload
+        // ── Generate canvas blob for upload/download with ALL layouts support
         async generateStripBlob() {
             const c   = document.createElement('canvas');
             const ctx = c.getContext('2d');
             const fr  = this.frames.find(f => f.id === this.activeFrame) ?? this.frames[0];
+            const max = this.maxCaptures;
+            const S   = 4; // Scale factor for hi-res
 
-            const isGrid = this.activeLayout === 'grid';
-            const max    = this.maxCaptures;
-            const iW = 450, iH = 600, pad = 30, gap = 8, topDec = 60, btmDec = 80;
-
-            if (isGrid) {
-                c.width  = iW * 2 + pad * 3;
-                c.height = iH * 2 + pad * 3 + topDec + btmDec;
-            } else {
-                c.width  = iW + pad * 2;
-                c.height = iH * max + gap * (max - 1) + pad * 2 + topDec + btmDec;
+            // Load images
+            const imgs = [];
+            for (let i = 0; i < max; i++) {
+                if (!this.capturedImages[i]) continue;
+                const img = new Image();
+                img.src = this.capturedImages[i];
+                await new Promise(r => img.onload = r);
+                imgs.push(img);
             }
 
+            let cW = 0, cH = 0;
+            const topDec = 40 * S, btmDec = 60 * S;
+            
+            // Map layouts to their dimensions
+            let drawOps = []; // { i, x, y, w, h, r }
+
+            if (this.activeLayout === 'scatter') {
+                const iW = 100 * S, iH = 133 * S;
+                cW = 160 * S;
+                cH = 200 * S;
+                const rotations = [3, -2, 1, -4];
+                const offsets = [{x:5,y:5}, {x:-8,y:10}, {x:4,y:-5}, {x:-6,y:12}];
+                for (let i = 0; i < max; i++) {
+                    const o = offsets[i] ?? {x:0,y:0};
+                    drawOps.push({ i, x: (20 + i*22 + o.x)*S, y: (20 + o.y)*S, w: iW, h: iH, r: rotations[i]||0 });
+                }
+            } else if (this.activeLayout === 'overlap') {
+                const iW = 100 * S, iH = 133 * S;
+                cW = 140 * S;
+                cH = iH + (max-1)*38*S + 16*S;
+                for (let i = 0; i < max; i++) {
+                    drawOps.push({ i, x: 10*S, y: i*38*S, w: iW, h: iH, r: 0 });
+                }
+            } else if (this.activeLayout === 'collage') {
+                const bigW = 110*S, bigH = 160*S, smallW = 72*S, smallH = 77*S, gap = 4*S, pad = 10*S;
+                cW = pad*2 + bigW + gap + smallW;
+                cH = pad*2 + bigH;
+                drawOps.push({ i: 0, x: pad, y: pad, w: bigW, h: bigH, r: 0 });
+                drawOps.push({ i: 1, x: pad+bigW+gap, y: pad, w: smallW, h: smallH, r: 0 });
+                drawOps.push({ i: 2, x: pad+bigW+gap, y: pad+smallH+gap, w: smallW, h: smallH, r: 0 });
+            } else if (this.activeLayout === 'diagonal') {
+                const iW = 100*S, iH = 133*S, offsetX = 18*S, offsetY = 14*S, pad = 12*S;
+                cW = pad*2 + iW + offsetX*(max-1);
+                cH = pad + iH + offsetY*(max-1) + 16*S;
+                for (let i = 0; i < max; i++) {
+                    drawOps.push({ i, x: pad + i*offsetX, y: pad/2 + i*offsetY, w: iW, h: iH, r: 0 });
+                }
+            } else if (this.activeLayout === 'zine') {
+                const topW = 176*S, topH = 110*S, botW = 84*S, botH = 90*S, gap = 4*S, pad = 10*S;
+                cW = pad*2 + topW;
+                cH = pad*2 + topH + gap + botH;
+                drawOps.push({ i: 0, x: pad, y: pad, w: topW, h: topH, r: 0 });
+                drawOps.push({ i: 1, x: pad, y: pad+topH+gap, w: botW, h: botH, r: 0 });
+                drawOps.push({ i: 2, x: pad+botW+gap, y: pad+topH+gap, w: botW, h: botH, r: 0 });
+            } else if (this.activeLayout === 'stack') {
+                const rotations = [3, -2, 1, -4];
+                const iW = 100*S, iH = 133*S, pad = 20*S;
+                cW = 160*S;
+                cH = iH + pad*2 + 10*S;
+                for (let i = 0; i < max; i++) {
+                    drawOps.push({ i, x: pad + i*2*S, y: pad + i*2*S, w: iW, h: iH, r: rotations[i]||0 });
+                }
+            } else {
+                // fallback: single, double, trio, strip, grid
+                const isGrid = this.activeLayout === 'grid';
+                const photoW = (isGrid ? 110 : 100) * S;
+                const photoH = Math.round(photoW * (4/3));
+                const pad = 12*S, gap = 6*S;
+                cW = isGrid ? pad*2 + photoW*2 + gap : pad*2 + photoW;
+                cH = isGrid ? pad*2 + photoH*2 + gap : pad*2 + photoH*max + gap*(max-1);
+                
+                for (let i = 0; i < max; i++) {
+                    let x = pad, y = pad;
+                    if (isGrid) {
+                        x = pad + (i % 2) * (photoW + gap);
+                        y = pad + Math.floor(i / 2) * (photoH + gap);
+                    } else {
+                        y = pad + i * (photoH + gap);
+                    }
+                    drawOps.push({ i, x, y, w: photoW, h: photoH, r: 0 });
+                }
+            }
+
+            // Apply decorations
+            c.width  = cW;
+            c.height = cH + topDec + btmDec;
+
+            // Background
             if (fr.bg.startsWith('linear')) {
                 const g = ctx.createLinearGradient(0, 0, 0, c.height);
                 g.addColorStop(0, '#ffe4ef'); g.addColorStop(1, '#ffd4e4');
@@ -1050,33 +1057,38 @@ function photobooth() {
                 cross:   'saturate(1.4) hue-rotate(30deg) contrast(1.15) brightness(0.95)',
             };
 
-            for (let i = 0; i < this.capturedImages.length; i++) {
-                const img = new Image();
-                img.src   = this.capturedImages[i];
-                await new Promise(r => img.onload = r);
-
-                let x, y;
-                if (isGrid) {
-                    x = pad + (i % 2) * (iW + pad);
-                    y = topDec + pad + Math.floor(i / 2) * (iH + gap);
-                } else {
-                    x = pad;
-                    y = topDec + pad + i * (iH + gap);
+            // Draw images
+            for (const op of drawOps) {
+                if (!imgs[op.i]) continue;
+                ctx.save();
+                // Move context to the center of the image to rotate it properly
+                ctx.translate(op.x + op.w/2, op.y + topDec + op.h/2);
+                ctx.rotate(op.r * Math.PI / 180);
+                
+                if (filterMap[this.activeFilter]) {
+                    ctx.filter = filterMap[this.activeFilter];
+                }
+                
+                // Draw drop shadow if it's a scatter/stack/overlap etc
+                if (['scatter', 'overlap', 'diagonal', 'stack', 'collage', 'zine'].includes(this.activeLayout)) {
+                    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                    ctx.shadowBlur = 16 * (S/2);
+                    ctx.shadowOffsetY = 4 * (S/2);
                 }
 
-                ctx.save();
-                if (filterMap[this.activeFilter]) ctx.filter = filterMap[this.activeFilter];
-                ctx.drawImage(img, x, y, iW, iH);
+                // Draw image offset by half width/height because of translate
+                ctx.drawImage(imgs[op.i], -op.w/2, -op.h/2, op.w, op.h);
                 ctx.restore();
             }
 
+            // Draw branding text
             ctx.fillStyle = fr.color ?? '#2a2018';
-            ctx.font      = 'italic 22px Georgia, serif';
+            ctx.font      = `italic ${18*S}px Georgia, serif`;
             ctx.textAlign = 'center';
-            ctx.fillText('bloxpinbooth', c.width / 2, c.height - 44);
-            ctx.font = '14px monospace';
-            ctx.globalAlpha = 0.45;
-            ctx.fillText(new Date().toLocaleDateString(), c.width / 2, c.height - 20);
+            ctx.fillText('bloxpinbooth', c.width / 2, c.height - 25*S);
+            ctx.font      = `${11*S}px monospace`;
+            ctx.globalAlpha = 0.5;
+            ctx.fillText(new Date().toLocaleDateString(), c.width / 2, c.height - 10*S);
             ctx.globalAlpha = 1;
 
             return new Promise(resolve => c.toBlob(resolve, 'image/jpeg', 0.92));
