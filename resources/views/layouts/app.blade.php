@@ -18,7 +18,7 @@
     
     <!-- PWA Setup -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#E60023">
+    <meta name="theme-color" content="#000000">
     <link rel="apple-touch-icon" href="{{ asset('images/icon-512.png') }}">
 
     <!-- Open Graph / Facebook -->
