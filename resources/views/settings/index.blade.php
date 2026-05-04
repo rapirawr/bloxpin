@@ -10,7 +10,7 @@
     }">
         
         {{-- ── Sidebar Navigation ── --}}
-        <aside class="w-full md:w-64 flex-shrink-0">
+        <aside class="flex-none w-full md:w-64 lg:w-72">
             <h1 class="text-2xl font-display font-bold mb-8 px-2">Settings</h1>
             
             <nav class="flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide">
@@ -68,7 +68,7 @@
         </aside>
 
         {{-- ── Main Content ── --}}
-        <main class="flex-1 bg-white dark:bg-white/5 border border-dark/5 dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-sm">
+        <main class="flex-1 min-w-0 bg-white dark:bg-white/5 border border-dark/5 dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-sm">
             
             {{-- Profile Tab --}}
             <section x-show="tab === 'profile'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">

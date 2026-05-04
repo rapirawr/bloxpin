@@ -69,10 +69,10 @@
     </script>
 
     <style>
-        .compact-mode .max-w-7xl, .compact-mode .max-w-5xl { max-width: 100% !important; padding-left: 1rem; padding-right: 1rem; }
-        .compact-mode .py-8, .compact-mode .py-12 { padding-top: 1rem; padding-bottom: 1rem; }
-        .compact-mode .mb-8, .compact-mode .mb-12 { margin-bottom: 1rem; }
-        .compact-mode .gap-6, .compact-mode .gap-8 { gap: 0.75rem; }
+        .compact-mode .max-w-7xl, .compact-mode .max-w-5xl { max-width: 1400px !important; padding-left: 2rem; padding-right: 2rem; }
+        .compact-mode .py-8, .compact-mode .py-12 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        .compact-mode .mb-8, .compact-mode .mb-12 { margin-bottom: 1.5rem; }
+        .compact-mode .gap-8, .compact-mode .gap-12 { gap: 1.5rem; }
     </style>
 
     @stack('head')
