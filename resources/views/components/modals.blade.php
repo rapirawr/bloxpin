@@ -17,11 +17,14 @@
              class="relative bg-white dark:bg-dark border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 w-[90%] max-w-sm mx-auto z-10 text-center">
             
             <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                 :class="confirmData.type === 'primary' ? 'bg-white text-black' : 'bg-zinc-900 text-white'">
-                <template x-if="confirmData.type === 'primary'">
+                 :class="(confirmData.type === 'primary' || confirmData.type === 'alert' || confirmData.type === 'success') ? 'bg-white text-black' : 'bg-zinc-900 text-white'">
+                <template x-if="confirmData.type === 'primary' || confirmData.type === 'alert'">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </template>
-                <template x-if="confirmData.type !== 'primary'">
+                <template x-if="confirmData.type === 'success'">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </template>
+                <template x-if="confirmData.type !== 'primary' && confirmData.type !== 'alert' && confirmData.type !== 'success'">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </template>
             </div>
@@ -30,12 +33,14 @@
             <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm" x-text="confirmData.message"></p>
             
             <div class="flex gap-3">
-                <button @click="closeModal()" class="flex-1 py-3 px-4 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-dark dark:text-white font-bold rounded-xl transition-colors">
-                    Batal
-                </button>
+                <template x-if="confirmData.type !== 'alert'">
+                    <button @click="closeModal()" class="flex-1 py-3 px-4 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-dark dark:text-white font-bold rounded-xl transition-colors">
+                        Batal
+                    </button>
+                </template>
                 <button @click="confirmAction()" 
                         class="flex-1 py-3 px-4 font-bold rounded-xl transition-colors shadow-lg"
-                        :class="confirmData.type === 'primary' ? 'bg-white text-black hover:bg-gray-100' : 'bg-zinc-900 text-white hover:bg-black'">
+                        :class="(confirmData.type === 'primary' || confirmData.type === 'alert') ? 'bg-white text-black hover:bg-gray-100' : 'bg-zinc-900 text-white hover:bg-black'">
                     <span x-text="confirmData.confirmText || 'Ya, Lanjutkan'"></span>
                 </button>
             </div>

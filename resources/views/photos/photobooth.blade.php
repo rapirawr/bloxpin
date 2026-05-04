@@ -334,18 +334,67 @@ function photobooth() {
         ],
 
         frames: [
-            { id:'classic',  name:'Classic',  thumbStyle:'background:#f5f0e8;border-color:rgba(200,169,110,0.5)',                        bg:'#f5f0e8',                              color:'#2a2018', accent:'#c8a96e' },
-            { id:'dark',     name:'Dark',     thumbStyle:'background:#111;border-color:rgba(255,255,255,0.15)',                          bg:'#111010',                              color:'#ffffff', accent:'#888888' },
-            { id:'blush',    name:'Blush',    thumbStyle:'background:linear-gradient(160deg,#ffe4ef,#ffd4e4);border-color:rgba(255,150,180,0.4)', bg:'linear-gradient(160deg,#ffe4ef,#ffd4e4)', color:'#7a3050', accent:'#ff90b8' },
-            { id:'forest',   name:'Forest',   thumbStyle:'background:#1a2e1a;border-color:rgba(100,180,80,0.3)',                         bg:'#1a2e1a',                              color:'#c8e8a8', accent:'#6ab050' },
-            { id:'polaroid', name:'Polaroid', thumbStyle:'background:#fafaf5;border-color:#ddd',                                        bg:'#fafaf5',                              color:'#333333', accent:'#999999' },
-            { id:'cinema',   name:'Cinema',   thumbStyle:'background:#1a1209;border-color:rgba(200,168,75,0.4)',                         bg:'#1a1209',                              color:'#c8a84b', accent:'#c8a84b' },
-            { id:'diaryfm',  name:'Diary',    thumbStyle:'background:#f0e8d8;border-color:rgba(160,120,70,0.5)',                         bg:'#f0e8d8',                              color:'#5c3d1e', accent:'#a0783c' },
-            { id:'y2k',      name:'Y2K',      thumbStyle:'background:linear-gradient(135deg,#e0c8ff,#c8e8ff);border-color:rgba(180,120,255,0.5)', bg:'linear-gradient(135deg,#e8d8ff,#d0ecff)', color:'#5020a0', accent:'#9060e0' },
-            { id:'matcha',   name:'Matcha',   thumbStyle:'background:#d4e8c8;border-color:rgba(80,140,60,0.4)',                          bg:'#d4e8c8',                              color:'#2a4a1a', accent:'#5a8c40' },
-            { id:'midnight', name:'Night',    thumbStyle:'background:linear-gradient(160deg,#0a0a1e,#101030);border-color:rgba(100,120,255,0.4)', bg:'linear-gradient(160deg,#0a0a1e,#101030)', color:'#a0b0ff', accent:'#6070e0' },
-            { id:'washi',    name:'Washi',    thumbStyle:'background:#fdf6ec;border-color:rgba(220,100,80,0.4)',                         bg:'#fdf6ec',                              color:'#8c3020', accent:'#dc6450' },
-            { id:'lomo',     name:'Lomo',     thumbStyle:'background:#120c18;border-color:rgba(200,50,200,0.4)',                         bg:'#120c18',                              color:'#e060e0', accent:'#c030c0' },
+            { id:'classic',  name:'Classic',  bg:'#f5f0e8', color:'#2a2018', accent:'#c8a96e', decoHtml: `
+                <div style="position:absolute;top:10px;right:10px;font-size:16px;opacity:0.8;">✨</div>
+                <div style="position:absolute;bottom:50px;left:10px;font-size:12px;opacity:0.5;font-family:serif;">No. 001</div>
+                <svg style="position:absolute;top:20px;left:10px;width:15px;height:15px;opacity:0.3;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            `},
+            { id:'dark',     name:'Dark',     bg:'#111010', color:'#ffffff', accent:'#888888', decoHtml: `
+                <div style="position:absolute;top:10px;left:10px;font-size:14px;opacity:0.4;">📸</div>
+                <div style="position:absolute;bottom:45px;right:10px;font-size:9px;color:#fff;opacity:0.3;letter-spacing:3px;font-weight:bold;">ULTRA-PAN</div>
+                <div style="position:absolute;top:50%;right:4px;width:1px;height:40px;background:linear-gradient(to bottom,transparent,#fff,transparent);opacity:0.2;"></div>
+            `},
+            { id:'blush',    name:'Blush',    bg:'linear-gradient(160deg,#ffe4ef,#ffd4e4)', color:'#7a3050', accent:'#ff90b8', decoHtml: `
+                <div style="position:absolute;top:15px;right:15px;font-size:20px;">🌸</div>
+                <div style="position:absolute;top:40px;left:12px;font-size:14px;">💕</div>
+                <svg style="position:absolute;bottom:40px;right:15px;width:24px;height:24px;opacity:0.4;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            `},
+            { id:'forest',   name:'Forest',   bg:'#1a2e1a', color:'#c8e8a8', accent:'#6ab050', decoHtml: `
+                <div style="position:absolute;top:10px;left:10px;font-size:18px;">🌿</div>
+                <div style="position:absolute;bottom:50px;right:12px;font-size:12px;font-weight:bold;opacity:0.4;letter-spacing:1px;">WILD</div>
+                <div style="position:absolute;top:40px;right:15px;width:20px;height:20px;border:1px solid #c8e8a820;border-radius:50%;"></div>
+            `},
+            { id:'polaroid', name:'Polaroid', bg:'#fafaf5', color:'#333333', accent:'#999999', decoHtml: `
+                <div style="position:absolute;bottom:42px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:#00000008;border-radius:2px;"></div>
+                <div style="position:absolute;top:10px;right:12px;font-size:12px;opacity:0.3;">1/125 f8</div>
+                <div style="position:absolute;top:10px;left:12px;font-size:14px;">☁️</div>
+            `},
+            { id:'cinema',   name:'Cinema',   bg:'#1a1209', color:'#c8a84b', accent:'#c8a84b', decoHtml: `
+                <div style="position:absolute;top:0;bottom:0;left:6px;width:1px;background:repeating-linear-gradient(to bottom,transparent,transparent 5px,#ffffff15 5px,#ffffff15 10px);"></div>
+                <div style="position:absolute;top:15px;right:15px;font-size:10px;opacity:0.5;font-weight:bold;">[ TAKE 24 ]</div>
+                <div style="position:absolute;bottom:42px;left:15px;font-size:14px;">🎬</div>
+            `},
+            { id:'diaryfm',  name:'Diary',    bg:'#f0e8d8', color:'#5c3d1e', accent:'#a0783c', decoHtml: `
+                <div style="position:absolute;top:12px;left:12px;font-size:18px;">📒</div>
+                <div style="position:absolute;top:45px;right:15px;font-size:14px;">✉️</div>
+                <div style="position:absolute;bottom:45px;left:15px;font-size:10px;font-style:italic;opacity:0.5;">Our special day...</div>
+            `},
+            { id:'y2k',      name:'Y2K',      bg:'linear-gradient(135deg,#e8d8ff,#d0ecff)', color:'#5020a0', accent:'#9060e0', decoHtml: `
+                <div style="position:absolute;top:10px;right:10px;font-size:22px;filter:drop-shadow(0 0 5px #fff);">⭐</div>
+                <div style="position:absolute;bottom:45px;left:15px;font-size:18px;">🛸</div>
+                <div style="position:absolute;top:50px;left:10px;font-size:14px;">🌈</div>
+                <div style="position:absolute;top:15px;left:40px;width:30px;height:1px;background:#5020a030;"></div>
+            `},
+            { id:'matcha',   name:'Matcha',   bg:'#d4e8c8', color:'#2a4a1a', accent:'#5a8c40', decoHtml: `
+                <div style="position:absolute;top:15px;right:15px;font-size:18px;">🍵</div>
+                <div style="position:absolute;bottom:48px;left:12px;font-size:12px;opacity:0.6;">ZEN-01</div>
+                <svg style="position:absolute;top:40px;left:15px;width:20px;height:20px;opacity:0.2;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            `},
+            { id:'midnight', name:'Night',    bg:'linear-gradient(160deg,#0a0a1e,#101030)', color:'#a0b0ff', accent:'#6070e0', decoHtml: `
+                <div style="position:absolute;top:15px;left:20px;font-size:16px;opacity:0.8;">🌙</div>
+                <div style="position:absolute;top:12px;right:20px;font-size:14px;opacity:0.5;">✨</div>
+                <div style="position:absolute;bottom:42px;right:20px;width:30px;height:1px;background:currentColor;opacity:0.4;"></div>
+            `},
+            { id:'washi',    name:'Washi',    bg:'#fdf6ec', color:'#8c3020', accent:'#dc6450', decoHtml: `
+                <div style="position:absolute;top:0;left:30px;right:30px;height:10px;background:#dc645040;clip-path:polygon(0 0, 100% 0, 90% 100%, 10% 100%);"></div>
+                <div style="position:absolute;bottom:45px;right:15px;font-size:18px;">🎋</div>
+                <div style="position:absolute;top:15px;left:10px;font-size:14px;">🐈</div>
+            `},
+            { id:'lomo',     name:'Lomo',     bg:'#120c18', color:'#e060e0', accent:'#c030c0', decoHtml: `
+                <div style="position:absolute;inset:0;background:radial-gradient(circle at center,transparent 40%,#00000060);pointer-events:none;"></div>
+                <div style="position:absolute;top:15px;right:15px;font-size:12px;font-weight:bold;letter-spacing:1px;opacity:0.9;">LC-A</div>
+                <div style="position:absolute;bottom:42px;left:15px;font-size:16px;">🎯</div>
+            `},
         ],
 
         layoutOptions: [
@@ -432,77 +481,91 @@ function photobooth() {
 
         // ── Camera stream
         async startStream() {
-            // Jika sedang switching, jangan reset isStreaming agar UI tidak kedip terlalu lama
-            if (!this.isSwitching) {
-                this.isStreaming = false;
-            }
+            if (!this.isSwitching) this.isStreaming = false;
             this.cameraError = false;
 
-            // 1. Stop total stream lama
+            // 1. Cleanup thorough
             this.stopAllTracks();
+            await new Promise(r => setTimeout(r, 500));
 
-            // 2. Jeda lebih lama untuk hardware mobile (beberapa butuh waktu lebih)
-            await new Promise(r => setTimeout(r, 600));
-
-            const tryStream = async (constraints) => {
+            const tryConstraints = async (constraints) => {
                 try {
+                    console.log("Attempting:", constraints);
                     const stream = await navigator.mediaDevices.getUserMedia(constraints);
                     if (this.$refs.video) {
                         this.$refs.video.srcObject = stream;
-                        // Tunggu sebentar agar metadata siap sebelum play
-                        await new Promise(r => {
-                            this.$refs.video.onloadedmetadata = r;
-                            // Timeout jika onloadedmetadata tidak terpicu
-                            setTimeout(r, 1000);
+                        // Tunggu video ready
+                        await new Promise((resolve) => {
+                            const v = this.$refs.video;
+                            v.onloadedmetadata = () => {
+                                v.play().then(resolve).catch(resolve);
+                            };
+                            setTimeout(resolve, 1500); // safety timeout
                         });
-                        await this.$refs.video.play();
                         return true;
                     }
                 } catch (e) {
-                    console.warn('Stream attempt failed:', constraints, e.name);
+                    console.warn("Stream failed:", e.name, constraints);
                     return false;
                 }
                 return false;
             };
 
-            // Urutan Percobaan:
-            // 1. Ideal (High Res + Facing Mode)
-            const success = await tryStream({
+            // PERCOBAAN 1: Ideal with facingMode
+            let success = await tryConstraints({
                 video: {
                     facingMode: { ideal: this.facingMode },
-                    width:  { ideal: 1080 },
+                    width: { ideal: 1080 },
                     height: { ideal: 1440 },
                     aspectRatio: { ideal: 0.75 }
                 },
                 audio: false
             });
 
+            // PERCOBAAN 2: Fallback device enumeration (Sangat berguna di Android)
+            if (!success) {
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                    
+                    // Cari device yang labelnya mengandung 'back' atau 'front' sesuai facingMode
+                    const targetLabel = this.facingMode === 'user' ? 'front' : 'back';
+                    const targetDevice = videoDevices.find(d => 
+                        d.label.toLowerCase().includes(targetLabel)
+                    ) || videoDevices[0];
+
+                    if (targetDevice) {
+                        success = await tryConstraints({
+                            video: { deviceId: { exact: targetDevice.deviceId } },
+                            audio: false
+                        });
+                    }
+                } catch (err) {
+                    console.warn("Enumeration failed", err);
+                }
+            }
+
+            // PERCOBAAN 3: Basic Facing Mode
+            if (!success) {
+                success = await tryConstraints({
+                    video: { facingMode: this.facingMode },
+                    audio: false
+                });
+            }
+
+            // PERCOBAAN 4: Last Resort
+            if (!success) {
+                success = await tryConstraints({ video: true, audio: false });
+            }
+
             if (success) {
                 this.isStreaming = true;
-                return;
+                this.cameraError = false;
+            } else {
+                this.isStreaming = false;
+                this.cameraError = true;
+                window.showToast?.('Gagal memuat kamera. Coba refresh halaman.', 'error');
             }
-
-            // 2. Fallback 1: Facing Mode Saja
-            const fallback1 = await tryStream({
-                video: { facingMode: { ideal: this.facingMode } },
-                audio: false
-            });
-
-            if (fallback1) {
-                this.isStreaming = true;
-                return;
-            }
-
-            // 3. Fallback 2: Video Apapun
-            const fallback2 = await tryStream({ video: true, audio: false });
-            if (fallback2) {
-                this.isStreaming = true;
-                return;
-            }
-
-            // Jika semua gagal
-            this.cameraError = true;
-            this.isStreaming = false;
         },
 
         // ── Switch kamera (front ↔ rear)
@@ -609,6 +672,8 @@ function photobooth() {
             const filterStyle = filterV ? `filter:${filterV};` : '';
             const dateStr = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'2-digit' });
             const bgStyle = fr.bg.startsWith('linear') ? `background:${fr.bg};` : `background-color:${fr.bg};`;
+            const decoHtml = fr.decoHtml ?? '';
+            const grainOverlay = `<div style="position:absolute;inset:0;background:url('https://www.transparenttextures.com/patterns/stardust.png');opacity:0.15;pointer-events:none;mix-blend-mode:overlay;"></div>`;
 
             const imgOrSlot = (i, w, h) => {
                 if (this.capturedImages[i]) {
@@ -642,7 +707,7 @@ function photobooth() {
                     slots += `<div style="position:absolute;left:${left}px;top:${top}px;width:${iW}px;height:${iH}px;border-radius:2px;overflow:hidden;transform:rotate(${r}deg);box-shadow:0 4px 16px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.08);transition:all 0.4s;">${imgOrSlot(i,iW,iH)}</div>`;
                 }
                 innerHTML = `<div style="position:relative;width:${containerW}px;height:${scatH}px;">${slots}</div><div style="width:${containerW}px;">${footer}</div>`;
-                const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}</div>`;
+                const finalHTML = `<div style="position:relative;width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${decoHtml}${grainOverlay}</div>`;
                 wraps.forEach(w => w.innerHTML = finalHTML);
                 return;
 
@@ -656,15 +721,15 @@ function photobooth() {
                 }
                 const totalH = iH + (max-1)*38;
                 innerHTML = `<div style="position:relative;width:${containerW}px;height:${totalH+16}px;">${slots}</div>`;
-                const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}</div>`;
+                const finalHTML = `<div style="position:relative;width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}${decoHtml}${grainOverlay}</div>`;
                 wraps.forEach(w => w.innerHTML = finalHTML);
                 return;
 
             } else if (this.activeLayout === 'collage') {
                 const bigW=110, bigH=160, smallW=72, smallH=77, gap=4, pad=10;
                 containerW = pad*2 + bigW + gap + smallW;
-                innerHTML = `<div style="display:flex;gap:${gap}px;padding:${pad}px ${pad}px 6px;"><div style="width:${bigW}px;height:${bigH}px;border-radius:2px;overflow:hidden;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,0.3);">${imgOrSlot(0,bigW,bigH)}</div><div style="display:flex;flex-direction:column;gap:${gap}px;flex:1;"><div style="width:${smallW}px;height:${smallH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">${imgOrSlot(1,smallW,smallH)}</div><div style="width:${smallW}px;height:${smallH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">${imgOrSlot(2,smallW,smallH)}</div></div></div>`;
-                const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}</div>`;
+                innerHTML = `<div style="padding:${pad}px ${pad}px 6px;display:flex;gap:${gap}px;"><div style="width:${bigW}px;height:${bigH}px;border-radius:2px;overflow:hidden;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,0.3);">${imgOrSlot(0,bigW,bigH)}</div><div style="display:flex;flex-direction:column;gap:${gap}px;flex:1;"><div style="width:${smallW}px;height:${smallH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">${imgOrSlot(1,smallW,smallH)}</div><div style="width:${smallW}px;height:${smallH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">${imgOrSlot(2,smallW,smallH)}</div></div></div>`;
+                const finalHTML = `<div style="position:relative;width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}${decoHtml}${grainOverlay}</div>`;
                 wraps.forEach(w => w.innerHTML = finalHTML);
                 return;
 
@@ -677,7 +742,7 @@ function photobooth() {
                     slots += `<div style="position:absolute;left:${pad + i*offsetX}px;top:${pad/2 + i*offsetY}px;width:${iW}px;height:${iH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.35);z-index:${i};">${imgOrSlot(i,iW,iH)}</div>`;
                 }
                 innerHTML = `<div style="position:relative;width:${containerW}px;height:${totalH}px;">${slots}</div>`;
-                const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}</div>`;
+                const finalHTML = `<div style="position:relative;width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}${decoHtml}${grainOverlay}</div>`;
                 wraps.forEach(w => w.innerHTML = finalHTML);
                 return;
 
@@ -685,7 +750,7 @@ function photobooth() {
                 const topW=176, topH=110, botW=84, botH=90, gap=4, pad=10;
                 containerW = pad*2 + topW;
                 innerHTML = `<div style="padding:${pad}px ${pad}px 6px;display:flex;flex-direction:column;gap:${gap}px;"><div style="width:${topW}px;height:${topH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">${imgOrSlot(0,topW,topH)}</div><div style="display:flex;gap:${gap}px;"><div style="width:${botW}px;height:${botH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">${imgOrSlot(1,botW,botH)}</div><div style="width:${botW}px;height:${botH}px;border-radius:2px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);">${imgOrSlot(2,botW,botH)}</div></div></div>`;
-                const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}</div>`;
+                const finalHTML = `<div style="position:relative;width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}${decoHtml}${grainOverlay}</div>`;
                 wraps.forEach(w => w.innerHTML = finalHTML);
                 return;
 
@@ -699,7 +764,7 @@ function photobooth() {
                     slots += `<div style="position:absolute;left:${pad + i*2}px;top:${pad + i*2}px;width:${iW}px;height:${iH}px;border-radius:2px;overflow:hidden;transform:rotate(${r}deg);box-shadow:0 4px 16px rgba(0,0,0,0.4);z-index:${i};">${imgOrSlot(i,iW,iH)}</div>`;
                 }
                 innerHTML = `<div style="position:relative;width:${containerW}px;height:${iH+pad*2+10}px;">${slots}</div>`;
-                const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}</div>`;
+                const finalHTML = `<div style="position:relative;width:${containerW}px;${bgStyle}border-radius:4px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">${innerHTML}${footer}${decoHtml}${grainOverlay}</div>`;
                 wraps.forEach(w => w.innerHTML = finalHTML);
                 return;
             }
@@ -724,7 +789,7 @@ function photobooth() {
                 ? `display:grid;grid-template-columns:1fr 1fr;gap:${gap}px;padding:${pad}px;`
                 : `display:flex;flex-direction:column;gap:${gap}px;padding:${pad}px;`;
 
-            const finalHTML = `<div style="width:${containerW}px;${bgStyle}border-radius:3px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06);transition:all 0.4s;"><div style="${gridOrFlex}">${slotsHTML}</div>${footer}</div>`;
+            const finalHTML = `<div style="position:relative;width:${containerW}px;${bgStyle}border-radius:3px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06);transition:all 0.4s;"><div style="${gridOrFlex}">${slotsHTML}</div>${footer}${decoHtml}${grainOverlay}</div>`;
             wraps.forEach(wrap => { wrap.innerHTML = finalHTML; });
         },
 
@@ -755,6 +820,22 @@ function photobooth() {
                 ctx.fillStyle = fr.bg;
             }
             ctx.fillRect(0, 0, c.width, c.height);
+
+            // ── Grain overlay
+            const gC = document.createElement('canvas');
+            const gX = gC.getContext('2d');
+            gC.width = gC.height = 128;
+            const gD = gX.createImageData(128, 128);
+            for (let i = 0; i < gD.data.length; i += 4) {
+                const v = Math.random() * 255;
+                gD.data[i] = gD.data[i+1] = gD.data[i+2] = v; gD.data[i+3] = 22;
+            }
+            gX.putImageData(gD, 0, 0);
+            ctx.save();
+            ctx.fillStyle = ctx.createPattern(gC, 'repeat');
+            ctx.globalCompositeOperation = 'overlay';
+            ctx.fillRect(0, 0, c.width, c.height);
+            ctx.restore();
 
             const filterMap = {
                 vintage: 'sepia(0.25) contrast(1.1) brightness(0.92)',
@@ -801,12 +882,69 @@ function photobooth() {
             ctx.fillText(new Date().toLocaleDateString(), c.width / 2, c.height - 18);
             ctx.globalAlpha = 1;
 
+            // ── Draw Decorations on Canvas ──
+            const drawDecos = () => {
+                ctx.save();
+                ctx.fillStyle = fr.color;
+                ctx.font = '24px serif';
+                
+                if (this.activeFrame === 'classic') {
+                    ctx.fillText('✨', c.width - 40, 40);
+                    ctx.font = '14px serif';
+                    ctx.fillText('No. 001', 50, c.height - 100);
+                } else if (this.activeFrame === 'dark') {
+                    ctx.fillText('📸', 40, 40);
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillText('ULTRA-PAN', c.width - 60, c.height - 100);
+                } else if (this.activeFrame === 'blush') {
+                    ctx.fillText('🌸', c.width - 45, 50);
+                    ctx.fillText('💕', 40, 80);
+                } else if (this.activeFrame === 'forest') {
+                    ctx.fillText('🌿', 40, 40);
+                    ctx.font = 'bold 14px sans-serif';
+                    ctx.fillText('WILD', c.width - 50, c.height - 110);
+                } else if (this.activeFrame === 'y2k') {
+                    ctx.fillText('⭐', c.width - 45, 45);
+                    ctx.fillText('🛸', 50, c.height - 100);
+                    ctx.fillText('🌈', 40, 100);
+                } else if (this.activeFrame === 'diaryfm') {
+                    ctx.fillText('📒', 45, 45);
+                    ctx.fillText('✉️', c.width - 45, 100);
+                } else if (this.activeFrame === 'washi') {
+                    ctx.fillText('🎋', c.width - 45, c.height - 100);
+                    ctx.fillText('🐈', 45, 50);
+                } else if (this.activeFrame === 'midnight') {
+                    ctx.fillText('🌙', 50, 50);
+                    ctx.fillText('✨', c.width - 50, 45);
+                } else if (this.activeFrame === 'matcha') {
+                    ctx.fillText('🍵', c.width - 45, 50);
+                    ctx.font = '12px sans-serif';
+                    ctx.fillText('ZEN-01', 50, c.height - 110);
+                } else if (this.activeFrame === 'lomo') {
+                    ctx.fillText('🎯', 50, c.height - 100);
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.fillText('LC-A', c.width - 50, 40);
+                } else if (this.activeFrame === 'cinema') {
+                    ctx.fillText('🎬', 50, c.height - 100);
+                    ctx.font = 'bold 12px monospace';
+                    ctx.fillText('[ TAKE 24 ]', c.width - 60, 40);
+                }
+                ctx.restore();
+            };
+            drawDecos();
+
             c.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
                 const a   = document.createElement('a');
                 a.href    = url;
                 a.download = `filmbooth-${this.activeFrame}-${Date.now()}.jpg`;
                 a.click();
+                
+                // Beri notifikasi sukses via Modal
+                setTimeout(() => {
+                    window.appAlert?.('Download Berhasil', 'Foto berhasil disimpan ke perangkat kamu!', 'Mantap');
+                }, 500);
             }, 'image/jpeg', 0.92);
         },
 

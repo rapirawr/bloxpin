@@ -89,8 +89,12 @@
     
     <script>
         // Global Modal Helpers
-        window.appConfirm = (title, message, onConfirm, confirmText = 'Ya, Lanjutkan') => {
-            window.dispatchEvent(new CustomEvent('app-confirm', { detail: { title, message, onConfirm, confirmText } }));
+        window.appConfirm = (title, message, onConfirm, confirmText = 'Ya, Lanjutkan', type = 'default') => {
+            window.dispatchEvent(new CustomEvent('app-confirm', { detail: { title, message, onConfirm, confirmText, type } }));
+        };
+
+        window.appAlert = (title, message, confirmText = 'OK') => {
+            window.dispatchEvent(new CustomEvent('app-confirm', { detail: { title, message, confirmText, type: 'success' } }));
         };
 
         window.appPrompt = (title, message, onConfirm, defaultValue = '', placeholder = '', confirmText = 'Simpan') => {
