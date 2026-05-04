@@ -71,7 +71,7 @@
                     {{-- Camera Loading --}}
                     <div class="pb-cam-loading" x-show="!isStreaming && !cameraError" style="display:none">
                         <div class="pb-loading-spin"></div>
-                        <span>INITIALIZING...</span>
+                        <span>SWITCHING...</span>
                     </div>
 
                     {{-- Camera Error --}}
@@ -99,6 +99,18 @@
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
                     </button>
+
+                    {{-- Torch Toggle (Hanya muncul kalau back camera) --}}
+                    <button @click="toggleTorch()"
+                            x-show="facingMode === 'environment'"
+                            class="pb-torch-btn"
+                            :class="torchActive ? 'active' : ''"
+                            style="display:none">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </button>
                 </div>
 
                 {{-- Capture controls (Mobile & Desktop) --}}
@@ -119,6 +131,23 @@
                 </div>
 
             </div>{{-- /camera-section --}}
+
+            {{-- ── RECENT CLIPS / MINI GALLERY ── --}}
+            <div class="pb-mini-gallery" x-show="capturedImages.length > 0" x-transition>
+                <div class="pb-gallery-label">RECENT CLIPS</div>
+                <div class="pb-gallery-scroll">
+                    <template x-for="(img, index) in capturedImages" :key="index">
+                        <div class="pb-gallery-item">
+                            <img :src="img" :style="filterCSS[activeFilter] ? `filter:${filterCSS[activeFilter]}` : ''" />
+                            <button @click="removeImage(index)" class="pb-item-del">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
 
             {{-- ── MOBILE PREVIEW SECTION ── --}}
             <div class="pb-mobile-preview-area lg:hidden" x-show="capturedImages.length > 0" x-transition>
@@ -310,6 +339,7 @@ function photobooth() {
         shotLabel:       'READY',
         clockStr:        '--:--',
         clockInterval:   null,
+        torchActive:     false, // ← BARU: state flash/senter
 
         // ── Layout map
         get maxCaptures() {
@@ -659,6 +689,48 @@ function photobooth() {
 
             this.isCameraOff = false;
             this.isSwitching = false;
+
+            // Reset torch kalau pindah kamera
+            this.torchActive = false;
+        },
+
+        // ── Toggle Torch (Senter Kamera Belakang)
+        async toggleTorch() {
+            const stream = this.$refs.video?.srcObject;
+            if (!stream) return;
+
+            const track = stream.getVideoTracks()[0];
+            if (!track) return;
+
+            const capabilities = track.getCapabilities?.() || {};
+            if (!capabilities.torch) {
+                window.showToast?.('Flash tidak tersedia di kamera ini.', 'info');
+                return;
+            }
+
+            try {
+                this.torchActive = !this.torchActive;
+                await track.applyConstraints({
+                    advanced: [{ torch: this.torchActive }]
+                });
+            } catch (e) {
+                console.error('[Camera] Torch error:', e);
+                this.torchActive = false;
+                window.showToast?.('Gagal mengaktifkan flash.', 'error');
+            }
+        },
+
+        // ── Hapus satu gambar
+        removeImage(index) {
+            this.capturedImages.splice(index, 1);
+            
+            if (this.capturedImages.length === 0) {
+                this.shotLabel = 'READY';
+            } else {
+                this.shotLabel = `${this.capturedImages.length}/${this.maxCaptures} — SHOOT`;
+            }
+            
+            this.$nextTick(() => this.renderStrip());
         },
 
         // ── Manual single-shot snap
@@ -1337,6 +1409,65 @@ function photobooth() {
 .pb-flip-btn:active { transform: scale(0.9); }
 .pb-flip-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .pb-flip-btn.switching { opacity: 0.6; cursor: wait; }
+
+/* Torch button */
+.pb-torch-btn {
+    position: absolute; top: 12px; left: 12px;
+    width: 36px; height: 36px;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.8);
+    cursor: pointer; z-index: 15;
+    transition: all 0.2s;
+}
+.pb-torch-btn.active {
+    background: #c8a96e;
+    color: #1a1714;
+    border-color: #f0d090;
+    box-shadow: 0 0 15px rgba(200,169,110,0.5);
+}
+
+/* Mini Gallery (Captured Images) */
+.pb-mini-gallery {
+    padding: 0 24px 20px;
+    width: 100%;
+    max-width: 520px;
+}
+.pb-gallery-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; color: #8a8278;
+    letter-spacing: 0.15em; margin-bottom: 10px;
+}
+.pb-gallery-scroll {
+    display: flex; gap: 12px;
+    overflow-x: auto; padding-bottom: 8px;
+    scrollbar-width: none;
+}
+.pb-gallery-scroll::-webkit-scrollbar { display: none; }
+.pb-gallery-item {
+    position: relative;
+    flex-shrink: 0;
+    width: 70px; aspect-ratio: 3/4;
+    border-radius: 4px; overflow: hidden;
+    background: #0d0b09;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.pb-gallery-item img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.pb-item-del {
+    position: absolute; top: 4px; right: 4px;
+    width: 20px; height: 20px;
+    background: rgba(201,54,58,0.85);
+    color: white; border: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; opacity: 0; transition: opacity 0.2s;
+}
+.pb-gallery-item:hover .pb-item-del { opacity: 1; }
 
 /* ── Desktop shutter row ───────────────────── */
 .pb-capture-row {
