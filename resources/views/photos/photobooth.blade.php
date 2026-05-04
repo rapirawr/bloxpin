@@ -418,85 +418,67 @@ function photobooth() {
         },
 
         // ── Stop semua track yang aktif (helper)
-stopAllTracks() {
-    const video = this.$refs.video;
-    if (!video) return;
-
-    if (video.srcObject) {
-        video.srcObject.getTracks().forEach(t => {
-            t.enabled = false;
-            t.stop();
-        });
-        video.srcObject = null;
-    }
-},
+        stopAllTracks() {
+            if (this.$refs.video?.srcObject) {
+                this.$refs.video.srcObject.getTracks().forEach(t => {
+                    t.stop();
+                    t.enabled = false;
+                });
+                this.$refs.video.srcObject = null;
+            }
+        },
 
         // ── Camera stream
-async startStream() {
-    this.cameraError = false;
-    const video = this.$refs.video;
-    if (!video) return;
+        async startStream() {
+            // Stop & clear stream lama dulu
+            this.stopAllTracks();
 
-    // Pastikan srcObject null dulu sebelum request baru
-    video.srcObject = null;
-
-    const tryGetStream = async (constraints) => {
-        return await navigator.mediaDevices.getUserMedia(constraints);
-    };
-
-    // Coba dengan constraints lengkap dulu
-    const constraintsList = [
-        // Attempt 1: ideal facingMode + resolution
-        {
-            video: {
-                facingMode: { ideal: this.facingMode },
-                width:  { ideal: 1080 },
-                height: { ideal: 1440 },
-                aspectRatio: { ideal: 0.75 },
-            },
-            audio: false
-        },
-        // Attempt 2: exact facingMode tanpa resolution
-        {
-            video: { facingMode: { exact: this.facingMode } },
-            audio: false
-        },
-        // Attempt 3: ideal facingMode tanpa resolution
-        {
-            video: { facingMode: { ideal: this.facingMode } },
-            audio: false
-        },
-        // Attempt 4: video: true saja (last resort)
-        {
-            video: true,
-            audio: false
-        },
-    ];
-
-    for (const constraints of constraintsList) {
-        try {
-            const stream = await tryGetStream(constraints);
-            video.srcObject = stream;
-            video.load(); // iOS Safari: paksa reload element
-            await video.play().catch(() => {});
-            this.isStreaming = true;
+            // Tunggu hardware release (lebih lama = lebih aman di Android/iOS)
+            await new Promise(r => setTimeout(r, 400));
             this.cameraError = false;
-            return; // sukses, keluar
-        } catch (e) {
-            console.warn('Camera attempt failed:', e.name, e.message, constraints);
-            // Jika NotReadableError, tunggu lebih lama sebelum retry
-            if (e.name === 'NotReadableError' || e.name === 'AbortError') {
-                await new Promise(r => setTimeout(r, 500));
-            }
-            // lanjut ke attempt berikutnya
-        }
-    }
 
-    // Semua attempt gagal
-    this.cameraError = true;
-    this.isStreaming  = false;
-    window.showToast?.('Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
-},
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: { ideal: this.facingMode },
+                        aspectRatio: { ideal: 0.75 },
+                        width:  { ideal: 1080 },
+                        height: { ideal: 1440 }
+                    },
+                    audio: false
+                };
+
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+                if (this.$refs.video) {
+                    this.$refs.video.srcObject = stream;
+                    // Paksa play — Safari iOS kadang tidak autoplay setelah srcObject di-set ulang
+                    await this.$refs.video.play().catch(() => {});
+                    this.isStreaming = true;
+                }
+            } catch (e) {
+                console.error('Camera Error:', e.name, e.message);
+
+                // Fallback: constraints paling minimal
+                try {
+                    const fallbackStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: { ideal: this.facingMode } },
+                        audio: false
+                    });
+                    if (this.$refs.video) {
+                        this.$refs.video.srcObject = fallbackStream;
+                        await this.$refs.video.play().catch(() => {});
+                        this.isStreaming  = true;
+                        this.cameraError  = false;
+                    }
+                } catch (err2) {
+                    console.error('Fallback Camera Error:', err2.name, err2.message);
+                    this.cameraError  = true;
+                    this.isStreaming   = false;
+                    window.showToast?.('Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
+                }
+            }
+        },
 
         // ── Switch kamera (front ↔ rear) — FIX UTAMA
 async switchCamera() {
@@ -504,23 +486,22 @@ async switchCamera() {
 
     this.isSwitching  = true;
     this.isStreaming   = false;
-    this.isCameraOff  = true;
+    this.isCameraOff  = true;   // ← matiin video dulu (layar hitam)
 
-    // 1. Stop dulu
+    // Stop tracks
     this.stopAllTracks();
 
-    // 2. Tunggu hardware benar-benar lepas
-    //    Android butuh ~600-800ms, iOS ~300ms — pakai 800ms biar aman
-    await new Promise(r => setTimeout(r, 800));
+    // Tunggu hardware release + biar efek "mati" keliatan
+    await new Promise(r => setTimeout(r, 500));
 
-    // 3. Ganti facing mode
+    // Ganti kamera
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
 
-    // 4. Start stream baru
+    // Start stream baru
     await this.startStream();
 
-    this.isCameraOff = false;
-    this.isSwitching = false;
+    this.isCameraOff  = false;  // ← nyalain lagi
+    this.isSwitching  = false;
 },
 
         // ── Manual single-shot snap
