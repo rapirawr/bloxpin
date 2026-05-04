@@ -101,18 +101,20 @@
                     </button>
                 </div>
 
-                {{-- Desktop shutter button + controls --}}
-                <div class="pb-capture-row hidden lg:flex">
-                    <button @click="resetSession()" class="pb-reset-btn">
+                {{-- Capture controls (Mobile & Desktop) --}}
+                <div class="pb-capture-row">
+                    <button @click="resetSession()" 
+                            class="pb-reset-btn"
+                            :style="capturedImages.length === 0 ? 'opacity:0;pointer-events:none' : ''">
                         RETAKE
                     </button>
-
+                    
                     <button @click="takeSnap()"
-                            :disabled="!isStreaming || isProcessing"
+                            :disabled="!isStreaming || isProcessing || capturedImages.length >= maxCaptures"
                             class="pb-shutter-btn">
                         <div class="pb-shutter-inner"></div>
                     </button>
-
+                    
                     <div class="pb-shot-label" x-text="shotLabel">READY</div>
                 </div>
 
