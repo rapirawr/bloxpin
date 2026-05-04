@@ -3,7 +3,7 @@
 @section('title', 'Settings — Bloxpin')
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 py-8 md:py-12">
+<div class="max-w-7xl mx-auto px-4 lg:px-8 py-8 md:py-12">
     <div class="flex flex-col md:flex-row gap-8 lg:gap-12" x-data="{ 
         tab: 'profile', 
         isCompact: document.documentElement.classList.contains('compact-mode') 
@@ -68,7 +68,7 @@
         </aside>
 
         {{-- ── Main Content ── --}}
-        <main class="flex-1 min-w-0 bg-white dark:bg-white/5 border border-dark/5 dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-sm">
+        <main class="flex-1 w-full overflow-y-auto overflow-x-auto bg-white dark:bg-white/5 border border-dark/5 dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-sm">
             
             {{-- Profile Tab --}}
             <section x-show="tab === 'profile'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
