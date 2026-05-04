@@ -477,131 +477,130 @@ function photobooth() {
             if (this.$refs.video) {
                 this.$refs.video.load();
             }
-        },
+        },// ── Stop semua track yang aktif (helper)
+stopAllTracks() {
+    const video = this.$refs.video;
+    if (video?.srcObject) {
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.srcObject = null;
+    }
+},
 
-        // ── Camera stream
 // ── Camera stream
-        async startStream() {
-            if (!this.isSwitching) this.isStreaming = false;
-            this.cameraError = false;
+async startStream() {
+    this.cameraError = false;
+    if (!this.isSwitching) this.isStreaming = false;
 
-            // 1. Cleanup thorough
-            this.stopAllTracks();
-            await new Promise(r => setTimeout(r, 500));
+    this.stopAllTracks();
+    // Tunggu browser benar-benar release kamera
+    await new Promise(r => setTimeout(r, 300));
 
-            const tryConstraints = async (constraints) => {
-                try {
-                    console.log("Attempting:", constraints);
-                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    if (this.$refs.video) {
-                        this.$refs.video.srcObject = stream;
-                        // Tunggu video ready
-                        await new Promise((resolve) => {
-                            const v = this.$refs.video;
-                            v.onloadedmetadata = () => {
-                                v.play().then(resolve).catch(resolve);
-                            };
-                            setTimeout(resolve, 1500); // safety timeout
-                        });
-                        return true;
-                    }
-                } catch (e) {
-                    console.warn("Stream failed:", e.name, constraints);
-                    return false;
-                }
-                return false;
-            };
-
-            // PERCOBAAN 1: Paksa (Exact) ganti lensa kamera. Ini wajib buat HP!
-            let success = await tryConstraints({
-                video: {
-                    facingMode: { exact: this.facingMode }, // <-- Kunci utamanya disini
-                    width: { ideal: 1080 },
-                    height: { ideal: 1440 },
-                    aspectRatio: { ideal: 0.75 }
-                },
-                audio: false
+    const tryConstraints = async (constraints) => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            const video = this.$refs.video;
+            if (!video) return false;
+            video.srcObject = stream;
+            await new Promise((resolve, reject) => {
+                video.onloadedmetadata = () => video.play().then(resolve).catch(resolve);
+                video.onerror = reject;
+                setTimeout(resolve, 2000);
             });
+            return true;
+        } catch (e) {
+            console.warn('Stream failed:', e.name, e.message);
+            return false;
+        }
+    };
 
-            // PERCOBAAN 2: Fallback ke Ideal. Kalau Exact gagal (contohnya web dibuka di Laptop yg gak punya kamera belakang)
-            if (!success) {
-                success = await tryConstraints({
-                    video: {
-                        facingMode: { ideal: this.facingMode },
-                        width: { ideal: 1080 },
-                        height: { ideal: 1440 },
-                        aspectRatio: { ideal: 0.75 }
-                    },
-                    audio: false
-                });
-            }
+    // Percobaan 1: exact facingMode
+    let success = await tryConstraints({
+        video: {
+            facingMode: { exact: this.facingMode },
+            width: { ideal: 1080 },
+            height: { ideal: 1440 },
+        },
+        audio: false
+    });
 
-            // PERCOBAAN 3: Fallback device enumeration (Sangat berguna di Android)
-            if (!success) {
-                try {
-                    const devices = await navigator.mediaDevices.enumerateDevices();
-                    const videoDevices = devices.filter(d => d.kind === 'videoinput');
-                    
-                    if (videoDevices.length > 1) {
-                        const targetLabel = this.facingMode === 'user' ? 'front' : 'back';
-                        let targetDevice = videoDevices.find(d => 
-                            d.label.toLowerCase().includes(targetLabel)
-                        );
+    // Percobaan 2: ideal facingMode (fallback laptop/desktop)
+    if (!success) {
+        success = await tryConstraints({
+            video: {
+                facingMode: { ideal: this.facingMode },
+                width: { ideal: 1080 },
+                height: { ideal: 1440 },
+            },
+            audio: false
+        });
+    }
 
-                        // Jika tidak ketemu berdasarkan label, coba tebak berdasarkan urutan
-                        if (!targetDevice) {
-                            if (this.facingMode === 'user') {
-                                targetDevice = videoDevices[0];
-                            } else {
-                                targetDevice = videoDevices[videoDevices.length - 1];
-                            }
-                        }
+    // Percobaan 3: enumerate device (Android)
+    if (!success) {
+        try {
+            // Minta permission dulu sebelum enumerate
+            const tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            tempStream.getTracks().forEach(t => t.stop());
 
-                        if (targetDevice) {
-                            success = await tryConstraints({
-                                video: { deviceId: { exact: targetDevice.deviceId } },
-                                audio: false
-                            });
-                        }
-                    }
-                } catch (err) {
-                    console.warn("Enumeration failed", err);
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === 'videoinput');
+
+            if (videoDevices.length > 1) {
+                const targetLabel = this.facingMode === 'user' ? 'front' : 'back';
+                let targetDevice = videoDevices.find(d =>
+                    d.label.toLowerCase().includes(targetLabel)
+                ) ?? (this.facingMode === 'user' ? videoDevices[0] : videoDevices[videoDevices.length - 1]);
+
+                if (targetDevice) {
+                    success = await tryConstraints({
+                        video: { deviceId: { exact: targetDevice.deviceId } },
+                        audio: false
+                    });
                 }
             }
+        } catch (err) {
+            console.warn('Enumeration failed', err);
+        }
+    }
 
-            if (success) {
-                this.isStreaming = true;
-                this.cameraError = false;
-            } else {
-                this.isStreaming = false;
-                this.cameraError = true;
-                window.showToast?.('Gagal memuat kamera. Coba refresh halaman.', 'error');
-            }
-        },
-        // ── Switch kamera (front ↔ rear)
-        async switchCamera() {
-            if (this.isSwitching || this.isProcessing) return;
+    // Percobaan 4: any camera (last resort)
+    if (!success) {
+        success = await tryConstraints({ video: true, audio: false });
+    }
 
-            this.isSwitching = true;
-            
-            // Toggle mode
-            const prevFacingMode = this.facingMode;
-            this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+    if (success) {
+        this.isStreaming = true;
+        this.cameraError = false;
+    } else {
+        this.isStreaming = false;
+        this.cameraError = true;
+        window.showToast?.('Gagal memuat kamera. Coba refresh halaman.', 'error');
+    }
+},
 
-            try {
-                await this.startStream();
-                // Kalau stream gagal (cameraError), rollback facingMode
-                if (this.cameraError) {
-                    this.facingMode = prevFacingMode;
-                }
-            } catch (err) {
-                console.error("Switch Camera Error:", err);
-                this.facingMode = prevFacingMode;
-            } finally {
-                this.isSwitching = false;
-            }
-        },
+// ── Switch kamera (front ↔ rear)
+async switchCamera() {
+    if (this.isSwitching || this.isProcessing) return;
 
+    this.isSwitching = true;
+    const prevFacingMode = this.facingMode;
+    this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+
+    try {
+        await this.startStream();
+        if (this.cameraError) {
+            this.facingMode = prevFacingMode;
+            // Coba kembalikan stream kamera sebelumnya
+            await this.startStream();
+        }
+    } catch (err) {
+        console.error('Switch Camera Error:', err);
+        this.facingMode = prevFacingMode;
+        await this.startStream();
+    } finally {
+        this.isSwitching = false;
+    }
+},
         // ── Manual single-shot snap
         takeSnap() {
             if (!this.isStreaming || this.isProcessing) return;
