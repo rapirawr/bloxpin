@@ -88,6 +88,7 @@
                     </div>
 
                     {{-- Flip camera --}}
+                    {{-- POIN 6: Tombol flip beranimasi spin saat isSwitching = true --}}
                     <button @click="switchCamera()"
                             :disabled="!isStreaming || isProcessing || isSwitching"
                             class="pb-flip-btn"
@@ -292,7 +293,8 @@ function photobooth() {
         // ── State
         isStreaming:     false,
         cameraError:     false,
-        isSwitching:     false,  // ← BARU: flag khusus switch kamera
+        // POIN 1: isSwitching — flag khusus supaya tombol flip tidak bisa diklik ganda
+        isSwitching:     false,
         capturedImages:  [],
         flash:           false,
         shakeCam:        false,
@@ -464,140 +466,153 @@ function photobooth() {
             this.clockInterval = setInterval(update, 10000);
         },
 
-        // ── Stop semua track yang aktif (helper)
+        // ── POIN 2: Helper stopAllTracks() — fungsi terpisah, dipanggil konsisten
+        // di switchCamera() dan startStream(). Stop semua track lalu null srcObject.
         stopAllTracks() {
-            if (this.$refs.video?.srcObject) {
-                this.$refs.video.srcObject.getTracks().forEach(t => {
-                    t.stop();
-                    t.enabled = false;
-                });
-                this.$refs.video.srcObject = null;
-            }
-            // Reset video element
-            if (this.$refs.video) {
-                this.$refs.video.load();
+            const video = this.$refs.video;
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
             }
         },
 
         // ── Camera stream
-// ── Camera stream
         async startStream() {
-            if (!this.isSwitching) this.isStreaming = false;
-            this.cameraError = false;
+            this.cameraError  = false;
+            // Hanya set isStreaming = false kalau bukan dari switchCamera,
+            // supaya viewport tidak berkedip blank saat switch.
+            if (!this.isSwitching) {
+                this.isStreaming = false;
+            }
 
-            // 1. Cleanup thorough
-            this.stopAllTracks();
-            await new Promise(r => setTimeout(r, 500));
+            // POIN 4: Delay 400ms (naik dari 150ms) — hardware kamera Android/iOS
+            // butuh waktu lebih lama untuk benar-benar release sebelum stream baru.
+            await new Promise(r => setTimeout(r, 400));
 
             const tryConstraints = async (constraints) => {
                 try {
-                    console.log("Attempting:", constraints);
+                    console.log('Attempting stream:', constraints);
                     const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    if (this.$refs.video) {
-                        this.$refs.video.srcObject = stream;
-                        // Tunggu video ready
-                        await new Promise((resolve) => {
-                            const v = this.$refs.video;
-                            v.onloadedmetadata = () => {
-                                v.play().then(resolve).catch(resolve);
-                            };
-                            setTimeout(resolve, 1500); // safety timeout
-                        });
-                        return true;
-                    }
+                    const video = this.$refs.video;
+                    if (!video) return false;
+
+                    video.srcObject = stream;
+
+                    // POIN 5: video.play() dipanggil eksplisit — fix Safari iOS
+                    // yang kadang tidak autoplay setelah srcObject diset ulang.
+                    await new Promise((resolve) => {
+                        video.onloadedmetadata = () => {
+                            video.play()
+                                .then(resolve)
+                                .catch(resolve); // lanjut meski play() reject (autoplay policy)
+                        };
+                        // Safety timeout 2 detik kalau onloadedmetadata tidak terpanggil
+                        setTimeout(resolve, 2000);
+                    });
+
+                    return true;
                 } catch (e) {
-                    console.warn("Stream failed:", e.name, constraints);
+                    console.warn('Stream failed:', e.name, e.message, constraints);
                     return false;
                 }
-                return false;
             };
 
-            // PERCOBAAN 1: Paksa (Exact) ganti lensa kamera. Ini wajib buat HP!
+            // Percobaan 1: Exact facingMode — wajib untuk HP agar ganti lensa fisik
             let success = await tryConstraints({
                 video: {
-                    facingMode: { exact: this.facingMode }, // <-- Kunci utamanya disini
-                    width: { ideal: 1080 },
+                    facingMode: { exact: this.facingMode },
+                    width:  { ideal: 1080 },
                     height: { ideal: 1440 },
-                    aspectRatio: { ideal: 0.75 }
+                    aspectRatio: { ideal: 0.75 },
                 },
-                audio: false
+                audio: false,
             });
 
-            // PERCOBAAN 2: Fallback ke Ideal. Kalau Exact gagal (contohnya web dibuka di Laptop yg gak punya kamera belakang)
+            // Percobaan 2: Ideal facingMode — fallback laptop/desktop tanpa kamera belakang
             if (!success) {
                 success = await tryConstraints({
                     video: {
                         facingMode: { ideal: this.facingMode },
-                        width: { ideal: 1080 },
+                        width:  { ideal: 1080 },
                         height: { ideal: 1440 },
-                        aspectRatio: { ideal: 0.75 }
+                        aspectRatio: { ideal: 0.75 },
                     },
-                    audio: false
+                    audio: false,
                 });
             }
 
-            // PERCOBAAN 3: Fallback device enumeration (Sangat berguna di Android)
+            // Percobaan 3: Enumerate device — berguna di Android yang label-nya tidak standar
             if (!success) {
                 try {
                     const devices = await navigator.mediaDevices.enumerateDevices();
                     const videoDevices = devices.filter(d => d.kind === 'videoinput');
-                    
+
                     if (videoDevices.length > 1) {
                         const targetLabel = this.facingMode === 'user' ? 'front' : 'back';
-                        let targetDevice = videoDevices.find(d => 
+                        let targetDevice = videoDevices.find(d =>
                             d.label.toLowerCase().includes(targetLabel)
                         );
 
-                        // Jika tidak ketemu berdasarkan label, coba tebak berdasarkan urutan
+                        // Tebak berdasarkan urutan jika tidak ketemu dari label
                         if (!targetDevice) {
-                            if (this.facingMode === 'user') {
-                                targetDevice = videoDevices[0];
-                            } else {
-                                targetDevice = videoDevices[videoDevices.length - 1];
-                            }
+                            targetDevice = this.facingMode === 'user'
+                                ? videoDevices[0]
+                                : videoDevices[videoDevices.length - 1];
                         }
 
                         if (targetDevice) {
                             success = await tryConstraints({
                                 video: { deviceId: { exact: targetDevice.deviceId } },
-                                audio: false
+                                audio: false,
                             });
                         }
                     }
                 } catch (err) {
-                    console.warn("Enumeration failed", err);
+                    console.warn('Enumeration failed:', err);
                 }
             }
 
             if (success) {
-                this.isStreaming = true;
-                this.cameraError = false;
+                this.isStreaming  = true;
+                this.cameraError  = false;
             } else {
-                this.isStreaming = false;
-                this.cameraError = true;
+                this.isStreaming  = false;
+                this.cameraError  = true;
                 window.showToast?.('Gagal memuat kamera. Coba refresh halaman.', 'error');
             }
         },
-        // ── Switch kamera (front ↔ rear)
+
+        // ── POIN 3: switchCamera() direfactor — tracks dihentikan SEBELUM
+        // facingMode diganti, menghilangkan race condition utama.
         async switchCamera() {
+            // POIN 1: Guard dengan isSwitching supaya tidak bisa diklik ganda
             if (this.isSwitching || this.isProcessing) return;
 
             this.isSwitching = true;
-            
-            // Toggle mode
+
+            // Hentikan semua track SEBELUM mengganti facingMode
+            this.stopAllTracks();
+
             const prevFacingMode = this.facingMode;
             this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
 
             try {
                 await this.startStream();
-                // Kalau stream gagal (cameraError), rollback facingMode
+
+                // Rollback jika stream gagal setelah switch
                 if (this.cameraError) {
+                    console.warn('Switch failed, rolling back to:', prevFacingMode);
                     this.facingMode = prevFacingMode;
+                    this.stopAllTracks();
+                    await this.startStream();
                 }
             } catch (err) {
-                console.error("Switch Camera Error:", err);
+                console.error('Switch Camera Error:', err);
                 this.facingMode = prevFacingMode;
+                this.stopAllTracks();
+                await this.startStream();
             } finally {
+                // POIN 1: Selalu reset flag di finally supaya tidak stuck
                 this.isSwitching = false;
             }
         },
@@ -898,12 +913,11 @@ function photobooth() {
             ctx.fillText(new Date().toLocaleDateString(), c.width / 2, c.height - 18);
             ctx.globalAlpha = 1;
 
-            // ── Draw Decorations on Canvas ──
             const drawDecos = () => {
                 ctx.save();
                 ctx.fillStyle = fr.color;
                 ctx.font = '24px serif';
-                
+
                 if (this.activeFrame === 'classic') {
                     ctx.fillText('✨', c.width - 40, 40);
                     ctx.font = '14px serif';
@@ -956,8 +970,7 @@ function photobooth() {
                 a.href    = url;
                 a.download = `filmbooth-${this.activeFrame}-${Date.now()}.jpg`;
                 a.click();
-                
-                // Beri notifikasi sukses via Modal
+
                 setTimeout(() => {
                     window.appAlert?.('Download Berhasil', 'Foto berhasil disimpan ke perangkat kamu!', 'Mantap');
                 }, 500);
@@ -1352,7 +1365,12 @@ function photobooth() {
 .pb-flip-btn:hover  { background: rgba(0,0,0,0.65); color: white; }
 .pb-flip-btn:active { transform: scale(0.9); }
 .pb-flip-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.pb-flip-btn.switching { opacity: 0.6; cursor: wait; }
+/* POIN 6: Visual feedback saat switching — tombol meredup dan ikon spin */
+.pb-flip-btn.switching {
+    opacity: 0.6;
+    cursor: wait;
+    pointer-events: none;
+}
 
 /* ── Desktop shutter row ───────────────────── */
 .pb-capture-row {
