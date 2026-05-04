@@ -15,7 +15,7 @@
     <meta name="google-site-verification" content="hNO97B-C80-QOjJzN3G53tLYwdRqd6j93fG5n5pELqE" />
 
     <title>@yield('title', config('app.name', 'Bloxpin'))</title>
-    <meta name="description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
+    <meta name="description" content="@yield('meta_description', 'Bloxpin Photobooth - Capture, style, and share your favorite moments with our aesthetic digital photobooth gallery.')">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     
     <!-- PWA Setup -->
@@ -28,7 +28,7 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:site_name" content="Bloxpin">
     <meta property="og:title" content="@yield('title', config('app.name', 'Bloxpin'))">
-    <meta property="og:description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
+    <meta property="og:description" content="@yield('meta_description', 'Bloxpin Photobooth - Capture, style, and share your favorite moments with our aesthetic digital photobooth gallery.')">
     <meta property="og:image" content="@yield('meta_image', asset('og-default.png'))">
     <meta property="og:image:secure_url" content="@yield('meta_image', asset('og-default.png'))">
     <meta property="og:image:width" content="@yield('meta_image_width', '1200')">
