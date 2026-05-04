@@ -67,6 +67,12 @@
                     {{-- Flash --}}
                     <div class="pb-flash" :class="flash ? 'active' : ''"></div>
 
+                    {{-- Camera Loading --}}
+                    <div class="pb-cam-loading" x-show="!isStreaming && !cameraError" style="display:none">
+                        <div class="pb-loading-spin"></div>
+                        <span>INITIALIZING...</span>
+                    </div>
+
                     {{-- Camera Error --}}
                     <div class="pb-cam-error" x-show="cameraError" style="display:none">
                         <div class="pb-error-icon">
@@ -422,26 +428,69 @@ filterCSS: {
 
         // ── Camera stream
         async startStream() {
+            // Ensure previous stream is fully stopped and cleared
             if (this.$refs.video?.srcObject) {
-                this.$refs.video.srcObject.getTracks().forEach(t => t.stop());
+                const oldStream = this.$refs.video.srcObject;
+                oldStream.getTracks().forEach(t => {
+                    t.stop();
+                    t.enabled = false;
+                });
+                this.$refs.video.srcObject = null;
             }
+
+            // Give the browser/hardware a brief moment to release the camera
+            await new Promise(r => setTimeout(r, 150));
+
             try {
                 this.cameraError = false;
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: this.facingMode, aspectRatio: 3/4, width: { ideal: 720 } },
+                
+                // Using ideal values rather than exact to avoid OverconstrainedError
+                // on various mobile devices with different camera capabilities
+                const constraints = {
+                    video: { 
+                        facingMode: { ideal: this.facingMode },
+                        aspectRatio: { ideal: 0.75 }, // 3:4
+                        width: { ideal: 1080 },
+                        height: { ideal: 1440 }
+                    },
                     audio: false
-                });
-                this.$refs.video.srcObject = stream;
-                this.isStreaming = true;
+                };
+
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                if (this.$refs.video) {
+                    this.$refs.video.srcObject = stream;
+                    this.isStreaming = true;
+                }
             } catch (e) {
-                this.cameraError   = true;
-                this.isStreaming   = false;
-                window.showToast?.('Izin kamera ditolak atau tidak tersedia.', 'error');
+                console.error("Camera Access Error:", e);
+                
+                // Fallback: Try with minimal constraints if the first attempt fails
+                try {
+                    const fallbackStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: { ideal: this.facingMode } },
+                        audio: false 
+                    });
+                    if (this.$refs.video) {
+                        this.$refs.video.srcObject = fallbackStream;
+                        this.isStreaming = true;
+                        this.cameraError = false;
+                    }
+                } catch (err2) {
+                    this.cameraError   = true;
+                    this.isStreaming   = false;
+                    window.showToast?.('Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
+                }
             }
         },
 
         async switchCamera() {
+            if (this.isProcessing) return;
+            
+            // Provide immediate feedback
+            this.isStreaming = false; 
             this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+            
             await this.startStream();
         },
 
@@ -1176,6 +1225,28 @@ const filterMap = {
     transition: background 0.2s;
 }
 .pb-cam-error button:hover { background: white; }
+
+/* Camera loading */
+.pb-cam-loading {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: #0d0b09;
+    gap: 12px; z-index: 25;
+}
+.pb-loading-spin {
+    width: 24px; height: 24px;
+    border: 2px solid rgba(200,169,110,0.15);
+    border-top-color: #c8a96e;
+    border-radius: 50%;
+    animation: pb-spin 0.8s linear infinite;
+}
+.pb-cam-loading span {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; color: #8a8278;
+    letter-spacing: 0.2em;
+}
+@keyframes pb-spin { to { transform: rotate(360deg); } }
 
 /* Flip button */
 .pb-flip-btn {
