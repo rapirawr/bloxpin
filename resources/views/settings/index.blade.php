@@ -284,7 +284,6 @@
                         </p>
                     </div>
                 </div>
-                </div>
             </section>
 
             {{-- Display Tab --}}
