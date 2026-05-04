@@ -91,7 +91,7 @@
                     {{-- Flip camera --}}
                     <button @click="switchCamera()"
                             :disabled="!isStreaming || isProcessing || isSwitching"
-                            class="pb-flip-btn"
+                            class="pb-flip-btn lg:hidden"
                             :class="isSwitching ? 'switching' : ''">
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              :style="isSwitching ? 'animation: pb-spin 0.6s linear infinite' : ''">
@@ -103,7 +103,7 @@
                     {{-- Torch Toggle (Hanya muncul kalau back camera) --}}
                     <button @click="toggleTorch()"
                             x-show="facingMode === 'environment'"
-                            class="pb-torch-btn"
+                            class="pb-torch-btn lg:hidden"
                             :class="torchActive ? 'active' : ''"
                             style="display:none">
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
