@@ -12,6 +12,9 @@
         </script>
     @endauth
 
+    <meta name="google-site-verification" content="google-site-verification=l2_VdK6MgfX_CxcOkJpLgL0YLh8r7dYQWJLPzPcDjr8" />
+
+
     <title>@yield('title', config('app.name', 'Bloxpin'))</title>
     <meta name="description" content="@yield('meta_description', 'Discover and share your moments on Bloxpin.')">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
