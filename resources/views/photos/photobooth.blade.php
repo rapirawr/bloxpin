@@ -449,26 +449,21 @@ function photobooth() {
             this.clockInterval = setInterval(update, 10000);
         },
 
-        // ── Cache daftar kamera
         _videoDevices: [],
         _currentDeviceId: null,
-        _deviceFacingMap: {},   // deviceId → 'user' | 'environment'
-        _attachTimeoutId: null, // Track pending attach timeout
-        _lastSwitchTime: 0,     // Debounce rapid taps
+        _deviceFacingMap: {},       
+        _attachTimeoutId: null,     
+        _lastSwitchTime: 0,     
 
-        // ── Stop semua track dari stream
-        _stopStream(stream) {
-            if (stream) {
-                stream.getTracks().forEach(t => t.stop());
-            }
-        },
-
-        // ── Safely detach stream from video element and stop all tracks
+        // ── Safely detach stream from video element and release hardware
+        // CRITICAL ORDER: pause → detach → stop
+        // If we stop tracks while video is still rendering, Android's camera HAL
+        // holds the hardware lock for 60-90s before releasing.
         _detachAndStop() {
             const video = this.$refs.video;
             if (!video) return;
 
-            // Cancel pending attach timeout to prevent stale play() calls
+            // Cancel pending attach timeout
             if (this._attachTimeoutId) {
                 clearTimeout(this._attachTimeoutId);
                 this._attachTimeoutId = null;
@@ -477,14 +472,20 @@ function photobooth() {
             // Remove stale event handler
             video.onloadedmetadata = null;
 
-            const stream = video.srcObject;
-            if (stream) {
-                this._stopStream(stream);
-            }
+            // 1. Pause the video element FIRST — tell rendering pipeline to stop
+            video.pause();
 
-            // Detach — srcObject = null is sufficient, no video.load() needed
-            // (video.load() after srcObject=null causes AbortError on iOS Safari 15+)
+            // 2. Grab the stream reference before detaching
+            const stream = video.srcObject;
+
+            // 3. Detach — breaks the rendering pipeline's connection to the stream
             video.srcObject = null;
+
+            // 4. NOW stop tracks — hardware can release immediately
+            //    because no renderer is holding a reference
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+            }
         },
 
         // ── Attach a stream to video element with proper loadedmetadata waiting
@@ -543,7 +544,6 @@ function photobooth() {
                 const lbl = (dev.label || '').toLowerCase();
 
                 // Conservative keyword matching with word boundaries
-                // (avoids false positives like 'camera2' matching front cam on Samsung)
                 const isBack = /\b(back|rear|belakang|environment)\b/.test(lbl);
                 const isFront = /\b(front|depan|user|selfie|facetime)\b/.test(lbl);
 
@@ -551,14 +551,31 @@ function photobooth() {
                 else if (isFront) newMap[dev.deviceId] = 'user';
             }
 
-            // Heuristic: kalau hanya ada 2 kamera dan satu sudah di-label,
-            // yang lainnya pasti kebalikannya
+            // ── Heuristic for 2-camera devices
             if (this._videoDevices.length === 2) {
                 const [a, b] = this._videoDevices;
                 if (newMap[a.deviceId] && !newMap[b.deviceId]) {
                     newMap[b.deviceId] = newMap[a.deviceId] === 'user' ? 'environment' : 'user';
                 } else if (!newMap[a.deviceId] && newMap[b.deviceId]) {
                     newMap[a.deviceId] = newMap[b.deviceId] === 'user' ? 'environment' : 'user';
+                }
+            }
+
+            // ── Heuristic for 3+ camera devices (Samsung, Xiaomi, Pixel, etc)
+            // If we know which device is 'user' but no device is mapped as 'environment',
+            // the SECOND device in the list is almost always the main back camera.
+            // (Android orders: front, back-main, back-ultrawide, back-macro)
+            if (this._videoDevices.length >= 3) {
+                const hasEnv = Object.values(newMap).includes('environment');
+                const knownUserId = Object.entries(newMap).find(([, f]) => f === 'user')?.[0];
+
+                if (knownUserId && !hasEnv) {
+                    // Find the first device that isn't the front camera
+                    const backCandidate = this._videoDevices.find(d => d.deviceId !== knownUserId);
+                    if (backCandidate) {
+                        newMap[backCandidate.deviceId] = 'environment';
+                        console.log('[Camera] 3+ cam heuristic: assigned environment to', backCandidate.deviceId.slice(0, 8));
+                    }
                 }
             }
 
@@ -624,16 +641,19 @@ function photobooth() {
             }
         },
 
-        // ── Helper: request a stream with retry for NotReadableError
-        async _tryGetStream(constraints, maxRetries = 2) {
+        // ── Helper: request a stream with retry for hardware-busy errors
+        // NotReadableError = camera HAL busy (Samsung, Xiaomi, most Android)
+        // AbortError       = camera released mid-request (iOS Safari, some Android)
+        async _tryGetStream(constraints, maxRetries = 3) {
+            const RETRYABLE = ['NotReadableError', 'AbortError'];
             for (let attempt = 0; attempt <= maxRetries; attempt++) {
                 try {
                     return await navigator.mediaDevices.getUserMedia(constraints);
                 } catch (e) {
-                    // Hardware not ready yet (common on Samsung/Xiaomi) — wait & retry
-                    if (e.name === 'NotReadableError' && attempt < maxRetries) {
-                        console.warn('[Switch] Hardware busy, retry in', 300 * (attempt + 1), 'ms');
-                        await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
+                    if (RETRYABLE.includes(e.name) && attempt < maxRetries) {
+                        const delay = 500 * (attempt + 1); // 500, 1000, 1500ms
+                        console.warn(`[Switch] ${e.name} — retry ${attempt + 1}/${maxRetries} in ${delay}ms`);
+                        await new Promise(r => setTimeout(r, delay));
                         continue;
                     }
                     console.warn('[Switch] Constraint failed:', e.name, attempt > 0 ? `(attempt ${attempt + 1})` : '');
@@ -663,8 +683,9 @@ function photobooth() {
             this._detachAndStop();
             this.isStreaming = false;
 
-            // Wait for hardware release (400ms sweet spot for most Android devices)
-            await new Promise(r => setTimeout(r, 400));
+            // Wait for hardware release — 500ms covers most Android devices
+            // (with correct detach order, hardware releases much faster)
+            await new Promise(r => setTimeout(r, 500));
 
             // ── 2. Refresh device list
             await this._buildDeviceMap();
