@@ -452,15 +452,14 @@ function photobooth() {
         // ── Cache daftar kamera
         _videoDevices: [],
         _currentDeviceId: null,
-        _deviceFacingMap: {},  // deviceId → 'user' | 'environment'
+        _deviceFacingMap: {},   // deviceId → 'user' | 'environment'
+        _attachTimeoutId: null, // Track pending attach timeout
+        _lastSwitchTime: 0,     // Debounce rapid taps
 
-        // ── Stop semua track dari stream tertentu
+        // ── Stop semua track dari stream
         _stopStream(stream) {
             if (stream) {
-                stream.getTracks().forEach(t => {
-                    t.stop();
-                    t.enabled = false;
-                });
+                stream.getTracks().forEach(t => t.stop());
             }
         },
 
@@ -469,14 +468,23 @@ function photobooth() {
             const video = this.$refs.video;
             if (!video) return;
 
+            // Cancel pending attach timeout to prevent stale play() calls
+            if (this._attachTimeoutId) {
+                clearTimeout(this._attachTimeoutId);
+                this._attachTimeoutId = null;
+            }
+
+            // Remove stale event handler
+            video.onloadedmetadata = null;
+
             const stream = video.srcObject;
             if (stream) {
                 this._stopStream(stream);
             }
 
-            // Detach: set srcObject null, then load() to fully reset the pipeline
+            // Detach — srcObject = null is sufficient, no video.load() needed
+            // (video.load() after srcObject=null causes AbortError on iOS Safari 15+)
             video.srcObject = null;
-            try { video.load(); } catch (_) {}
         },
 
         // ── Attach a stream to video element with proper loadedmetadata waiting
@@ -485,14 +493,29 @@ function photobooth() {
                 const video = this.$refs.video;
                 if (!video) return reject(new Error('No video element'));
 
-                // Safety timeout — don't hang forever
-                const timeout = setTimeout(() => {
+                // Cancel any pending timeout from previous attach
+                if (this._attachTimeoutId) {
+                    clearTimeout(this._attachTimeoutId);
+                    this._attachTimeoutId = null;
+                }
+
+                // Remove old listener to avoid stale callbacks
+                video.onloadedmetadata = null;
+
+                const onReady = () => {
+                    this._attachTimeoutId = null;
+                    video.onloadedmetadata = null;
                     video.play().then(resolve).catch(resolve);
-                }, 2000);
+                };
+
+                // Safety timeout — don't hang forever
+                this._attachTimeoutId = setTimeout(onReady, 2000);
 
                 video.onloadedmetadata = () => {
-                    clearTimeout(timeout);
-                    video.play().then(resolve).catch(resolve);
+                    if (this._attachTimeoutId) {
+                        clearTimeout(this._attachTimeoutId);
+                    }
+                    onReady();
                 };
 
                 video.srcObject = stream;
@@ -508,29 +531,38 @@ function photobooth() {
                 return;
             }
 
-            const backKeywords = ['back', 'rear', 'belakang', 'environment', 'camera2', 'wide', 'ultra', 'main'];
-            const frontKeywords = ['front', 'depan', 'user', 'selfie', 'facetime', 'facecam'];
-
+            // Rebuild map — preserve existing known mappings for current devices only
+            const newMap = {};
             for (const dev of this._videoDevices) {
-                const lbl = (dev.label || '').toLowerCase();
-                if (backKeywords.some(kw => lbl.includes(kw))) {
-                    this._deviceFacingMap[dev.deviceId] = 'environment';
-                } else if (frontKeywords.some(kw => lbl.includes(kw))) {
-                    this._deviceFacingMap[dev.deviceId] = 'user';
+                // Preserve existing known mappings (from track.getSettings)
+                if (this._deviceFacingMap[dev.deviceId]) {
+                    newMap[dev.deviceId] = this._deviceFacingMap[dev.deviceId];
+                    continue;
                 }
+
+                const lbl = (dev.label || '').toLowerCase();
+
+                // Conservative keyword matching with word boundaries
+                // (avoids false positives like 'camera2' matching front cam on Samsung)
+                const isBack = /\b(back|rear|belakang|environment)\b/.test(lbl);
+                const isFront = /\b(front|depan|user|selfie|facetime)\b/.test(lbl);
+
+                if (isBack) newMap[dev.deviceId] = 'environment';
+                else if (isFront) newMap[dev.deviceId] = 'user';
             }
 
             // Heuristic: kalau hanya ada 2 kamera dan satu sudah di-label,
             // yang lainnya pasti kebalikannya
             if (this._videoDevices.length === 2) {
                 const [a, b] = this._videoDevices;
-                if (this._deviceFacingMap[a.deviceId] && !this._deviceFacingMap[b.deviceId]) {
-                    this._deviceFacingMap[b.deviceId] = this._deviceFacingMap[a.deviceId] === 'user' ? 'environment' : 'user';
-                } else if (!this._deviceFacingMap[a.deviceId] && this._deviceFacingMap[b.deviceId]) {
-                    this._deviceFacingMap[a.deviceId] = this._deviceFacingMap[b.deviceId] === 'user' ? 'environment' : 'user';
+                if (newMap[a.deviceId] && !newMap[b.deviceId]) {
+                    newMap[b.deviceId] = newMap[a.deviceId] === 'user' ? 'environment' : 'user';
+                } else if (!newMap[a.deviceId] && newMap[b.deviceId]) {
+                    newMap[a.deviceId] = newMap[b.deviceId] === 'user' ? 'environment' : 'user';
                 }
             }
 
+            this._deviceFacingMap = newMap;
             console.log('[Camera] Device map:', JSON.stringify(this._deviceFacingMap));
         },
 
@@ -542,7 +574,6 @@ function photobooth() {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: { ideal: 'user' },
-                        aspectRatio: { ideal: 0.75 },
                         width: { ideal: 1080 },
                         height: { ideal: 1440 }
                     },
@@ -579,6 +610,10 @@ function photobooth() {
                         const s = track.getSettings();
                         this._currentDeviceId = s.deviceId || null;
                         if (s.facingMode) this.facingMode = s.facingMode;
+                        // Register in facing map (was missing in fallback path)
+                        if (s.deviceId) {
+                            this._deviceFacingMap[s.deviceId] = s.facingMode || 'user';
+                        }
                     }
                     await this._buildDeviceMap();
                 } catch (e2) {
@@ -589,20 +624,32 @@ function photobooth() {
             }
         },
 
-        // ── Helper: request a stream with given constraints, returns null on failure
-        async _tryGetStream(constraints) {
-            try {
-                return await navigator.mediaDevices.getUserMedia(constraints);
-            } catch (e) {
-                console.warn('[Switch] Constraint failed:', e.name);
-                return null;
+        // ── Helper: request a stream with retry for NotReadableError
+        async _tryGetStream(constraints, maxRetries = 2) {
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    return await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (e) {
+                    // Hardware not ready yet (common on Samsung/Xiaomi) — wait & retry
+                    if (e.name === 'NotReadableError' && attempt < maxRetries) {
+                        console.warn('[Switch] Hardware busy, retry in', 300 * (attempt + 1), 'ms');
+                        await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
+                        continue;
+                    }
+                    console.warn('[Switch] Constraint failed:', e.name, attempt > 0 ? `(attempt ${attempt + 1})` : '');
+                    return null;
+                }
             }
+            return null;
         },
 
         // ── Switch kamera (front ↔ rear) — BULLETPROOF HARDWARE SWITCH
         async switchCamera() {
+            // Hard debounce — prevent rapid double-tap race condition
+            const now = Date.now();
+            if (now - this._lastSwitchTime < 1200) return;
             if (this.isSwitching || this.isProcessing) return;
-
+            this._lastSwitchTime = now;
             this.isSwitching = true;
             this.isCameraOff = true;
 
@@ -616,8 +663,8 @@ function photobooth() {
             this._detachAndStop();
             this.isStreaming = false;
 
-            // Short delay for hardware release (300ms is enough with proper cleanup)
-            await new Promise(r => setTimeout(r, 300));
+            // Wait for hardware release (400ms sweet spot for most Android devices)
+            await new Promise(r => setTimeout(r, 400));
 
             // ── 2. Refresh device list
             await this._buildDeviceMap();
@@ -634,7 +681,6 @@ function photobooth() {
                 newStream = await this._tryGetStream({
                     video: {
                         deviceId: { exact: targetDeviceId },
-                        aspectRatio: { ideal: 0.75 },
                         width: { ideal: 1080 },
                         height: { ideal: 1440 }
                     },
@@ -648,7 +694,6 @@ function photobooth() {
                 newStream = await this._tryGetStream({
                     video: {
                         facingMode: { exact: wantFacing },
-                        aspectRatio: { ideal: 0.75 },
                         width: { ideal: 1080 },
                         height: { ideal: 1440 }
                     },
@@ -663,12 +708,9 @@ function photobooth() {
                 for (const dev of candidates) {
                     console.log('[Switch] Strategy C: trying other device →', dev.deviceId.slice(0, 8));
                     newStream = await this._tryGetStream({
-                        video: {
-                            deviceId: { exact: dev.deviceId },
-                            aspectRatio: { ideal: 0.75 }
-                        },
+                        video: { deviceId: { exact: dev.deviceId } },
                         audio: false
-                    });
+                    }, 1); // Fewer retries for candidates
                     if (newStream) break;
                 }
             }
@@ -679,10 +721,10 @@ function photobooth() {
                 newStream = await this._tryGetStream({
                     video: { facingMode: wantFacing },
                     audio: false
-                });
+                }, 1);
             }
             if (!newStream) {
-                newStream = await this._tryGetStream({ video: true, audio: false });
+                newStream = await this._tryGetStream({ video: true, audio: false }, 1);
             }
 
             // ── 3. VERIFY & APPLY
