@@ -452,6 +452,7 @@ function photobooth() {
         // ── Cache daftar kamera
         _videoDevices: [],
         _currentDeviceId: null,
+        _deviceFacingMap: {},  // deviceId → 'user' | 'environment'
 
         // ── Stop semua track dari stream tertentu
         _stopStream(stream) {
@@ -463,39 +464,81 @@ function photobooth() {
             }
         },
 
-        // ── Stop track yang ada di video element
-        stopAllTracks() {
-            const stream = this.$refs.video?.srcObject;
+        // ── Safely detach stream from video element and stop all tracks
+        _detachAndStop() {
+            const video = this.$refs.video;
+            if (!video) return;
+
+            const stream = video.srcObject;
             if (stream) {
                 this._stopStream(stream);
-                this.$refs.video.srcObject = null;
             }
+
+            // Detach: set srcObject null, then load() to fully reset the pipeline
+            video.srcObject = null;
+            try { video.load(); } catch (_) {}
         },
 
-        // ── Cari deviceId berdasarkan facingMode (helper)
-        _findDeviceId(targetFacing) {
-            if (this._videoDevices.length <= 1) return null;
+        // ── Attach a stream to video element with proper loadedmetadata waiting
+        _attachStream(stream) {
+            return new Promise((resolve, reject) => {
+                const video = this.$refs.video;
+                if (!video) return reject(new Error('No video element'));
 
-            const isBack = targetFacing === 'environment';
-            const keywords = isBack
-                ? ['back', 'rear', 'belakang', 'environment', 'camera2', 'wide', 'ultra']
-                : ['front', 'depan', 'user', 'selfie', 'facetime'];
+                // Safety timeout — don't hang forever
+                const timeout = setTimeout(() => {
+                    video.play().then(resolve).catch(resolve);
+                }, 2000);
+
+                video.onloadedmetadata = () => {
+                    clearTimeout(timeout);
+                    video.play().then(resolve).catch(resolve);
+                };
+
+                video.srcObject = stream;
+            });
+        },
+
+        // ── Build a device → facingMode map by analyzing labels & track settings
+        async _buildDeviceMap() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                this._videoDevices = devices.filter(d => d.kind === 'videoinput');
+            } catch (_) {
+                return;
+            }
+
+            const backKeywords = ['back', 'rear', 'belakang', 'environment', 'camera2', 'wide', 'ultra', 'main'];
+            const frontKeywords = ['front', 'depan', 'user', 'selfie', 'facetime', 'facecam'];
 
             for (const dev of this._videoDevices) {
                 const lbl = (dev.label || '').toLowerCase();
-                if (keywords.some(kw => lbl.includes(kw))) {
-                    return dev.deviceId;
+                if (backKeywords.some(kw => lbl.includes(kw))) {
+                    this._deviceFacingMap[dev.deviceId] = 'environment';
+                } else if (frontKeywords.some(kw => lbl.includes(kw))) {
+                    this._deviceFacingMap[dev.deviceId] = 'user';
                 }
             }
-            return null;
+
+            // Heuristic: kalau hanya ada 2 kamera dan satu sudah di-label,
+            // yang lainnya pasti kebalikannya
+            if (this._videoDevices.length === 2) {
+                const [a, b] = this._videoDevices;
+                if (this._deviceFacingMap[a.deviceId] && !this._deviceFacingMap[b.deviceId]) {
+                    this._deviceFacingMap[b.deviceId] = this._deviceFacingMap[a.deviceId] === 'user' ? 'environment' : 'user';
+                } else if (!this._deviceFacingMap[a.deviceId] && this._deviceFacingMap[b.deviceId]) {
+                    this._deviceFacingMap[a.deviceId] = this._deviceFacingMap[b.deviceId] === 'user' ? 'environment' : 'user';
+                }
+            }
+
+            console.log('[Camera] Device map:', JSON.stringify(this._deviceFacingMap));
         },
 
-        // ── Camera stream (hanya untuk INIT pertama kali)
+        // ── Camera stream — INIT only (first load)
         async startStream() {
             this.cameraError = false;
 
             try {
-                // Coba kamera depan dulu (default untuk photobooth)
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: { ideal: 'user' },
@@ -506,35 +549,30 @@ function photobooth() {
                     audio: false
                 });
 
-                this.$refs.video.srcObject = stream;
-                await this.$refs.video.play().catch(() => {});
+                await this._attachStream(stream);
                 this.isStreaming = true;
                 this.facingMode = 'user';
 
-                // Simpan deviceId aktif
                 const track = stream.getVideoTracks()[0];
                 if (track) {
                     const s = track.getSettings();
                     this._currentDeviceId = s.deviceId || null;
-                    // Cek facingMode dari track settings (lebih akurat)
                     if (s.facingMode) this.facingMode = s.facingMode;
+                    // Register in facing map
+                    if (s.deviceId) {
+                        this._deviceFacingMap[s.deviceId] = s.facingMode || 'user';
+                    }
                     console.log('[Camera] Init OK — device:', s.deviceId?.slice(0, 8), 'facing:', s.facingMode);
                 }
 
-                // Enumerate setelah permission granted (baru dapat label)
-                try {
-                    const devices = await navigator.mediaDevices.enumerateDevices();
-                    this._videoDevices = devices.filter(d => d.kind === 'videoinput');
-                    console.log('[Camera] Devices:', this._videoDevices.map(d => d.label || d.deviceId.slice(0, 8)));
-                } catch (_) {}
+                // Enumerate after permission granted (labels now available)
+                await this._buildDeviceMap();
 
             } catch (e) {
                 console.error('[Camera] Init error:', e.name, e.message);
-                // Fallback: coba tanpa constraint apapun
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                    this.$refs.video.srcObject = stream;
-                    await this.$refs.video.play().catch(() => {});
+                    await this._attachStream(stream);
                     this.isStreaming = true;
                     const track = stream.getVideoTracks()[0];
                     if (track) {
@@ -542,15 +580,26 @@ function photobooth() {
                         this._currentDeviceId = s.deviceId || null;
                         if (s.facingMode) this.facingMode = s.facingMode;
                     }
+                    await this._buildDeviceMap();
                 } catch (e2) {
-                    console.error('[Camera] Init fallback also failed:', e2.name);
+                    console.error('[Camera] Fallback also failed:', e2.name);
                     this.cameraError = true;
                     this.isStreaming = false;
                 }
             }
         },
 
-        // ── Switch kamera (front ↔ rear) — VERIFIED HARDWARE SWITCH
+        // ── Helper: request a stream with given constraints, returns null on failure
+        async _tryGetStream(constraints) {
+            try {
+                return await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (e) {
+                console.warn('[Switch] Constraint failed:', e.name);
+                return null;
+            }
+        },
+
+        // ── Switch kamera (front ↔ rear) — BULLETPROOF HARDWARE SWITCH
         async switchCamera() {
             if (this.isSwitching || this.isProcessing) return;
 
@@ -558,90 +607,143 @@ function photobooth() {
             this.isCameraOff = true;
 
             const oldDeviceId = this._currentDeviceId;
-            const wantFacing = this.facingMode === 'user' ? 'environment' : 'user';
-            
-            console.log('[Switch] Current:', oldDeviceId?.slice(0, 8), 'Want:', wantFacing);
+            const oldFacing = this.facingMode;
+            const wantFacing = oldFacing === 'user' ? 'environment' : 'user';
 
-            // 1. Matikan total
-            this.stopAllTracks();
-            await new Promise(r => setTimeout(r, 850)); // Jeda lebih lama agar hardware release
+            console.log('[Switch] From:', oldFacing, '(', oldDeviceId?.slice(0, 8), ') → Want:', wantFacing);
 
-            // 2. Refresh daftar device
-            try {
-                const devs = await navigator.mediaDevices.enumerateDevices();
-                this._videoDevices = devs.filter(d => d.kind === 'videoinput');
-            } catch (_) {}
+            // ── 1. STOP old stream completely BEFORE requesting new one
+            this._detachAndStop();
+            this.isStreaming = false;
+
+            // Short delay for hardware release (300ms is enough with proper cleanup)
+            await new Promise(r => setTimeout(r, 300));
+
+            // ── 2. Refresh device list
+            await this._buildDeviceMap();
 
             let newStream = null;
 
-            // STRATEGI 1: Cari device yang BENAR-BENAR beda dari sebelumnya (berdasarkan ID)
-            const otherDevice = this._videoDevices.find(d => d.deviceId !== oldDeviceId);
-            const targetId = this._findDeviceId(wantFacing) || (otherDevice ? otherDevice.deviceId : null);
+            // ── STRATEGY A: Find the exact target device by ID from our map
+            // This is the most reliable way — we know which deviceId maps to which facing
+            const targetDeviceId = Object.entries(this._deviceFacingMap)
+                .find(([id, facing]) => facing === wantFacing && id !== oldDeviceId)?.[0];
 
-            if (targetId) {
-                try {
-                    console.log('[Switch] Strategy 1: Target DeviceId', targetId.slice(0, 8));
-                    newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { deviceId: { exact: targetId }, aspectRatio: { ideal: 0.75 } },
+            if (targetDeviceId) {
+                console.log('[Switch] Strategy A: deviceId exact →', targetDeviceId.slice(0, 8));
+                newStream = await this._tryGetStream({
+                    video: {
+                        deviceId: { exact: targetDeviceId },
+                        aspectRatio: { ideal: 0.75 },
+                        width: { ideal: 1080 },
+                        height: { ideal: 1440 }
+                    },
+                    audio: false
+                });
+            }
+
+            // ── STRATEGY B: facingMode exact (browser-native switching)
+            if (!newStream) {
+                console.log('[Switch] Strategy B: facingMode exact →', wantFacing);
+                newStream = await this._tryGetStream({
+                    video: {
+                        facingMode: { exact: wantFacing },
+                        aspectRatio: { ideal: 0.75 },
+                        width: { ideal: 1080 },
+                        height: { ideal: 1440 }
+                    },
+                    audio: false
+                });
+            }
+
+            // ── STRATEGY C: Try any OTHER device that isn't the current one
+            if (!newStream && this._videoDevices.length >= 2) {
+                // Pick the device that is NOT the old one
+                const candidates = this._videoDevices.filter(d => d.deviceId !== oldDeviceId);
+                for (const dev of candidates) {
+                    console.log('[Switch] Strategy C: trying other device →', dev.deviceId.slice(0, 8));
+                    newStream = await this._tryGetStream({
+                        video: {
+                            deviceId: { exact: dev.deviceId },
+                            aspectRatio: { ideal: 0.75 }
+                        },
                         audio: false
                     });
-                } catch (e) {
-                    console.warn('[Switch] Strategy 1 failed');
+                    if (newStream) break;
                 }
             }
 
-            // STRATEGI 2: facingMode exact
+            // ── STRATEGY D: Bare minimum fallback
             if (!newStream) {
-                try {
-                    console.log('[Switch] Strategy 2: facingMode exact', wantFacing);
-                    newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: { exact: wantFacing }, aspectRatio: { ideal: 0.75 } },
-                        audio: false
-                    });
-                } catch (e) {
-                    console.warn('[Switch] Strategy 2 failed');
-                }
+                console.log('[Switch] Strategy D: bare fallback');
+                newStream = await this._tryGetStream({
+                    video: { facingMode: wantFacing },
+                    audio: false
+                });
             }
-
-            // STRATEGI 3: Minimal fallback
             if (!newStream) {
-                try {
-                    console.log('[Switch] Strategy 3: Fallback');
-                    newStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                } catch (e) {
-                    console.error('[Switch] All failed');
-                }
+                newStream = await this._tryGetStream({ video: true, audio: false });
             }
 
-            // 3. Verifikasi Hasil
+            // ── 3. VERIFY & APPLY
             if (newStream) {
                 const track = newStream.getVideoTracks()[0];
                 const settings = track?.getSettings() || {};
                 const newDeviceId = settings.deviceId || null;
-                const actualFacing = settings.facingMode || null;
+                const reportedFacing = settings.facingMode || null;
 
-                console.log('[Switch] Result Device:', newDeviceId?.slice(0, 8), 'Facing:', actualFacing);
+                console.log('[Switch] Got device:', newDeviceId?.slice(0, 8),
+                            'reported facing:', reportedFacing,
+                            'changed:', newDeviceId !== oldDeviceId);
 
-                this.$refs.video.srcObject = newStream;
-                await this.$refs.video.play().catch(() => {});
+                // Attach to video
+                await this._attachStream(newStream);
                 this.isStreaming = true;
                 this._currentDeviceId = newDeviceId;
 
-                // CRITICAL FIX: Hanya ganti facingMode (mirroring) kalau ID kameranya BERBEDA
-                // atau kalau browser eksplisit lapor facingMode-nya.
-                if (actualFacing) {
-                    this.facingMode = actualFacing;
+                // Update our device map with fresh info from the track
+                if (newDeviceId && reportedFacing) {
+                    this._deviceFacingMap[newDeviceId] = reportedFacing;
+                }
+
+                // ── CRITICAL: Determine the real facingMode for mirroring
+                if (reportedFacing) {
+                    // Browser explicitly told us — trust it
+                    this.facingMode = reportedFacing;
                 } else if (newDeviceId && newDeviceId !== oldDeviceId) {
-                    // Berhasil ganti kamera fisik, asumsikan arahnya benar
-                    this.facingMode = wantFacing;
+                    // Device ID changed → hardware actually switched
+                    // Check our map first
+                    if (this._deviceFacingMap[newDeviceId]) {
+                        this.facingMode = this._deviceFacingMap[newDeviceId];
+                    } else {
+                        // No map entry, assume the direction we asked for
+                        this.facingMode = wantFacing;
+                        this._deviceFacingMap[newDeviceId] = wantFacing;
+                    }
                 } else {
-                    // Masih di kamera yang sama! Tetap pakai facingMode lama agar tidak invert
-                    console.warn('[Switch] Camera ID did NOT change. Keeping old facingMode to avoid inversion.');
-                    // window.showToast?.('Gagal pindah lensa, tetap di kamera saat ini.', 'info');
+                    // ╔═══════════════════════════════════════════════════════╗
+                    // ║  Device ID did NOT change — camera is the SAME!      ║
+                    // ║  Do NOT flip facingMode, or we'll get false invert.  ║
+                    // ╚═══════════════════════════════════════════════════════╝
+                    console.warn('[Switch] Device ID unchanged — keeping facingMode as', oldFacing);
                 }
             } else {
-                this.cameraError = true;
-                window.showToast?.('Gagal ganti kamera.', 'error');
+                // All strategies failed — try to restart the old camera
+                console.error('[Switch] ALL strategies failed, restarting old camera');
+                try {
+                    const recovery = oldDeviceId
+                        ? await this._tryGetStream({ video: { deviceId: { exact: oldDeviceId } }, audio: false })
+                        : await this._tryGetStream({ video: true, audio: false });
+                    if (recovery) {
+                        await this._attachStream(recovery);
+                        this.isStreaming = true;
+                        // facingMode stays the same
+                    } else {
+                        this.cameraError = true;
+                    }
+                } catch (_) {
+                    this.cameraError = true;
+                }
             }
 
             this.isCameraOff = false;
